@@ -14,6 +14,7 @@ function _init()
     menu = true
     play = false
     option = false
+    guide = false
 
     -- list of falling icons on menu screen
     icons = {}
@@ -327,7 +328,7 @@ function _update()
                 menu_y -= 8
             end
 
-            -- if selected option
+            -- x to select option
             if btnp(5) then
                 -- disable menu
                 menu = false
@@ -337,10 +338,11 @@ function _update()
                 if menu_y == 80 then
                     play = true
                     initialise()
-                elseif menu_y == 90 then
-                    --guide screen
+                -- if "guide" selected, go to guide screen
+                elseif menu_y == 88 then
+                    guide = true
                 -- if "options" selected, go to options
-                elseif menu_y == 98 then
+                elseif menu_y == 96 then
                     menu_y = 80
                     option = true
                 end
@@ -616,6 +618,8 @@ function _draw()
         if menu_y != false then
             spr(3, menu_x, menu_y)
         end
+    elseif guide then
+        draw_guide("❎ to return", true)
     elseif option then
         -- draw main frame and background
         if controller then
@@ -769,8 +773,8 @@ function to_title()
 end
 
 function draw_title_menu(info_message)
-    -- fill with white background
-    cls(7)
+    -- fill with accent background
+    cls(themes[theme_select][2])
 
     -- set to + draw pattern
     -- create background
@@ -867,4 +871,113 @@ function draw_title_menu(info_message)
 
     -- draw "mines" logo
     sspr(0, 32, 72, 63, 28, 32)
+end
+
+function draw_guide(info_message, show_mines)
+    -- fill with accent background
+    cls(themes[theme_select][2])
+
+    -- set to + draw pattern
+    -- create background
+    -- set back to normal fill
+    fillp(◆)
+    rectfill(0, 0, 128, 128, themes[theme_select][1])
+    fillp(█)
+    
+    -- if there are fewer than 15 icons in the background, spawn a new one
+    if #icons < 15 then
+        -- add an icon to the list
+        add(icons, {
+            -- centre of x movement
+            -- sin wave moves greater and less than this value
+            x_base = flr(rnd(120)),
+
+            -- multiplier for range of horizontal movement
+            multi = rnd(1),
+
+            -- position on screen
+            -- spawn off screen
+            x = -20,
+            y = flr(rnd(120))-120,
+
+            -- sprite (random: flag or mine)
+            s = flr(rnd(2))+3,
+
+            -- downwards speed
+            speed = flr(rnd(2))+0.4,
+
+            -- draw icon at coords
+            draw = function(self)
+                spr(self.s, self.x, self.y)
+            end,
+
+            -- fall down
+            -- move left and right, following sin graph
+            fall = function(self)
+                self.y += self.speed
+                self.x = self.x_base + sin(t()*self.multi)*5
+            end,
+
+            -- delete self if off screen
+            check = function(self)
+                if self.y > 130 then
+                    del(icons, self)
+                end
+            end
+        })
+    end
+
+    -- for each icon, draw it, make it fall, and check if it's off screen
+    for i in all(icons) do
+        i:draw()
+        i:fall()
+        i:check()
+    end
+
+    -- draw background and border
+    rectfill(10, 10, 118, 118, 1)
+    rectfill(11, 11, 117, 117, 7)
+
+    if info_message then
+        if info_message == "RETURN" then
+            rectfill(92, 119, 118, 123, 1)
+            print(info_message, 94, 118, 7)
+        else
+            rectfill(69, 119, 118, 124, 1)
+            print(info_message, 70, 119, 7)
+        end
+    end
+
+    -- draw "mini" background and letters
+    rectfill(18, 18, 34, 24, themes[theme_select][1])
+    print("mini", 19, 19, 7)
+    
+    print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select][1])
+    
+    print("🅾️ / right click TO flag\nto mark a mine", 19, 48, 8)
+
+    rect(27, 67, 100, 108, 13)
+
+    -- draw grid as title background
+    for col=28, 92, 16 do
+        for row=68, 115, 16 do
+            spr(1, col, row)
+        end
+    end
+
+    for col=36, 90, 16 do
+        for row=76, 100, 16 do
+            spr(1, col, row)
+        end
+    end
+
+    print("FLAG ALL MINES TO WIN!", 22, 110, 0)
+
+    --ADD TIME THING!
+    if show_mines then
+        spr(4, 76, 92)
+    end
+
+    spr(3, 76, 92)
+
 end
