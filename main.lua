@@ -131,15 +131,20 @@ function _update()
         -- update movement
         if controller then
             if btnp(0) and p.x != 0 then
+                -- play sound
+                sfx(0)
                 p.x -= 8
                 p.mx -= 1
             elseif btnp(1) and p.x != 120 then
+                sfx(0)
                 p.x += 8
                 p.mx += 1
             elseif btnp(2) and p.y != 8 then
+                sfx(0)
                 p.y -= 8
                 p.my -= 1
             elseif btnp(3) and p.y != 120 then
+                sfx(0)
                 p.y += 8
                 p.my += 1
             end
@@ -215,6 +220,7 @@ function _update()
                     -- if there is already a flag there
                     if flags[p.mx][p.my] == true then
                         -- remove the flag, and add one to the flag count
+                        sfx(3)
                         flags[p.mx][p.my] = false
                         fcount += 1
                     -- if there wasn't already a flag there...
@@ -222,6 +228,7 @@ function _update()
                         -- if the player still has flags left...
                         if fcount != 0 then
                             -- add a flag and take one from the flag count
+                            sfx(1)
                             flags[p.mx][p.my] = true
                             fcount -= 1
                         end
@@ -268,6 +275,7 @@ function _update()
                     -- if there isn't a mine there, dig that space
                     if not lose then
                         --printh("", "log", true)
+                        sfx(2)
                         uncover({p.mx, p.my})
                     end
                 end
@@ -295,8 +303,10 @@ function _update()
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
+                sfx(4)
                 menu_y += 16
             elseif btnp(2) and menu_y != 80 then
+                sfx(4)
                 menu_y -= 16
             end
 
@@ -304,6 +314,7 @@ function _update()
             if btnp(5) then
                 -- disable menu
                 menu = false
+                sfx(5)
 
                 -- if "play" selected, start the game
                 if menu_y == 80 then
@@ -337,11 +348,13 @@ function _update()
 
                 -- if hovering over "play", start the game
                 if hover_play then
+                    sfx(5)
                     menu = false
                     play = true
                     initialise()
                 -- if hovering over "options", go to options
                 elseif hover_options then
+                    sfx(5)
                     menu = false
                     option = true
                 end
@@ -353,13 +366,16 @@ function _update()
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
+                sfx(4)
                 menu_y += 16
             elseif btnp(2) and menu_y != 80 then
+                sfx(4)
                 menu_y -= 16
             end
 
             -- x to select option
             if btnp(5) then
+                sfx(5)
                 if menu_y == 80 then
                     if theme_select != #themes then
                         theme_select += 1
@@ -377,6 +393,7 @@ function _update()
                 end
             -- o to return to menu
             elseif btnp(4) then
+                sfx(6)
                 option = false
                 menu = true
                 -- place cursor on "options"
@@ -402,6 +419,7 @@ function _update()
             -- if left clicking
             if stat(34) == 1 and not sticky then
                 if menu_y == 80 then
+                    sfx(5)
                     sticky = true
                     if theme_select != #themes then
                         theme_select += 1
@@ -409,6 +427,7 @@ function _update()
                         theme_select = 1
                     end
                 elseif menu_y == 96 then
+                    sfx(5)
                     sticky = true
                     if controller then
                         controller = false
@@ -418,6 +437,7 @@ function _update()
                         controller = true
                     end
                 elseif hover_return then
+                    sfx(6)
                     options = false
                     menu = true
                 end
