@@ -126,7 +126,6 @@ function _update()
         end
     end
 
-    -- if playing...
     if play and not (lose or win) then
         -- update movement
         if controller then
@@ -282,7 +281,6 @@ function _update()
                 end
             end
         end
-    -- if the player has lost or won
     elseif win or lose then
         if controller then
             -- x for return
@@ -317,17 +315,16 @@ function _update()
                 end
             end
         end
-    -- if the player is in the main menu
     elseif menu then
         -- if using controller
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
                 sfx(4)
-                menu_y += 16
+                menu_y += 8
             elseif btnp(2) and menu_y != 80 then
                 sfx(4)
-                menu_y -= 16
+                menu_y -= 8
             end
 
             -- if selected option
@@ -340,8 +337,10 @@ function _update()
                 if menu_y == 80 then
                     play = true
                     initialise()
+                elseif menu_y == 90 then
+                    --guide screen
                 -- if "options" selected, go to options
-                else
+                elseif menu_y == 98 then
                     menu_y = 80
                     option = true
                 end
@@ -380,7 +379,6 @@ function _update()
                 end
             end
         end
-    -- if the player is in the options
     elseif option then
         -- if using controller
         if controller then
@@ -594,14 +592,23 @@ function _draw()
             rectfill(37, 81, 53, 87, 6)
 
             print("play", 38, 82, 7)
+            print("guide", 38, 90, 6)
+            print("options", 38, 98, 6)
+        elseif menu_y == 88 then
+            rectfill(37, 89, 57, 95, 6)
+
+            print("play", 38, 82, 6)
+            print("guide", 38, 90, 7)
             print("options", 38, 98, 6)
         elseif menu_y == 96 then
             rectfill(37, 97, 65, 103, 6)
 
             print("play", 38, 82, 6)
+            print("guide", 38, 90, 6)
             print("options", 38, 98, 7)
         else
             print("play", 38, 82, 6)
+            print("guide", 38, 90, 6)
             print("options", 38, 98, 6)
         end
 
@@ -609,7 +616,6 @@ function _draw()
         if menu_y != false then
             spr(3, menu_x, menu_y)
         end
-    -- if the player is in the options menu
     elseif option then
         -- draw main frame and background
         if controller then
@@ -654,9 +660,6 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
-
-    print(mo_x, 50, 50, 2)
-    print(mo_y)
 end
 
 function gen_matrix(fill)
