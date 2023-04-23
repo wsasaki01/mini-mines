@@ -42,7 +42,14 @@ function _init()
     pb = false
 
     -- current colour theme
-    theme = 12
+    theme_select = 1
+
+    -- list of themes
+    -- {main, accent}
+    themes = {
+        -- blue (white)
+        {12, 7},
+    }
 end
 
 function initialise()
@@ -343,12 +350,15 @@ function _update()
                 menu_y -= 16
             end
 
-            -- if selected option
+            -- x to select option
             if btnp(5) then
-
+                if menu_y == 80 then
+                end
+            -- o to return to menu
             elseif btnp(4) then
                 option = false
                 menu = true
+                -- place cursor on "options"
                 menu_y = 96
             end
 
@@ -502,10 +512,24 @@ function _draw()
         -- draw main frame and background
         draw_title_menu("🅾️ TO RETURN")
         
-        print("theme", 38, 82, 6)
+        -- set a background for whichever option is currently selected
+        if menu_y == 80 then
+            rectfill(37, 81, 57, 87, 6)
+
+            print("theme", 38, 82, 7)
+            print("control", 38, 98, 6)
+        elseif menu_y == 96 then
+            rectfill(37, 97, 65, 103, 6)
+
+            print("theme", 38, 82, 6)
+            print("control", 38, 98, 7)
+        else
+            print("theme", 38, 82, 6)
+            print("control", 38, 98, 6)
+        end
+
         rectfill(75, 81, 81, 87, 0)
 
-        print("control", 38, 98, 6)
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
         
         -- set a background for whichever option is currently selected
@@ -560,7 +584,7 @@ function draw_digs()
     for c1=1, #digs do
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
-                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, theme)
+                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, themes[theme_select][1])
 
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
                     print(grid[c1][c2], c1*8-5, c2*8+2, 7)
@@ -642,7 +666,7 @@ function draw_title_menu(info_message)
     -- create background
     -- set back to normal fill
     fillp(◆)
-    rectfill(0, 0, 128, 128, theme)
+    rectfill(0, 0, 128, 128, themes[theme_select][1])
     fillp(█)
     
     -- if there are fewer than 15 icons in the background, spawn a new one
@@ -718,7 +742,7 @@ function draw_title_menu(info_message)
     end
 
     -- draw "mini" background and letters
-    rectfill(28, 24, 59, 31, theme)
+    rectfill(28, 24, 59, 31, themes[theme_select][1])
     print("m", 30, 26, 7)
     print("i", 38, 26)
     print("n", 46, 26)
