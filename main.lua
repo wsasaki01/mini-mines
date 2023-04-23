@@ -243,6 +243,8 @@ function _update()
 
             -- o or left click for dig
             if (btnp("4") or (stat(34) == 1 and not sticky)) and not wait then
+                sticky = true
+                
                 if first then
                     -- create a list of mines
                     mine_list = create_mines(width, height, mcount)
@@ -282,19 +284,38 @@ function _update()
         end
     -- if the player has lost or won
     elseif win or lose then
-        -- x for return
-        if btnp(5) then
-            win = false
-            lose = false
-            initialise()
-        end
+        if controller then
+            -- x for return
+            if btnp(5) then
+                win = false
+                lose = false
+                initialise()
+            end
 
-        -- o for return to menu
-        if btnp(4) then
-            win = false
-            lose = false
-            play = false
-            menu = true
+            -- o for return to menu
+            if btnp(4) then
+                win = false
+                lose = false
+                play = false
+                menu = true
+            end
+        elseif mouse then
+            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
+            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+
+            if stat(34) == 1 and not sticky then
+                sticky = true
+                if hover_replay then
+                    win = false
+                    lose = false
+                    initialise()
+                elseif hover_quit then
+                    win = false
+                    lose = false
+                    play = false
+                    menu = true
+                end
+            end
         end
     -- if the player is in the main menu
     elseif menu then
@@ -474,9 +495,30 @@ function _draw()
         -- draw message
         print("you lose...", sin(t()*0.5)*6+43, 46, 2)
 
-        -- draw options
-        print("❎ to replay", 22, 58, 13)
-        print("🅾️ to return to menu")
+        if controller then
+            -- draw options
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu")
+        elseif mouse then
+            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
+            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+
+            -- set a background for whichever option is currently selected
+            if hover_replay then
+                rectfill(21, 57, 69, 63, 6)
+
+                print("❎ to replay", 22, 58, 13)
+                print("🅾️ to return to menu", 22, 65)
+            elseif hover_quit then
+                rectfill(21, 64, 101, 70, 6)
+
+                print("❎ to replay", 22, 58, 13)
+                print("🅾️ to return to menu", 22, 65)
+            else
+                print("❎ to replay", 22, 58, 13)
+                print("🅾️ to return to menu", 22, 65)
+            end
+        end
     elseif play then
         -- clear screen with grey background
         cls(13)
@@ -612,6 +654,9 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
+
+    print(mo_x, 50, 50, 2)
+    print(mo_y)
 end
 
 function gen_matrix(fill)
