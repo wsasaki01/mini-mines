@@ -345,19 +345,13 @@ function _update()
 
             -- if selected option
             if btnp(5) then
-                -- disable menu
-                menu = false
 
-                -- if "play" selected, start the game
-                if menu_y == 80 then
-                    play = true
-                    initialise()
-                -- if "options" selected, go to options
-                else
-                    menu_y = 80
-                    option = true
-                end
+            elseif btnp(4) then
+                option = false
+                menu = true
+                menu_y = 96
             end
+
         -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
@@ -506,7 +500,7 @@ function _draw()
     -- if the player is in the options menu
     elseif option then
         -- draw main frame and background
-        draw_title_menu("❎ TO RETURN")
+        draw_title_menu("🅾️ TO RETURN")
         
         print("theme", 38, 82, 6)
         rectfill(75, 81, 81, 87, 0)
