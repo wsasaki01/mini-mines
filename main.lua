@@ -66,7 +66,7 @@ function initialise()
     height = 15
 
     -- number of mines
-    mcount = 10
+    mcount = 30
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -198,12 +198,11 @@ function _update()
                     -- player has won
                     win = true
 
-                    -- record the pb
-                    -- add trailing 0 if needed
-                    if ct%60 < 10 then
-                        pb = {tostr(ct\60), "0"..tostr(ct%60)}
-                    else
-                        pb = {tostr(ct\60), tostr(ct%60)}
+                    -- record the pb if needed
+                    if pb == false then
+                        pb = ct
+                    elseif ct < pb then
+                        pb = ct
                     end
                 end
             end
@@ -535,11 +534,18 @@ function _draw()
         -- draw best time box
         rectfill(76, 81, 99, 103, 6)
         print("best:", 77, 82, 7)
+
+        -- format the pb as needed
         if pb == false then
-            print("---", 77, 92, 2)
+            pb_text = {"-", "-"}
+        elseif pb%60 < 10 then
+            pb_text = {tostr(pb\60), "0"..tostr(pb%60)}
         else
-            print(pb[1]..":"..pb[2], 77, 92, 2)
+            pb_text = {tostr(pb\60), tostr(pb%60)}
         end
+
+        -- display best score
+        print(pb_text[1]..":"..pb_text[2], 77, 92, 2)
 
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
