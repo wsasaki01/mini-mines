@@ -49,6 +49,9 @@ function _init()
     themes = {
         -- blue (white)
         {12, 7},
+
+        -- orange (white)
+        {9, 7}
     }
 end
 
@@ -353,6 +356,11 @@ function _update()
             -- x to select option
             if btnp(5) then
                 if menu_y == 80 then
+                    if theme_select != #themes then
+                        theme_select += 1
+                    else
+                        theme_select = 1
+                    end
                 end
             -- o to return to menu
             elseif btnp(4) then
@@ -377,6 +385,7 @@ function _update()
                 menu_y = false
             end
             
+            --[[
             -- if left clicking
             if stat(34) == 1 then
                 menu = false
@@ -392,6 +401,7 @@ function _update()
                     option = true
                 end
             end
+            --]]
         end
     end
 end
@@ -528,17 +538,14 @@ function _draw()
             print("control", 38, 98, 6)
         end
 
-        rectfill(75, 81, 81, 87, 0)
+        -- theme preview
+        rectfill(75, 81, 81, 87, themes[theme_select][1])
+        pset(75, 81, themes[theme_select][2])
+        pset(81, 81, themes[theme_select][2])
+        pset(75, 87, themes[theme_select][2])
+        pset(81, 87, themes[theme_select][2])
 
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
-        
-        -- set a background for whichever option is currently selected
-        if menu_y == 80 then
-            
-        elseif menu_y == 96 then
-
-        else
-        end
 
         -- if the player is hovering over an option, draw the flag next to it
         if menu_y != false then
