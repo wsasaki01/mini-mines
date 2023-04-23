@@ -334,6 +334,7 @@ function _update()
         end
     -- if the player is in the options
     elseif option then
+        --[[
         -- if using controller
         if controller then
             -- movement
@@ -389,6 +390,7 @@ function _update()
                 end
             end
         end
+        --]]
     end
 end
 
@@ -505,6 +507,7 @@ function _draw()
         end
     -- if the player is in the options menu
     elseif option then
+        --[[
         -- draw main frame and background
         draw_title_menu("❎ TO RETURN")
         
@@ -526,6 +529,7 @@ function _draw()
         if menu_y != false then
             spr(3, menu_x, menu_y)
         end
+        --]]
     end
 
     -- if mouse control is enabled, draw the cursor
