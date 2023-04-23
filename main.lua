@@ -42,7 +42,17 @@ function _init()
     pb = false
 
     -- current colour theme
-    theme = 12
+    theme_select = 1
+
+    -- list of themes
+    -- {main, accent}
+    themes = {
+        -- blue (white)
+        {12, 7},
+
+        -- orange (white)
+        {9, 7}
+    }
 end
 
 function initialise()
@@ -110,6 +120,10 @@ function _update()
     if mouse then
         mo_x = stat(32)
         mo_y = stat(33)
+
+        if not (sticky and stat(34) == 1) then
+            sticky = false
+        end
     end
 
     -- if playing...
@@ -317,24 +331,24 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 then
-                menu = false
+            if stat(34) == 1 and not sticky then
+                -- ensure player click accidentally in next screen
+                sticky = true
+
                 -- if hovering over "play", start the game
                 if hover_play then
+                    menu = false
                     play = true
-                    -- ensure player doesn't dig immedediately when loading game
-                    sticky = true
                     initialise()
                 -- if hovering over "options", go to options
                 elseif hover_options then
-                    menu_y = 80
+                    menu = false
                     option = true
                 end
             end
         end
     -- if the player is in the options
     elseif option then
-        --[[
         -- if using controller
         if controller then
             -- movement
@@ -344,53 +358,71 @@ function _update()
                 menu_y -= 16
             end
 
-            -- if selected option
+            -- x to select option
             if btnp(5) then
-                -- disable menu
-                menu = false
-
-                -- if "play" selected, start the game
                 if menu_y == 80 then
-                    play = true
-                    initialise()
-                -- if "options" selected, go to options
-                else
-                    menu_y = 80
-                    option = true
+                    if theme_select != #themes then
+                        theme_select += 1
+                    else
+                        theme_select = 1
+                    end
+                elseif menu_y == 96 then
+                    if controller then
+                        controller = false
+                        mouse = true
+                    else
+                        mouse = false
+                        controller = true
+                    end
                 end
+            -- o to return to menu
+            elseif btnp(4) then
+                option = false
+                menu = true
+                -- place cursor on "options"
+                menu_y = 96
             end
+
         -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
-            hover_options = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
+            hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
+            hover_control = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
+            hover_return = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
 
             -- set cursor position if hovering over an option
-            if hover_play then
+            if hover_theme then
                 menu_y = 80
-            elseif hover_options then
+            elseif hover_control then
                 menu_y = 96
             else
                 menu_y = false
             end
             
             -- if left clicking
-            if stat(34) == 1 then
-                menu = false
-                -- if hovering over "play", start the game
-                if hover_play then
-                    play = true
-                    -- ensure player doesn't dig immedediately when loading game
+            if stat(34) == 1 and not sticky then
+                if menu_y == 80 then
                     sticky = true
-                    initialise()
-                -- if hovering over "options", go to options
-                elseif hover_options then
-                    menu_y = 80
-                    option = true
+                    if theme_select != #themes then
+                        theme_select += 1
+                    else
+                        theme_select = 1
+                    end
+                elseif menu_y == 96 then
+                    sticky = true
+                    if controller then
+                        controller = false
+                        mouse = true
+                    else
+                        mouse = false
+                        controller = true
+                    end
+                elseif hover_return then
+                    options = false
+                    menu = true
                 end
             end
         end
-        --]]
     end
 end
 
@@ -474,7 +506,11 @@ function _draw()
         spr(17, p.x, p.y)
     elseif menu then
         -- draw main frame and background
-        draw_title_menu("❎ TO SELECT")
+        if controller then
+            draw_title_menu("❎ TO SELECT")
+        elseif mouse then
+            draw_title_menu()
+        end
 
         -- draw best time box
         rectfill(76, 81, 99, 103, 6)
@@ -507,29 +543,43 @@ function _draw()
         end
     -- if the player is in the options menu
     elseif option then
-        --[[
         -- draw main frame and background
-        draw_title_menu("❎ TO RETURN")
-        
-        print("theme", 38, 82, 6)
-        rectfill(75, 81, 81, 87, 0)
-
-        print("control", 38, 98, 6)
-        if controller then spr(34, 75, 97) else spr(33, 75, 97) end
+        if controller then
+            draw_title_menu("🅾️ TO RETURN")
+        elseif mouse then
+            draw_title_menu("RETURN")
+        end
         
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
-            
-        elseif menu_y == 96 then
+            rectfill(37, 81, 57, 87, 6)
 
+            print("theme", 38, 82, 7)
+            print("control", 38, 98, 6)
+        elseif menu_y == 96 then
+            rectfill(37, 97, 65, 103, 6)
+
+            print("theme", 38, 82, 6)
+            print("control", 38, 98, 7)
         else
+            print("theme", 38, 82, 6)
+            print("control", 38, 98, 6)
         end
+
+        -- theme preview
+        rectfill(75, 81, 81, 87, themes[theme_select][1])
+        -- rounded corners
+        pset(75, 81, themes[theme_select][2])
+        pset(81, 81, themes[theme_select][2])
+        pset(75, 87, themes[theme_select][2])
+        pset(81, 87, themes[theme_select][2])
+
+        if controller then spr(34, 75, 97) else spr(33, 75, 97) end
 
         -- if the player is hovering over an option, draw the flag next to it
         if menu_y != false then
             spr(3, menu_x, menu_y)
         end
-        --]]
     end
 
     -- if mouse control is enabled, draw the cursor
@@ -570,7 +620,7 @@ function draw_digs()
     for c1=1, #digs do
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
-                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, theme)
+                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, themes[theme_select][1])
 
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
                     print(grid[c1][c2], c1*8-5, c2*8+2, 7)
@@ -652,7 +702,7 @@ function draw_title_menu(info_message)
     -- create background
     -- set back to normal fill
     fillp(◆)
-    rectfill(0, 0, 128, 128, theme)
+    rectfill(0, 0, 128, 128, themes[theme_select][1])
     fillp(█)
     
     -- if there are fewer than 15 icons in the background, spawn a new one
@@ -710,8 +760,13 @@ function draw_title_menu(info_message)
     rectfill(20, 16, 107, 111, 7)
 
     if info_message then
-        rectfill(59, 112, 108, 118, 1)
-        print(info_message, 60, 113, 7)
+        if info_message == "RETURN" then
+            rectfill(82, 112, 108, 118, 1)
+            print(info_message, 84, 113, 7)
+        else
+            rectfill(59, 112, 108, 118, 1)
+            print(info_message, 60, 113, 7)
+        end
     end
 
     -- draw grid as title background
@@ -728,7 +783,7 @@ function draw_title_menu(info_message)
     end
 
     -- draw "mini" background and letters
-    rectfill(28, 24, 59, 31, theme)
+    rectfill(28, 24, 59, 31, themes[theme_select][1])
     print("m", 30, 26, 7)
     print("i", 38, 26)
     print("n", 46, 26)
