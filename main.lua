@@ -120,6 +120,10 @@ function _update()
     if mouse then
         mo_x = stat(32)
         mo_y = stat(33)
+
+        if not (sticky and stat(34) == 1) then
+            sticky = false
+        end
     end
 
     -- if playing...
@@ -327,17 +331,18 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 then
-                menu = false
+            if stat(34) == 1 and not sticky then
+                -- ensure player click accidentally in next screen
+                sticky = true
+
                 -- if hovering over "play", start the game
                 if hover_play then
+                    menu = false
                     play = true
-                    -- ensure player doesn't dig immedediately when loading game
-                    sticky = true
                     initialise()
                 -- if hovering over "options", go to options
                 elseif hover_options then
-                    menu_y = 80
+                    menu = false
                     option = true
                 end
             end
@@ -361,6 +366,14 @@ function _update()
                     else
                         theme_select = 1
                     end
+                elseif menu_y == 96 then
+                    if controller then
+                        controller = false
+                        mouse = true
+                    else
+                        mouse = false
+                        controller = true
+                    end
                 end
             -- o to return to menu
             elseif btnp(4) then
@@ -373,35 +386,42 @@ function _update()
         -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
-            hover_options = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
+            hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
+            hover_control = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
+            hover_return = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
 
             -- set cursor position if hovering over an option
-            if hover_play then
+            if hover_theme then
                 menu_y = 80
-            elseif hover_options then
+            elseif hover_control then
                 menu_y = 96
             else
                 menu_y = false
             end
             
-            --[[
             -- if left clicking
-            if stat(34) == 1 then
-                menu = false
-                -- if hovering over "play", start the game
-                if hover_play then
-                    play = true
-                    -- ensure player doesn't dig immedediately when loading game
+            if stat(34) == 1 and not sticky then
+                if menu_y == 80 then
                     sticky = true
-                    initialise()
-                -- if hovering over "options", go to options
-                elseif hover_options then
-                    menu_y = 80
-                    option = true
+                    if theme_select != #themes then
+                        theme_select += 1
+                    else
+                        theme_select = 1
+                    end
+                elseif menu_y == 96 then
+                    sticky = true
+                    if controller then
+                        controller = false
+                        mouse = true
+                    else
+                        mouse = false
+                        controller = true
+                    end
+                elseif hover_return then
+                    options = false
+                    menu = true
                 end
             end
-            --]]
         end
     end
 end
@@ -486,7 +506,11 @@ function _draw()
         spr(17, p.x, p.y)
     elseif menu then
         -- draw main frame and background
-        draw_title_menu("❎ TO SELECT")
+        if controller then
+            draw_title_menu("❎ TO SELECT")
+        elseif mouse then
+            draw_title_menu()
+        end
 
         -- draw best time box
         rectfill(76, 81, 99, 103, 6)
@@ -520,7 +544,11 @@ function _draw()
     -- if the player is in the options menu
     elseif option then
         -- draw main frame and background
-        draw_title_menu("🅾️ TO RETURN")
+        if controller then
+            draw_title_menu("🅾️ TO RETURN")
+        elseif mouse then
+            draw_title_menu("RETURN")
+        end
         
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
@@ -540,6 +568,7 @@ function _draw()
 
         -- theme preview
         rectfill(75, 81, 81, 87, themes[theme_select][1])
+        -- rounded corners
         pset(75, 81, themes[theme_select][2])
         pset(81, 81, themes[theme_select][2])
         pset(75, 87, themes[theme_select][2])
@@ -731,8 +760,13 @@ function draw_title_menu(info_message)
     rectfill(20, 16, 107, 111, 7)
 
     if info_message then
-        rectfill(59, 112, 108, 118, 1)
-        print(info_message, 60, 113, 7)
+        if info_message == "RETURN" then
+            rectfill(82, 112, 108, 118, 1)
+            print(info_message, 84, 113, 7)
+        else
+            rectfill(59, 112, 108, 118, 1)
+            print(info_message, 60, 113, 7)
+        end
     end
 
     -- draw grid as title background
