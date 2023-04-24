@@ -354,11 +354,14 @@ function _update()
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
+            hover_guide = (37 < mo_x and mo_x < 57) and (89 < mo_y and mo_y < 95)
             hover_options = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
 
             -- set cursor position if hovering over an option
             if hover_play then
                 menu_y = 80
+            elseif hover_guide then
+                menu_y = 88
             elseif hover_options then
                 menu_y = 96
             else
@@ -376,12 +379,34 @@ function _update()
                     menu = false
                     play = true
                     initialise()
+                -- if hovering over "play", start the game
+                elseif hover_guide then
+                    sfx(5)
+                    menu = false
+                    guide = true
                 -- if hovering over "options", go to options
                 elseif hover_options then
                     sfx(5)
                     menu = false
                     option = true
                 end
+            end
+        end
+    elseif guide then
+        -- return to title screen
+        if controller then
+            if btnp(4) then
+                sfx(6)
+                guide = false
+                menu = true
+            end
+        elseif mouse then
+            -- bounds for "return" in guide menu
+            hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
+            if stat(34) == 1 and not sticky and hover_return_guide then
+                sticky = true
+                guide = false
+                menu = true
             end
         end
     elseif option then
@@ -428,7 +453,7 @@ function _update()
             -- bounds for "play" and "options" on main menu
             hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
             hover_control = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
-            hover_return = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
+            hover_return_options = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
 
             -- set cursor position if hovering over an option
             if hover_theme then
@@ -459,7 +484,7 @@ function _update()
                         mouse = false
                         controller = true
                     end
-                elseif hover_return then
+                elseif hover_return_options then
                     sfx(6)
                     options = false
                     menu = true
@@ -622,7 +647,11 @@ function _draw()
             spr(3, menu_x, menu_y)
         end
     elseif guide then
-        draw_guide("❎ to return", true)
+        if controller then
+            draw_guide("🅾️ TO RETURN")
+        elseif mouse then
+            draw_guide("RETURN")
+        end
     elseif option then
         -- draw main frame and background
         if controller then
@@ -1006,5 +1035,4 @@ function draw_guide(info_message)
     print("1", 87, 86, 7)
 
     spr(3, 76, 92)
-
 end
