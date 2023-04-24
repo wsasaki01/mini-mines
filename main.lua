@@ -41,6 +41,7 @@ function _init()
     -- store pb
     -- empty by default
     pb = false
+    new_pb = false
 
     -- current colour theme
     theme_select = 1
@@ -70,7 +71,7 @@ function initialise()
     height = 15
 
     -- number of mines
-    mcount = 30
+    mcount = 1
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -202,10 +203,10 @@ function _update()
                     win = true
 
                     -- record the pb if needed
-                    if pb == false then
+                    if pb == false or (ct < pb) then
                         pb = ct
-                    elseif ct < pb then
-                        pb = ct
+                        -- tell _update() that there's been a new pb
+                        new_pb = true
                     end
                 end
             end
@@ -291,6 +292,8 @@ function _update()
             if btnp(5) then
                 win = false
                 lose = false
+                new_pb = false
+
                 initialise()
             end
 
@@ -299,6 +302,8 @@ function _update()
                 win = false
                 lose = false
                 play = false
+                new_pb = false
+
                 menu = true
             end
         elseif mouse then
@@ -512,6 +517,10 @@ function _draw()
         -- draw options
         print("❎ replay", 22, 58, 13)
         print("🅾️ return to menu")
+
+        if new_pb then
+            pb_message()
+        end
     elseif lose then
         -- draw message box and border
         rectfill(18, 39, 109, 72, 9)
@@ -697,6 +706,10 @@ function _draw()
         spr(20, mo_x, mo_y)
     end
 end
+
+-- ***********************
+--     EXTRA FUNCTIONS 
+-- ***********************
 
 function gen_matrix(fill)
     m = {}
@@ -1035,4 +1048,22 @@ function draw_guide(info_message)
     print("1", 87, 86, 7)
 
     spr(3, 76, 92)
+end
+
+function pb_message()
+    -- positioned below timer
+    x = 113
+
+    -- move up and down periodically
+    y = flr(sin(t()*1))+11
+
+    -- colouring
+    pset(x+6, y-3, 1)
+    line(x+5, y-2, x+7, y-2, 1)
+    pset(x+6, y-2, 2)
+    line(x+4, y-1, x+8, y-1, 1)
+    line(x+5, y-1, x+7, y-1, 2)
+    rectfill(x, y, x+12, y+11, 2)
+    print("NEW\nPB!", x+1, y, 7)
+    line(x, y+12, x+12, y+12, 0)
 end
