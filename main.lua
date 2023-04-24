@@ -54,6 +54,9 @@ function _init()
         -- orange (white)
         {9, 7}
     }
+
+    mine_flash = 0
+    show_mines = false
 end
 
 function initialise()
@@ -873,7 +876,7 @@ function draw_title_menu(info_message)
     sspr(0, 32, 72, 63, 28, 32)
 end
 
-function draw_guide(info_message, show_mines)
+function draw_guide(info_message)
     -- fill with accent background
     cls(themes[theme_select][2])
 
@@ -974,10 +977,33 @@ function draw_guide(info_message, show_mines)
 
     print("FLAG ALL MINES TO WIN!", 22, 110, 0)
 
-    --ADD TIME THING!
-    if show_mines then
-        spr(4, 76, 92)
+    if mine_flash != 30 then
+        mine_flash += 1
+    else
+        mine_flash = 0
+        show_mines = not show_mines
     end
+
+    if show_mines then
+        spr(4, 68, 76)
+        spr(4, 76, 92)
+        spr(4, 36, 92)
+    end
+
+    rectfill(76, 76, 99, 91, themes[theme_select][1])
+    rectfill(84, 76, 99, 99, themes[theme_select][1])
+    rectfill(68, 84, 75, 107, themes[theme_select][1])
+    rectfill(76, 100, 99, 107, themes[theme_select][1])
+
+    print("1", 79, 78, 7)
+    print("2", 79, 86, 7)
+    print("2", 71, 86, 7)
+    print("1", 71, 94, 7)
+    print("1", 71, 102, 7)
+    print("1", 79, 102, 7)
+    print("1", 87, 102, 7)
+    print("1", 87, 94, 7)
+    print("1", 87, 86, 7)
 
     spr(3, 76, 92)
 
