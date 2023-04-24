@@ -14,6 +14,7 @@ function _init()
     menu = true
     play = false
     option = false
+    guide = false
 
     -- list of falling icons on menu screen
     icons = {}
@@ -53,6 +54,9 @@ function _init()
         -- orange (white)
         {9, 7}
     }
+
+    mine_flash = 0
+    show_mines = false
 end
 
 function initialise()
@@ -126,7 +130,6 @@ function _update()
         end
     end
 
-    -- if playing...
     if play and not (lose or win) then
         -- update movement
         if controller then
@@ -282,7 +285,6 @@ function _update()
                 end
             end
         end
-    -- if the player has lost or won
     elseif win or lose then
         if controller then
             -- x for return
@@ -317,20 +319,19 @@ function _update()
                 end
             end
         end
-    -- if the player is in the main menu
     elseif menu then
         -- if using controller
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
                 sfx(4)
-                menu_y += 16
+                menu_y += 8
             elseif btnp(2) and menu_y != 80 then
                 sfx(4)
-                menu_y -= 16
+                menu_y -= 8
             end
 
-            -- if selected option
+            -- x to select option
             if btnp(5) then
                 -- disable menu
                 menu = false
@@ -340,8 +341,11 @@ function _update()
                 if menu_y == 80 then
                     play = true
                     initialise()
+                -- if "guide" selected, go to guide screen
+                elseif menu_y == 88 then
+                    guide = true
                 -- if "options" selected, go to options
-                else
+                elseif menu_y == 96 then
                     menu_y = 80
                     option = true
                 end
@@ -350,11 +354,14 @@ function _update()
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
+            hover_guide = (37 < mo_x and mo_x < 57) and (89 < mo_y and mo_y < 95)
             hover_options = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
 
             -- set cursor position if hovering over an option
             if hover_play then
                 menu_y = 80
+            elseif hover_guide then
+                menu_y = 88
             elseif hover_options then
                 menu_y = 96
             else
@@ -372,6 +379,11 @@ function _update()
                     menu = false
                     play = true
                     initialise()
+                -- if hovering over "play", start the game
+                elseif hover_guide then
+                    sfx(5)
+                    menu = false
+                    guide = true
                 -- if hovering over "options", go to options
                 elseif hover_options then
                     sfx(5)
@@ -380,7 +392,23 @@ function _update()
                 end
             end
         end
-    -- if the player is in the options
+    elseif guide then
+        -- return to title screen
+        if controller then
+            if btnp(4) then
+                sfx(6)
+                guide = false
+                menu = true
+            end
+        elseif mouse then
+            -- bounds for "return" in guide menu
+            hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
+            if stat(34) == 1 and not sticky and hover_return_guide then
+                sticky = true
+                guide = false
+                menu = true
+            end
+        end
     elseif option then
         -- if using controller
         if controller then
@@ -425,7 +453,7 @@ function _update()
             -- bounds for "play" and "options" on main menu
             hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
             hover_control = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
-            hover_return = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
+            hover_return_options = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
 
             -- set cursor position if hovering over an option
             if hover_theme then
@@ -456,7 +484,7 @@ function _update()
                         mouse = false
                         controller = true
                     end
-                elseif hover_return then
+                elseif hover_return_options then
                     sfx(6)
                     options = false
                     menu = true
@@ -594,14 +622,23 @@ function _draw()
             rectfill(37, 81, 53, 87, 6)
 
             print("play", 38, 82, 7)
+            print("guide", 38, 90, 6)
+            print("options", 38, 98, 6)
+        elseif menu_y == 88 then
+            rectfill(37, 89, 57, 95, 6)
+
+            print("play", 38, 82, 6)
+            print("guide", 38, 90, 7)
             print("options", 38, 98, 6)
         elseif menu_y == 96 then
             rectfill(37, 97, 65, 103, 6)
 
             print("play", 38, 82, 6)
+            print("guide", 38, 90, 6)
             print("options", 38, 98, 7)
         else
             print("play", 38, 82, 6)
+            print("guide", 38, 90, 6)
             print("options", 38, 98, 6)
         end
 
@@ -609,7 +646,12 @@ function _draw()
         if menu_y != false then
             spr(3, menu_x, menu_y)
         end
-    -- if the player is in the options menu
+    elseif guide then
+        if controller then
+            draw_guide("🅾️ TO RETURN")
+        elseif mouse then
+            draw_guide("RETURN")
+        end
     elseif option then
         -- draw main frame and background
         if controller then
@@ -654,9 +696,6 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
-
-    print(mo_x, 50, 50, 2)
-    print(mo_y)
 end
 
 function gen_matrix(fill)
@@ -766,8 +805,8 @@ function to_title()
 end
 
 function draw_title_menu(info_message)
-    -- fill with white background
-    cls(7)
+    -- fill with accent background
+    cls(themes[theme_select][2])
 
     -- set to + draw pattern
     -- create background
@@ -864,4 +903,136 @@ function draw_title_menu(info_message)
 
     -- draw "mines" logo
     sspr(0, 32, 72, 63, 28, 32)
+end
+
+function draw_guide(info_message)
+    -- fill with accent background
+    cls(themes[theme_select][2])
+
+    -- set to + draw pattern
+    -- create background
+    -- set back to normal fill
+    fillp(◆)
+    rectfill(0, 0, 128, 128, themes[theme_select][1])
+    fillp(█)
+    
+    -- if there are fewer than 15 icons in the background, spawn a new one
+    if #icons < 15 then
+        -- add an icon to the list
+        add(icons, {
+            -- centre of x movement
+            -- sin wave moves greater and less than this value
+            x_base = flr(rnd(120)),
+
+            -- multiplier for range of horizontal movement
+            multi = rnd(1),
+
+            -- position on screen
+            -- spawn off screen
+            x = -20,
+            y = flr(rnd(120))-120,
+
+            -- sprite (random: flag or mine)
+            s = flr(rnd(2))+3,
+
+            -- downwards speed
+            speed = flr(rnd(2))+0.4,
+
+            -- draw icon at coords
+            draw = function(self)
+                spr(self.s, self.x, self.y)
+            end,
+
+            -- fall down
+            -- move left and right, following sin graph
+            fall = function(self)
+                self.y += self.speed
+                self.x = self.x_base + sin(t()*self.multi)*5
+            end,
+
+            -- delete self if off screen
+            check = function(self)
+                if self.y > 130 then
+                    del(icons, self)
+                end
+            end
+        })
+    end
+
+    -- for each icon, draw it, make it fall, and check if it's off screen
+    for i in all(icons) do
+        i:draw()
+        i:fall()
+        i:check()
+    end
+
+    -- draw background and border
+    rectfill(10, 10, 118, 118, 1)
+    rectfill(11, 11, 117, 117, 7)
+
+    if info_message then
+        if info_message == "RETURN" then
+            rectfill(92, 119, 118, 123, 1)
+            print(info_message, 94, 118, 7)
+        else
+            rectfill(69, 119, 118, 124, 1)
+            print(info_message, 70, 119, 7)
+        end
+    end
+
+    -- draw "mini" background and letters
+    rectfill(18, 18, 34, 24, themes[theme_select][1])
+    print("mini", 19, 19, 7)
+    
+    print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select][1])
+    
+    print("🅾️ / right click TO flag\nto mark a mine", 19, 48, 8)
+
+    -- draw grid border
+    rect(27, 67, 100, 108, 13)
+
+    -- draw sample grid
+    for col=28, 92, 16 do
+        for row=68, 115, 16 do
+            spr(1, col, row)
+        end
+    end
+
+    for col=36, 90, 16 do
+        for row=76, 100, 16 do
+            spr(1, col, row)
+        end
+    end
+
+    print("FLAG ALL MINES TO WIN!", 22, 110, 0)
+
+    if mine_flash != 30 then
+        mine_flash += 1
+    else
+        mine_flash = 0
+        show_mines = not show_mines
+    end
+
+    if show_mines then
+        spr(4, 68, 76)
+        spr(4, 76, 92)
+        spr(4, 36, 92)
+    end
+
+    rectfill(76, 76, 99, 91, themes[theme_select][1])
+    rectfill(84, 76, 99, 99, themes[theme_select][1])
+    rectfill(68, 84, 75, 107, themes[theme_select][1])
+    rectfill(76, 100, 99, 107, themes[theme_select][1])
+
+    print("1", 79, 78, 7)
+    print("2", 79, 86, 7)
+    print("2", 71, 86, 7)
+    print("1", 71, 94, 7)
+    print("1", 71, 102, 7)
+    print("1", 79, 102, 7)
+    print("1", 87, 102, 7)
+    print("1", 87, 94, 7)
+    print("1", 87, 86, 7)
+
+    spr(3, 76, 92)
 end
