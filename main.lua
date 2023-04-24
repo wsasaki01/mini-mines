@@ -956,9 +956,10 @@ function draw_guide(info_message, show_mines)
     
     print("🅾️ / right click TO flag\nto mark a mine", 19, 48, 8)
 
+    -- draw grid border
     rect(27, 67, 100, 108, 13)
 
-    -- draw grid as title background
+    -- draw sample grid
     for col=28, 92, 16 do
         for row=68, 115, 16 do
             spr(1, col, row)
