@@ -121,6 +121,9 @@ function initialise()
 end
 
 function _update()
+    -- allow user to return to title from pico-8 menu
+    menuitem(2, "return to title", ensure)
+    
     -- if mouse enabled, capture positions
     if mouse then
         mo_x = stat(32)
@@ -169,9 +172,6 @@ function _update()
         if not first then
             ct = flr(t()) - record
         end
-
-        -- add menu item to return to title
-        menuitem(2, "return to title", ensure)
 
         -- if the player hasn't already lost
         -- makes sure there's no iteration of matrices that haven't been made yet
@@ -817,14 +817,29 @@ function set_control(b)
     return true
 end
 
-function ensure()
+function ensure(b)
+    -- ignore right/left button presses
+    if (b&1 > 0) or (b&2 > 0) then
+        return true
+    end
+
+    -- ask the user to confirm their choice
     menuitem(2, "are you sure?", to_title)
     return true
 end
 
-function to_title()
-    menu = true
+function to_title(b)
+    -- ignore right/left button presses
+    if (b&1 > 0) or (b&2 > 0) then
+        return true
+    end
+
+    -- set the option back to normal, and return to the menu
+    menuitem(2, "return to title", ensure)
     play = false
+    option = false
+    guide = false
+    menu = true
 end
 
 function draw_title_menu(info_message)
