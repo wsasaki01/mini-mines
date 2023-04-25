@@ -13,6 +13,7 @@ function _init()
     -- boot up to menu screen
     menu = true
     play = false
+    difficulty = false
     option = false
     guide = false
 
@@ -134,7 +135,45 @@ function _update()
         end
     end
 
-    if play and not (lose or win) then
+    if win or lose then
+        if controller then
+            -- x for return
+            if btnp(5) then
+                win = false
+                lose = false
+                new_pb = false
+
+                initialise()
+            end
+
+            -- o for return to menu
+            if btnp(4) then
+                win = false
+                lose = false
+                play = false
+                new_pb = false
+
+                menu = true
+            end
+        elseif mouse then
+            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
+            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+
+            if stat(34) == 1 and not sticky then
+                sticky = true
+                if hover_replay then
+                    win = false
+                    lose = false
+                    initialise()
+                elseif hover_quit then
+                    win = false
+                    lose = false
+                    play = false
+                    menu = true
+                end
+            end
+        end
+    elseif play then
         -- update movement
         if controller then
             if btnp(0) and p.x != 0 then
@@ -284,44 +323,6 @@ function _update()
                         sfx(2)
                         uncover({p.mx, p.my})
                     end
-                end
-            end
-        end
-    elseif win or lose then
-        if controller then
-            -- x for return
-            if btnp(5) then
-                win = false
-                lose = false
-                new_pb = false
-
-                initialise()
-            end
-
-            -- o for return to menu
-            if btnp(4) then
-                win = false
-                lose = false
-                play = false
-                new_pb = false
-
-                menu = true
-            end
-        elseif mouse then
-            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
-            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
-
-            if stat(34) == 1 and not sticky then
-                sticky = true
-                if hover_replay then
-                    win = false
-                    lose = false
-                    initialise()
-                elseif hover_quit then
-                    win = false
-                    lose = false
-                    play = false
-                    menu = true
                 end
             end
         end
@@ -614,9 +615,6 @@ function _draw()
         if p.my != 0 then
             spr(17, p.x, p.y)
         end
-
-        print(p.mx, 0, 0, 0)
-        print(p.my)
     elseif menu then
         -- draw main frame and background
         if controller then
