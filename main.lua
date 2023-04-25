@@ -188,9 +188,10 @@ function _update()
                     end
                 end
 
-                -- if the player has flagged all mined, uncover all the mines
-                -- DOESN'T WORK
+                -- if the player wins
                 if ccount == mcount then
+                    -- if the player has flagged all mined, uncover all the mines
+                    -- DOESN'T WORK
                     for col in all(grid) do
                         for row in all(grid[col]) do
                             if type(grid[col][row]) == "number" then
