@@ -71,7 +71,7 @@ function initialise()
     height = 15
 
     -- number of mines
-    mcount = 1
+    mcount = 4
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -192,8 +192,8 @@ function _update()
                 if ccount == mcount then
                     -- if the player has flagged all mined, uncover all the mines
                     -- DOESN'T WORK
-                    for col in all(grid) do
-                        for row in all(grid[col]) do
+                    for col=1, #grid do
+                        for row=1, #grid[col] do
                             if type(grid[col][row]) == "number" then
                                 uncover({col, row})
                             end
