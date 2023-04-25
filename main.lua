@@ -71,7 +71,7 @@ function initialise()
     height = 15
 
     -- number of mines
-    mcount = 4
+    mcount = 30
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -252,7 +252,8 @@ function _update()
                 
                 if first then
                     -- create a list of mines
-                    mine_list = create_mines(width, height, mcount)
+                    -- pass in current position to ensure no mine spawns there
+                    mine_list = create_mines(width, height, mcount, {p.mx, p.my})
 
                     for mine in all(mine_list) do
                         --printh(mine[1]..", "..mine[2], "log", false)

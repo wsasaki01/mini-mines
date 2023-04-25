@@ -1,22 +1,30 @@
-function create_mines(width, height, mines)
+function create_mines(width, height, mines, current)
+    -- store mines
     local grid = {}
 
+    -- keep adding mines until there's enough
     while #grid != mines do
-        printh("---", "log")
+        --printh("---", "log")
+        -- generate a mine location
         local loc = gen(width, height)
-        printh("loc: "..loc[1]..", "..loc[2], "log")
+        --printh("loc: "..loc[1]..", "..loc[2], "log")
 
+        -- check if there's already a mine there, or that's where the player pressed
         local flag = false
         for mine in all(grid) do
-            printh("checking against: "..mine[1]..", "..mine[2], "log")
-            if loc[1] == mine[1] and loc[2] == mine[2] then
-                printh("!!!", "log")
+            --printh("checking against: "..mine[1]..", "..mine[2], "log")
+            if
+            (loc[1] == mine[1] and loc[2] == mine[2]) or
+            (loc[1] == current[1] and loc[2] == current[2]) then
+                --printh("!!!", "log")
+                -- if so, don't add that location to the list
                 flag = true
             end
         end
 
+        -- add valid mines to the list
         if not flag then
-            printh("added!", "log")
+            --printh("added!", "log")
 
             add(grid, loc)
         end
