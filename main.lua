@@ -71,7 +71,7 @@ function initialise()
     height = 15
 
     -- number of mines
-    mcount = 30
+    mcount = 1
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -502,8 +502,23 @@ end
 
 function _draw()
     if win then
-        -- draw all dug spaces
+        -- clear screen with grey background
+        cls(13)
+
+        -- draw the map
+        map(0, 0)
+
+        -- draw all dug spaces and flags
         draw_digs()
+        draw_flags()
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
 
         -- draw message box and border
         rectfill(18, 39, 109, 72, 9)
@@ -523,6 +538,24 @@ function _draw()
             pb_message()
         end
     elseif lose then
+        -- clear screen with grey background
+        cls(13)
+
+        -- draw the map
+        map(0, 0)
+
+        -- draw all dug spaces and flags
+        draw_digs()
+        draw_flags()
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
+        
         -- draw message box and border
         rectfill(18, 39, 109, 72, 9)
         rectfill(19, 40, 108, 71, 7)
