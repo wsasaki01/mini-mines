@@ -212,7 +212,7 @@ function _update()
             end
 
             -- x or right click for flag
-            if (btnp("5") or stat(34) == 2) and not wait then
+            if (btnp("5") or stat(34) == 2) and not wait and p.my != 0 then
                 -- wait for player to lift key
                 if stat(34) == 2 then
                     wait = true
@@ -246,7 +246,7 @@ function _update()
             end
 
             -- o or left click for dig
-            if (btnp("4") or (stat(34) == 1 and not sticky)) and not wait then
+            if (btnp("4") or (stat(34) == 1 and not sticky)) and not wait and p.my != 0 then
                 sticky = true
                 
                 if first then
@@ -611,7 +611,12 @@ function _draw()
         end
     
         -- draw square cursor
-        spr(17, p.x, p.y)
+        if p.my != 0 then
+            spr(17, p.x, p.y)
+        end
+
+        print(p.mx, 0, 0, 0)
+        print(p.my)
     elseif menu then
         -- draw main frame and background
         if controller then
