@@ -531,8 +531,7 @@ function _draw()
         print("you win!", sin(t()*0.5)*10+48, sin(t())*5+47, 2)
 
         -- draw options
-        print("❎ replay", 22, 58, 13)
-        print("🅾️ return to menu")
+        win_lose_message()
 
         if new_pb then
             pb_message()
@@ -551,7 +550,6 @@ function _draw()
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
 
-
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
@@ -565,31 +563,9 @@ function _draw()
 
         -- draw message
         print("you lose...", sin(t()*0.5)*6+43, 46, 2)
-
-        if controller then
-            -- draw options
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu")
-        elseif mouse then
-            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
-            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
-
-            -- set a background for whichever option is currently selected
-            if hover_replay then
-                rectfill(21, 57, 69, 63, 6)
-
-                print("❎ to replay", 22, 58, 13)
-                print("🅾️ to return to menu", 22, 65)
-            elseif hover_quit then
-                rectfill(21, 64, 101, 70, 6)
-
-                print("❎ to replay", 22, 58, 13)
-                print("🅾️ to return to menu", 22, 65)
-            else
-                print("❎ to replay", 22, 58, 13)
-                print("🅾️ to return to menu", 22, 65)
-            end
-        end
+       
+        -- draw options
+        win_lose_message()
     elseif play then
         -- clear screen with grey background
         cls(13)
@@ -1100,4 +1076,31 @@ function pb_message()
     rectfill(x, y, x+12, y+11, 2)
     print("NEW\nPB!", x+1, y, 7)
     line(x, y+12, x+12, y+12, 0)
+end
+
+function win_lose_message()
+    if controller then
+        -- draw options
+        print("❎ to replay", 22, 58, 13)
+        print("🅾️ to return to menu")
+    elseif mouse then
+        hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
+        hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+
+        -- set a background for whichever option is currently selected
+        if hover_replay then
+            rectfill(21, 57, 69, 63, 6)
+
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
+        elseif hover_quit then
+            rectfill(21, 64, 101, 70, 6)
+
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
+        else
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
+        end
+    end
 end
