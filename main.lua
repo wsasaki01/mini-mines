@@ -61,18 +61,24 @@ function _init()
     show_mines = false
 end
 
-function initialise()
+function initialise(diff)
     -- current time
     ct = 0
 
-    -- width of board
-    width = 16
-
-    -- height of board
-    height = 15
-
-    -- number of mines
-    mcount = 1
+    size = diff
+    if diff == "easy" then
+        width = 7 -- width of board
+        height = 7 -- height of board
+        mcount = 10 -- number of mines
+    elseif diff == "med" then
+        width = 11
+        height = 11
+        mcount = 20
+    elseif diff == "hard" then
+        width = 16
+        height = 15
+        mcount = 30
+    end
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -196,13 +202,13 @@ function _update()
                 -- maybe pass something into initialise()
                 if menu_y == 80 then
                     --easy
-                    initialise()
+                    initialise("easy")
                 elseif menu_y == 88 then
                     --medium
-                    initialise()
+                    initialise("med")
                 elseif menu_y == 96 then
                     --hard
-                    initialise()
+                    initialise("hard")
                 end
             end
         -- if using mouse
@@ -232,17 +238,17 @@ function _update()
                     sfx(5)
                     difficulty = false
                     play = true
-                    initialise()
+                    initialise("easy")
                 elseif hover_medium then
                     sfx(5)
                     difficulty = false
                     play = true
-                    initialise()
+                    initialise("med")
                 elseif hover_hard then
                     sfx(5)
                     difficulty = false
                     play = true
-                    initialise()
+                    initialise("hard")
                 end
             end
         end
@@ -697,8 +703,7 @@ function _draw()
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
 
-        -- draw the map
-        map(0, 0)
+        map(0, 0, 64-(8*width/2), 60-(8*height/2), width, height+1) -- draw the map
 
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
