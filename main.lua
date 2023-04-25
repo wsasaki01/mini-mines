@@ -173,6 +173,79 @@ function _update()
                 end
             end
         end
+    elseif difficulty then
+        -- if using controller
+        if controller then
+            -- movement
+            if btnp(3) and menu_y != 96 then
+                sfx(4)
+                menu_y += 8
+            elseif btnp(2) and menu_y != 80 then
+                sfx(4)
+                menu_y -= 8
+            end
+
+            -- x to select option
+            if btnp(5) then
+                -- disable menu
+                difficulty = false
+                play = true
+                sfx(5)
+
+                -- difficulty selection
+                -- maybe pass something into initialise()
+                if menu_y == 80 then
+                    --easy
+                    initialise()
+                elseif menu_y == 88 then
+                    --medium
+                    initialise()
+                elseif menu_y == 96 then
+                    --hard
+                    initialise()
+                end
+            end
+        -- if using mouse
+        elseif mouse then
+            -- bounds for "play" and "options" on main menu
+            hover_easy = (37 <= mo_x and mo_x <= 53) and (81 <= mo_y and mo_y <= 87)
+            hover_medium = (37 <= mo_x and mo_x <= 61) and (89 <= mo_y and mo_y <= 95)
+            hover_hard = (37 <= mo_x and mo_x <= 53) and (97 <= mo_y and mo_y <= 103)
+
+            -- set cursor position if hovering over an option
+            if hover_easy then
+                menu_y = 80
+            elseif hover_medium then
+                menu_y = 88
+            elseif hover_hard then
+                menu_y = 96
+            else
+                menu_y = false
+            end
+            
+            -- left click to pick difficulty
+            if stat(34) == 1 and not sticky then
+                -- ensure player click accidentally in next screen
+                sticky = true
+
+                if hover_easy then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise()
+                elseif hover_medium then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise()
+                elseif hover_hard then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise()
+                end
+            end
+        end
     elseif play then
         -- update movement
         if controller then
@@ -346,8 +419,7 @@ function _update()
 
                 -- if "play" selected, start the game
                 if menu_y == 80 then
-                    play = true
-                    initialise()
+                    difficulty = true
                 -- if "guide" selected, go to guide screen
                 elseif menu_y == 88 then
                     guide = true
@@ -384,8 +456,7 @@ function _update()
                 if hover_play then
                     sfx(5)
                     menu = false
-                    play = true
-                    initialise()
+                    difficulty = true
                 -- if hovering over "play", start the game
                 elseif hover_guide then
                     sfx(5)
@@ -567,6 +638,42 @@ function _draw()
        
         -- draw options
         win_lose_message()
+    elseif difficulty then
+        -- draw main frame and background
+        if controller then
+            draw_title_menu("❎ TO SELECT")
+        elseif mouse then
+            draw_title_menu()
+        end
+        -- set a background for whichever option is currently selected
+        if menu_y == 80 then
+            rectfill(37, 81, 53, 87, 6)
+
+            print("easy", 38, 82, 7)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 6)
+        elseif menu_y == 88 then
+            rectfill(37, 89, 61, 95, 6)
+
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 7)
+            print("hard", 38, 98, 6)
+        elseif menu_y == 96 then
+            rectfill(37, 97, 53, 103, 6)
+
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 7)
+        else
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 6)
+        end
+
+        -- if the player is hovering over an option, draw the flag next to it
+        if menu_y != false then
+            spr(3, menu_x, menu_y)
+        end
     elseif play then
         -- clear screen with grey background
         cls(13)
