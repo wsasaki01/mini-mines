@@ -70,14 +70,50 @@ function initialise(diff)
         width = 7 -- width of board
         height = 7 -- height of board
         mcount = 10 -- number of mines
+
+        -- player
+        p = {
+            -- pixel coordinates
+            x = 60,
+            y = 64,
+
+            -- map coordinates
+            mx = 9,
+            my = 8
+        }
+
+        xlim = {36, 84}
+        ylim = {40, 88}
     elseif diff == "med" then
         width = 11
         height = 11
         mcount = 20
+        
+        p = {
+            x = 60,
+            y = 64,
+
+            mx = 9,
+            my = 8
+        }
+
+        xlim = {20, 100}
+        ylim = {24, 104}
     elseif diff == "hard" then
         width = 16
         height = 15
         mcount = 30
+        
+        p = {
+            x = 64,
+            y = 64,
+
+            mx = 9,
+            my = 8
+        }
+
+        xlim = {0, 120}
+        ylim = {8, 120}
     end
 
     -- number of flags available (automaticall set to no. of mines)
@@ -91,17 +127,6 @@ function initialise(diff)
 
     -- has the player won?
     win = false
-
-    -- player
-    p = {
-        -- pixel coordinates
-        x = 64,
-        y = 64,
-
-        -- map coordinates
-        mx = 9,
-        my = 8
-    }
 
     -- create mine list
     mine_list = {}
@@ -255,20 +280,20 @@ function _update()
     elseif play then
         -- update movement
         if controller then
-            if btnp(0) and p.x != 0 then
+            if btnp(0) and p.x != xlim[1] then
                 -- play sound
                 sfx(0)
                 p.x -= 8
                 p.mx -= 1
-            elseif btnp(1) and p.x != 120 then
+            elseif btnp(1) and p.x != xlim[2] then
                 sfx(0)
                 p.x += 8
                 p.mx += 1
-            elseif btnp(2) and p.y != 8 then
+            elseif btnp(2) and p.y != ylim[1] then
                 sfx(0)
                 p.y -= 8
                 p.my -= 1
-            elseif btnp(3) and p.y != 120 then
+            elseif btnp(3) and p.y != ylim[2] then
                 sfx(0)
                 p.y += 8
                 p.my += 1
@@ -727,6 +752,9 @@ function _draw()
         if p.my != 0 then
             spr(17, p.x, p.y)
         end
+
+        print(p.x, 0, 0, 0)
+        print(p.y)
     elseif menu then
         -- draw main frame and background
         if controller then
