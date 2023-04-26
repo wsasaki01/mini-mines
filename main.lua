@@ -622,8 +622,8 @@ function _draw()
         cls(13)
 
         -- draw the map
-        map(0, 0)
-
+        map(0, 0, xoff, yoff, width, height+1) 
+        
         -- draw all dug spaces and flags
         draw_digs()
         draw_flags()
@@ -657,7 +657,7 @@ function _draw()
         cls(13)
 
         -- draw the map
-        map(0, 0)
+        map(0, 0, xoff, yoff, width, height+1) 
 
         -- draw all dug spaces and flags
         draw_digs()
