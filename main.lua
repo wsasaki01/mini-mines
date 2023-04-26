@@ -3,7 +3,7 @@ function _init()
     --     DEBUG
     -- *************
     reveal = false -- reveal mine locations during game
-    fill = false -- show values for each space
+    fill = true -- show values for each space
     -- *************
 
     -- enable devkit mouse
@@ -87,7 +87,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 20
+        mcount = 1
         
         p = {
             x = 60,
@@ -102,7 +102,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 30
+        mcount = 1
         
         p = {
             x = 64,
@@ -115,6 +115,11 @@ function initialise(diff)
         xlim = {0, 120}
         ylim = {8, 120}
     end
+
+    -- x and y offsets
+    -- how far into the screen should the map be drawn?
+    xoff = 64-(8*width/2)
+    yoff = 60-(8*height/2)
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -728,7 +733,8 @@ function _draw()
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
 
-        map(0, 0, 64-(8*width/2), 60-(8*height/2), width, height+1) -- draw the map
+        -- draw the map
+        map(0, 0, xoff, yoff, width, height+1) 
 
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
@@ -885,8 +891,9 @@ end
 function draw_flags()
     for c1=1, #flags do
         for c2=1, #flags[c1] do
-            if flags[c1][c2] then
-                spr(3, xlim[1]+c1*8-8, ylim[1]+c2*8-8)
+            if flags[c1][c2] == true then
+                -- y value doesn't have -8 because the top bar accounts for it
+                spr(3, xoff+c1*8-8, yoff+c2*8)
             end
         end
     end
@@ -896,10 +903,10 @@ function draw_digs()
     for c1=1, #digs do
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
-                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, themes[theme_select][1])
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select][1])
 
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
-                    print(grid[c1][c2], c1*8-5, c2*8+2, 7)
+                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
                 end
             end
         end
@@ -910,7 +917,7 @@ function draw_matrix()
     for c1=1, #grid do
         for c2=1, #grid[c1] do
             if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
-                print(grid[c1][c2], c1*8-5, c2*8+2, 8)
+                print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 8)
             end
         end
     end
@@ -928,10 +935,10 @@ function uncover(loc)
                     local probe = {loc[1]+pcol, loc[2]+prow}
 
                     if
-                    probe[1] > 0 and
-                    probe[1] < 17 and
-                    probe[2] > 0 and
-                    probe[2] < 16 then
+                    probe[1] >= 1 and
+                    probe[1] <= width and
+                    probe[2] >= 1 and
+                    probe[2] <= height then
                         if 
                         digs[probe[1]][probe[2]] != true and
                         flags[probe[1]][probe[2]] != true then
