@@ -21,8 +21,8 @@ function _init()
     icons = {}
 
     -- which control scheme to use?
-    controller = true
-    mouse = false
+    controller = false
+    mouse = true
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: controller", set_control)
@@ -61,18 +61,67 @@ function _init()
     show_mines = false
 end
 
-function initialise()
+function initialise(diff)
     -- current time
     ct = 0
 
-    -- width of board
-    width = 16
+    -- store the current difficulty
+    size = diff
+    if diff == "easy" then
+        width = 7 -- width of board
+        height = 7 -- height of board
+        mcount = 7 -- number of mines
 
-    -- height of board
-    height = 15
+        -- player
+        p = {
+            -- pixel coordinates
+            x = 60,
+            y = 64,
 
-    -- number of mines
-    mcount = 1
+            -- map coordinates
+            mx = 4,
+            my = 4
+        }
+
+        -- the limits for the cursor on the grid
+        xlim = {36, 84}
+        ylim = {40, 88}
+    elseif diff == "med" then
+        width = 11
+        height = 11
+        mcount = 15
+        
+        p = {
+            x = 60,
+            y = 64,
+
+            mx = 6,
+            my = 6
+        }
+
+        xlim = {20, 100}
+        ylim = {24, 104}
+    elseif diff == "hard" then
+        width = 16
+        height = 15
+        mcount = 30
+        
+        p = {
+            x = 64,
+            y = 64,
+
+            mx = 9,
+            my = 8
+        }
+
+        xlim = {0, 120}
+        ylim = {8, 120}
+    end
+
+    -- x and y offsets
+    -- how far into the screen should the map be drawn?
+    xoff = 64-(8*width/2)
+    yoff = 60-(8*height/2)
 
     -- number of flags available (automaticall set to no. of mines)
     fcount = mcount
@@ -85,17 +134,6 @@ function initialise()
 
     -- has the player won?
     win = false
-
-    -- player
-    p = {
-        -- pixel coordinates
-        x = 64,
-        y = 64,
-
-        -- map coordinates
-        mx = 9,
-        my = 8
-    }
 
     -- create mine list
     mine_list = {}
@@ -173,33 +211,112 @@ function _update()
                 end
             end
         end
-    elseif play then
-        -- update movement
+    elseif difficulty then
+        -- if using controller
         if controller then
-            if btnp(0) and p.x != 0 then
+            -- movement
+            if btnp(3) and menu_y != 96 then
+                sfx(4)
+                menu_y += 8
+            elseif btnp(2) and menu_y != 80 then
+                sfx(4)
+                menu_y -= 8
+            end
+
+            -- x to select option
+            if btnp(5) then
+                -- disable menu
+                difficulty = false
+                play = true
+                sfx(5)
+
+                -- difficulty selection
+                -- maybe pass something into initialise()
+                if menu_y == 80 then
+                    --easy
+                    initialise("easy")
+                elseif menu_y == 88 then
+                    --medium
+                    initialise("med")
+                elseif menu_y == 96 then
+                    --hard
+                    initialise("hard")
+                end
+            end
+        -- if using mouse
+        elseif mouse then
+            -- bounds for "play" and "options" on main menu
+            hover_easy = (37 <= mo_x and mo_x <= 53) and (81 <= mo_y and mo_y <= 87)
+            hover_medium = (37 <= mo_x and mo_x <= 61) and (89 <= mo_y and mo_y <= 95)
+            hover_hard = (37 <= mo_x and mo_x <= 53) and (97 <= mo_y and mo_y <= 103)
+
+            -- set cursor position if hovering over an option
+            if hover_easy then
+                menu_y = 80
+            elseif hover_medium then
+                menu_y = 88
+            elseif hover_hard then
+                menu_y = 96
+            else
+                menu_y = false
+            end
+            
+            -- left click to pick difficulty
+            if stat(34) == 1 and not sticky then
+                -- ensure player click accidentally in next screen
+                sticky = true
+
+                if hover_easy then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise("easy")
+                elseif hover_medium then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise("med")
+                elseif hover_hard then
+                    sfx(5)
+                    difficulty = false
+                    play = true
+                    initialise("hard")
+                end
+            end
+        end
+    elseif play then
+        -- update movement, using cursor limits
+        if controller then
+            if btnp(0) and p.x != xlim[1] then
                 -- play sound
                 sfx(0)
                 p.x -= 8
                 p.mx -= 1
-            elseif btnp(1) and p.x != 120 then
+            elseif btnp(1) and p.x != xlim[2] then
                 sfx(0)
                 p.x += 8
                 p.mx += 1
-            elseif btnp(2) and p.y != 8 then
+            elseif btnp(2) and p.y != ylim[1] then
                 sfx(0)
                 p.y -= 8
                 p.my -= 1
-            elseif btnp(3) and p.y != 120 then
+            elseif btnp(3) and p.y != ylim[2] then
                 sfx(0)
                 p.y += 8
                 p.my += 1
             end
         elseif mouse then
-            p.x = mo_x - mo_x%8
-            p.y = mo_y - mo_y%8
+            -- start at offset
+            -- find distance from current mouse to offset
+            -- int. div. of 8 to find how many spaces that is
+            -- mult. by 8 to actually set the position to that space
+            p.x = xoff + ((mo_x-xoff)\8)*8
+            p.y = yoff + ((mo_y-yoff)\8)*8
 
-            p.mx = p.x / 8 +1
-            p.my = p.y / 8
+            -- find distance from current mouse to offset
+            -- int. div. of 8 to find how many spaces that is
+            p.mx = (mo_x - xoff) \ 8 +1
+            p.my = (mo_y - yoff) \ 8
 
             -- if not still pressing key from menu, disable sticky
             if not (sticky and stat(34) == 1) then
@@ -301,7 +418,7 @@ function _update()
                     end
 
                     -- fill in the rest of the spaces with numbers for adjacent mines
-                    grid = fill_adj(grid)
+                    grid = fill_adj(grid, width, height)
 
                     first = false
                     record = flr(t())
@@ -346,8 +463,7 @@ function _update()
 
                 -- if "play" selected, start the game
                 if menu_y == 80 then
-                    play = true
-                    initialise()
+                    difficulty = true
                 -- if "guide" selected, go to guide screen
                 elseif menu_y == 88 then
                     guide = true
@@ -384,8 +500,7 @@ function _update()
                 if hover_play then
                     sfx(5)
                     menu = false
-                    play = true
-                    initialise()
+                    difficulty = true
                 -- if hovering over "play", start the game
                 elseif hover_guide then
                     sfx(5)
@@ -567,6 +682,42 @@ function _draw()
        
         -- draw options
         win_lose_message()
+    elseif difficulty then
+        -- draw main frame and background
+        if controller then
+            draw_title_menu("❎ TO SELECT")
+        elseif mouse then
+            draw_title_menu()
+        end
+        -- set a background for whichever option is currently selected
+        if menu_y == 80 then
+            rectfill(37, 81, 53, 87, 6)
+
+            print("easy", 38, 82, 7)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 6)
+        elseif menu_y == 88 then
+            rectfill(37, 89, 61, 95, 6)
+
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 7)
+            print("hard", 38, 98, 6)
+        elseif menu_y == 96 then
+            rectfill(37, 97, 53, 103, 6)
+
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 7)
+        else
+            print("easy", 38, 82, 6)
+            print("medium", 38, 90, 6)
+            print("hard", 38, 98, 6)
+        end
+
+        -- if the player is hovering over an option, draw the flag next to it
+        if menu_y != false then
+            spr(3, menu_x, menu_y)
+        end
     elseif play then
         -- clear screen with grey background
         cls(13)
@@ -591,7 +742,7 @@ function _draw()
         print(mins..secs, 108, 1, 7)
 
         -- draw the map
-        map(0, 0)
+        map(0, 0, xoff, yoff, width, height+1) 
 
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
@@ -615,6 +766,10 @@ function _draw()
         if p.my != 0 then
             spr(17, p.x, p.y)
         end
+
+        print(p.mx.." - "..p.x.." - "..mo_x, 0, 0, 0)
+        print(p.my.." - "..p.y.." - "..mo_y)
+        print(xoff)
     elseif menu then
         -- draw main frame and background
         if controller then
@@ -721,7 +876,7 @@ function _draw()
 end
 
 -- ***********************
---     EXTRA FUNCTIONS 
+--     EXTRA FUNCTIONS
 -- ***********************
 
 function gen_matrix(fill)
@@ -743,23 +898,28 @@ function draw_mine(loc)
 end
 
 function draw_flags()
+    -- iterate through matrix and draw all placed flags
     for c1=1, #flags do
         for c2=1, #flags[c1] do
-            if flags[c1][c2] then
-                spr(3, c1*8-8, c2*8)
+            if flags[c1][c2] == true then
+                -- y value doesn't have -8 because the top bar accounts for it
+                spr(3, xoff+c1*8-8, yoff+c2*8)
             end
         end
     end
 end
 
 function draw_digs()
+    -- iterate through the matrix and draw all dug spaces
     for c1=1, #digs do
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
-                rectfill(c1*8-8, c2*8, c1*8-1, c2*8+7, themes[theme_select][1])
+                -- draw the coloured background
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select][1])
 
+                -- draw the number if needed
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
-                    print(grid[c1][c2], c1*8-5, c2*8+2, 7)
+                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
                 end
             end
         end
@@ -767,31 +927,37 @@ function draw_digs()
 end
 
 function draw_matrix()
+    -- iterate through the matrix and draw all numbers
+    -- for debug use
     for c1=1, #grid do
         for c2=1, #grid[c1] do
             if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
-                print(grid[c1][c2], c1*8-5, c2*8+2, 8)
+                print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 8)
             end
         end
     end
 end
 
 function uncover(loc)
+    -- dig the current space
     digs[loc[1]][loc[2]] = true
 
-    -- if the current location is empty (no adjacent)...
+    -- if the current location is empty (no adjacent)
     if grid[loc[1]][loc[2]] == 0 then
         -- uncover all the spaces around it
         for pcol=-1, 1 do
             for prow=-1, 1 do
                 if not (pcol == 0 and prow == 0) then
+                    -- create a probe (an adjacent location to check)
                     local probe = {loc[1]+pcol, loc[2]+prow}
 
+                    -- if the probe is within bounds
                     if
-                    probe[1] > 0 and
-                    probe[1] < 17 and
-                    probe[2] > 0 and
-                    probe[2] < 16 then
+                    probe[1] >= 1 and
+                    probe[1] <= width and
+                    probe[2] >= 1 and
+                    probe[2] <= height then
+                        -- if that space hasn't already been dug, and doesn't have a flag, uncover it
                         if 
                         digs[probe[1]][probe[2]] != true and
                         flags[probe[1]][probe[2]] != true then
