@@ -243,12 +243,21 @@ function _update()
                     initialise("hard")
                 end
             end
+
+            -- o to return to title
+            if btnp(4) then
+                sfx(6)
+                difficulty = false
+                menu_y = 80
+                menu = true
+            end
         -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_easy = (37 <= mo_x and mo_x <= 53) and (81 <= mo_y and mo_y <= 87)
             hover_medium = (37 <= mo_x and mo_x <= 61) and (89 <= mo_y and mo_y <= 95)
             hover_hard = (37 <= mo_x and mo_x <= 53) and (97 <= mo_y and mo_y <= 103)
+            hover_return_difficulty = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
 
             -- set cursor position if hovering over an option
             if hover_easy then
@@ -281,6 +290,10 @@ function _update()
                     difficulty = false
                     play = true
                     initialise("hard")
+                elseif hover_return_difficulty then
+                    sfx(6)
+                    difficulty = false
+                    menu = true
                 end
             end
         end
@@ -526,6 +539,7 @@ function _update()
             -- bounds for "return" in guide menu
             hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
             if stat(34) == 1 and not sticky and hover_return_guide then
+                sfx(6)
                 sticky = true
                 guide = false
                 menu = true
@@ -686,7 +700,7 @@ function _draw()
         if controller then
             draw_title_menu("❎ TO SELECT")
         elseif mouse then
-            draw_title_menu()
+            draw_title_menu("RETURN")
         end
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
