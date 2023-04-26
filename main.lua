@@ -631,7 +631,6 @@ function _draw()
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
 
-
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
