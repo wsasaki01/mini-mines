@@ -21,8 +21,8 @@ function _init()
     icons = {}
 
     -- which control scheme to use?
-    controller = false
-    mouse = true
+    controller = true
+    mouse = false
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: controller", set_control)
@@ -191,6 +191,7 @@ function _update()
                 play = false
                 new_pb = false
 
+                menu_y = 80
                 menu = true
             end
         elseif mouse then
@@ -1007,6 +1008,7 @@ function to_title(b)
     play = false
     option = false
     guide = false
+    menu_y = 80
     menu = true
 end
 
