@@ -3,7 +3,7 @@ function _init()
     --     DEBUG
     -- *************
     reveal = false -- reveal mine locations during game
-    fill = true -- show values for each space
+    fill = false -- show values for each space
     -- *************
 
     -- enable devkit mouse
@@ -21,8 +21,8 @@ function _init()
     icons = {}
 
     -- which control scheme to use?
-    controller = true
-    mouse = false
+    controller = false
+    mouse = true
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: controller", set_control)
@@ -70,7 +70,7 @@ function initialise(diff)
     if diff == "easy" then
         width = 7 -- width of board
         height = 7 -- height of board
-        mcount = 10 -- number of mines
+        mcount = 7 -- number of mines
 
         -- player
         p = {
@@ -89,7 +89,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 1
+        mcount = 15
         
         p = {
             x = 60,
@@ -104,7 +104,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 1
+        mcount = 30
         
         p = {
             x = 64,
@@ -306,11 +306,17 @@ function _update()
                 p.my += 1
             end
         elseif mouse then
-            p.x = mo_x - mo_x%8
-            p.y = mo_y - mo_y%8
+            -- start at offset
+            -- find distance from current mouse to offset
+            -- int. div. of 8 to find how many spaces that is
+            -- mult. by 8 to actually set the position to that space
+            p.x = xoff + ((mo_x-xoff)\8)*8
+            p.y = yoff + ((mo_y-yoff)\8)*8
 
-            p.mx = p.x / 8 +1
-            p.my = p.y / 8
+            -- find distance from current mouse to offset
+            -- int. div. of 8 to find how many spaces that is
+            p.mx = (mo_x - xoff) \ 8 +1
+            p.my = (mo_y - yoff) \ 8
 
             -- if not still pressing key from menu, disable sticky
             if not (sticky and stat(34) == 1) then
@@ -761,8 +767,9 @@ function _draw()
             spr(17, p.x, p.y)
         end
 
-        print(p.x, 0, 0, 0)
-        print(p.y)
+        print(p.mx.." - "..p.x.." - "..mo_x, 0, 0, 0)
+        print(p.my.." - "..p.y.." - "..mo_y)
+        print(xoff)
     elseif menu then
         -- draw main frame and background
         if controller then
