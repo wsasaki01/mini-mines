@@ -65,6 +65,7 @@ function initialise(diff)
     -- current time
     ct = 0
 
+    -- store the current difficulty
     size = diff
     if diff == "easy" then
         width = 7 -- width of board
@@ -82,6 +83,7 @@ function initialise(diff)
             my = 4
         }
 
+        -- the limits for the cursor on the grid
         xlim = {36, 84}
         ylim = {40, 88}
     elseif diff == "med" then
@@ -283,7 +285,7 @@ function _update()
             end
         end
     elseif play then
-        -- update movement
+        -- update movement, using cursor limits
         if controller then
             if btnp(0) and p.x != xlim[1] then
                 -- play sound
@@ -889,6 +891,7 @@ function draw_mine(loc)
 end
 
 function draw_flags()
+    -- iterate through matrix and draw all placed flags
     for c1=1, #flags do
         for c2=1, #flags[c1] do
             if flags[c1][c2] == true then
@@ -900,11 +903,14 @@ function draw_flags()
 end
 
 function draw_digs()
+    -- iterate through the matrix and draw all dug spaces
     for c1=1, #digs do
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
+                -- draw the coloured background
                 rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select][1])
 
+                -- draw the number if needed
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
                     print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
                 end
@@ -914,6 +920,8 @@ function draw_digs()
 end
 
 function draw_matrix()
+    -- iterate through the matrix and draw all numbers
+    -- for debug use
     for c1=1, #grid do
         for c2=1, #grid[c1] do
             if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
@@ -924,21 +932,25 @@ function draw_matrix()
 end
 
 function uncover(loc)
+    -- dig the current space
     digs[loc[1]][loc[2]] = true
 
-    -- if the current location is empty (no adjacent)...
+    -- if the current location is empty (no adjacent)
     if grid[loc[1]][loc[2]] == 0 then
         -- uncover all the spaces around it
         for pcol=-1, 1 do
             for prow=-1, 1 do
                 if not (pcol == 0 and prow == 0) then
+                    -- create a probe (an adjacent location to check)
                     local probe = {loc[1]+pcol, loc[2]+prow}
 
+                    -- if the probe is within bounds
                     if
                     probe[1] >= 1 and
                     probe[1] <= width and
                     probe[2] >= 1 and
                     probe[2] <= height then
+                        -- if that space hasn't already been dug, and doesn't have a flag, uncover it
                         if 
                         digs[probe[1]][probe[2]] != true and
                         flags[probe[1]][probe[2]] != true then
