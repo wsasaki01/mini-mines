@@ -78,8 +78,8 @@ function initialise(diff)
             y = 64,
 
             -- map coordinates
-            mx = 9,
-            my = 8
+            mx = 4,
+            my = 4
         }
 
         xlim = {36, 84}
@@ -93,8 +93,8 @@ function initialise(diff)
             x = 60,
             y = 64,
 
-            mx = 9,
-            my = 8
+            mx = 6,
+            my = 6
         }
 
         xlim = {20, 100}
@@ -886,7 +886,14 @@ function draw_flags()
     for c1=1, #flags do
         for c2=1, #flags[c1] do
             if flags[c1][c2] then
-                spr(3, c1*8-8, c2*8)
+                if size == "easy" then
+                    spr(3, (width*8/2)+c1*8, (height*8/2)+c2*8+4)
+                elseif size == "med" then
+                    --spr(3, c1*8-8, c2*8)
+                    spr(3, 56-(width*8/2)+c1*8, 56-(height*8/2)+c2*8+4)
+                elseif size == "hard" then
+                    spr(3, c1*8-8, c2*8)
+                end
             end
         end
     end
