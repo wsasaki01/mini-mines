@@ -37,7 +37,7 @@ function gen(width, height)
     return {flr(rnd(width))+1, flr(rnd(height))+1}
 end
 
-function fill_adj(m)
+function fill_adj(m, width, height)
     for mcol=1, #m do
         for mrow=1, #m[mcol] do
             if m[mcol][mrow] != true then
@@ -52,10 +52,10 @@ function fill_adj(m)
                             --printh("probe: {"..probe[1]..", "..probe[2].."}", "log")
 
                             if
-                            probe[1] > 0 and
-                            probe[1] < 17 and
-                            probe[2] > 0 and
-                            probe[2] < 16 then
+                            probe[1] >= 1 and
+                            probe[1] <= width and
+                            probe[2] >= 1 and
+                            probe[2] <= height then
                                 --printh("passed!", "log")
                                 if m[probe[1]][probe[2]] == true then
                                     --printh("added!", "log")

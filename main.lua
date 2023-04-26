@@ -405,7 +405,7 @@ function _update()
                     end
 
                     -- fill in the rest of the spaces with numbers for adjacent mines
-                    grid = fill_adj(grid)
+                    grid = fill_adj(grid, width, height)
 
                     first = false
                     record = flr(t())
@@ -861,7 +861,7 @@ function _draw()
 end
 
 -- ***********************
---     EXTRA FUNCTIONS 
+--     EXTRA FUNCTIONS
 -- ***********************
 
 function gen_matrix(fill)
@@ -886,14 +886,7 @@ function draw_flags()
     for c1=1, #flags do
         for c2=1, #flags[c1] do
             if flags[c1][c2] then
-                if size == "easy" then
-                    spr(3, (width*8/2)+c1*8, (height*8/2)+c2*8+4)
-                elseif size == "med" then
-                    --spr(3, c1*8-8, c2*8)
-                    spr(3, 56-(width*8/2)+c1*8, 56-(height*8/2)+c2*8+4)
-                elseif size == "hard" then
-                    spr(3, c1*8-8, c2*8)
-                end
+                spr(3, xlim[1]+c1*8-8, ylim[1]+c2*8-8)
             end
         end
     end
