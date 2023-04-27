@@ -858,12 +858,16 @@ function _draw()
             print("play", 38, 82, 6)
             print("guide", 38, 90, 7)
             print("options", 38, 98, 6)
+            
+            sspr(24, 64, 24, 24, 76, 81)
         elseif menu_y == 96 then
             rectfill(37, 97, 65, 103, 6)
 
             print("play", 38, 82, 6)
             print("guide", 38, 90, 6)
             print("options", 38, 98, 7)
+
+            sspr(48, 64, 24, 24, 76, 81)
         else
             print("play", 38, 82, 6)
             print("guide", 38, 90, 6)
