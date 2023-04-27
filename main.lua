@@ -56,13 +56,32 @@ function _init()
     theme_select = 1
 
     -- list of themes
-    -- {main, accent}
+    -- main: primary colour (digs)
+    -- bg: background (behind menus)
+    -- accent: menu borders
+    -- gamebg: background for actual game
     themes = {
+        -- beige (purple)
+        {main = 15, bg = 7, accent = 13, gamebg = 4},
+
         -- blue (white)
-        {12, 7},
+        {main = 12, bg = 7, accent = 1, gamebg = 13},
 
         -- orange (white)
-        {9, 7}
+        {main = 9, bg = 7, accent = 1, gamebg = 3},
+
+        -- red (white)
+        {main = 8, bg = 7, accent = 0, gamebg = 0},
+
+        -- pink (white)
+        {main = 14, bg = 7, accent = 8, gamebg = 2},
+
+        -- light green (dark green)
+        {main = 11, bg = 3, accent = 5, gamebg = 3},
+
+        -- brown (purple)
+        {main = 4, bg = 2, accent = 1, gamebg = 3},
+
     }
 
     mine_flash = 0
@@ -642,7 +661,7 @@ end
 function _draw()
     if win then
         -- clear screen with grey background
-        cls(13)
+        cls(themes[theme_select]["gamebg"])
 
         -- draw the map
         map(0, 0, xoff, yoff, width, height+1) 
@@ -676,7 +695,7 @@ function _draw()
         end
     elseif lose then
         -- clear screen with grey background
-        cls(13)
+        cls(themes[theme_select]["gamebg"])
 
         -- draw the map
         map(0, 0, xoff, yoff, width, height+1) 
@@ -768,8 +787,8 @@ function _draw()
             spr(3, menu_x, menu_y)
         end
     elseif play then
-        -- clear screen with grey background
-        cls(13)
+        -- clear screen with background
+        cls(themes[theme_select]["gamebg"])
 
         -- record current seconds
         -- add leading 0 if needed
@@ -892,12 +911,20 @@ function _draw()
         end
 
         -- theme preview
-        rectfill(75, 81, 81, 87, themes[theme_select][1])
+        rectfill(75, 81, 81, 87, themes[theme_select]["main"])
+
         -- rounded corners
-        pset(75, 81, themes[theme_select][2])
-        pset(81, 81, themes[theme_select][2])
-        pset(75, 87, themes[theme_select][2])
-        pset(81, 87, themes[theme_select][2])
+        --[[
+        pset(75, 81, themes[theme_select]["bg"])
+        pset(81, 81, themes[theme_select]["bg"])
+        pset(75, 87, themes[theme_select]["bg"])
+        pset(81, 87, themes[theme_select]["bg"])
+        --]]
+
+        pset(75, 81, 7)
+        pset(81, 81, 7)
+        pset(75, 87, 7)
+        pset(81, 87, 7)
 
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
 
@@ -953,7 +980,7 @@ function draw_digs()
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
                 -- draw the coloured background
-                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select][1])
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
 
                 -- draw the number if needed
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
@@ -1052,13 +1079,13 @@ end
 
 function draw_title_menu(info_message)
     -- fill with accent background
-    cls(themes[theme_select][2])
+    cls(themes[theme_select]["bg"])
 
     -- set to + draw pattern
     -- create background
     -- set back to normal fill
     fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select][1])
+    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
     fillp(█)
     
     -- if there are fewer than 15 icons in the background, spawn a new one
@@ -1112,15 +1139,15 @@ function draw_title_menu(info_message)
     end
 
     -- draw background and border
-    rectfill(19, 15, 108, 112, 1)
+    rectfill(19, 15, 108, 112, themes[theme_select]["accent"])
     rectfill(20, 16, 107, 111, 7)
 
     if info_message then
         if info_message == "RETURN" then
-            rectfill(82, 112, 108, 118, 1)
+            rectfill(82, 112, 108, 118, themes[theme_select]["accent"])
             print(info_message, 84, 113, 7)
         else
-            rectfill(59, 112, 108, 118, 1)
+            rectfill(59, 112, 108, 118, themes[theme_select]["accent"])
             print(info_message, 60, 113, 7)
         end
     end
@@ -1139,7 +1166,7 @@ function draw_title_menu(info_message)
     end
 
     -- draw "mini" background and letters
-    rectfill(28, 24, 59, 31, themes[theme_select][1])
+    rectfill(28, 24, 59, 31, themes[theme_select]["main"])
     print("m", 30, 26, 7)
     print("i", 38, 26)
     print("n", 46, 26)
@@ -1153,13 +1180,13 @@ end
 
 function draw_guide(info_message)
     -- fill with accent background
-    cls(themes[theme_select][2])
+    cls(themes[theme_select]["bg"])
 
     -- set to + draw pattern
     -- create background
     -- set back to normal fill
     fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select][1])
+    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
     fillp(█)
     
     -- if there are fewer than 15 icons in the background, spawn a new one
@@ -1213,27 +1240,27 @@ function draw_guide(info_message)
     end
 
     -- draw background and border
-    rectfill(10, 10, 118, 118, 1)
+    rectfill(10, 10, 118, 118, themes[theme_select]["accent"])
     rectfill(11, 11, 117, 117, 7)
 
     if info_message then
         if info_message == "RETURN" then
-            rectfill(92, 119, 118, 123, 1)
+            rectfill(92, 119, 118, 123, themes[theme_select]["accent"])
             print(info_message, 94, 118, 7)
         else
-            rectfill(69, 119, 118, 124, 1)
+            rectfill(69, 119, 118, 124, themes[theme_select]["accent"])
             print(info_message, 70, 119, 7)
         end
     end
 
     -- draw "mini" background and letters
-    rectfill(18, 18, 34, 24, themes[theme_select][1])
+    rectfill(18, 18, 34, 24, themes[theme_select]["main"])
     print("mini", 19, 19, 7)
 
     -- draw "mines"
     sspr(80, 32, 40, 8, 36, 17)
     
-    print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select][1])
+    print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select]["main"])
     
     print("🅾️ / right click TO flag\nto mark a mine", 19, 48, 8)
 
@@ -1268,10 +1295,10 @@ function draw_guide(info_message)
         spr(4, 36, 92)
     end
 
-    rectfill(76, 76, 99, 91, themes[theme_select][1])
-    rectfill(84, 76, 99, 99, themes[theme_select][1])
-    rectfill(68, 84, 75, 107, themes[theme_select][1])
-    rectfill(76, 100, 99, 107, themes[theme_select][1])
+    rectfill(76, 76, 99, 91, themes[theme_select]["main"])
+    rectfill(84, 76, 99, 99, themes[theme_select]["main"])
+    rectfill(68, 84, 75, 107, themes[theme_select]["main"])
+    rectfill(76, 100, 99, 107, themes[theme_select]["main"])
 
     print("1", 79, 78, 7)
     print("2", 79, 86, 7)
