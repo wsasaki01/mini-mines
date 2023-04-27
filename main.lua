@@ -1238,6 +1238,9 @@ function draw_guide(info_message)
     -- draw "mini" background and letters
     rectfill(18, 18, 34, 24, themes[theme_select][1])
     print("mini", 19, 19, 7)
+
+    -- draw "mines"
+    sspr(80, 32, 40, 8, 36, 17)
     
     print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select][1])
     
