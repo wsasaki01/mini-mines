@@ -61,9 +61,6 @@ function _init()
     -- accent: menu borders
     -- gamebg: background for actual game
     themes = {
-        -- beige (purple)
-        {main = 15, bg = 7, accent = 13, gamebg = 4},
-
         -- blue (white)
         {main = 12, bg = 7, accent = 1, gamebg = 13},
 
@@ -82,6 +79,8 @@ function _init()
         -- brown (purple)
         {main = 4, bg = 2, accent = 1, gamebg = 3},
 
+        -- beige (purple)
+        {main = 15, bg = 7, accent = 13, gamebg = 4}
     }
 
     mine_flash = 0
