@@ -822,24 +822,7 @@ function _draw()
         elseif mouse then
             draw_title_menu()
         end
-
-        --[[
-        -- draw best time box
-        print("best:", 77, 82, 7)
-
-        -- format the pb as needed
-        if pb == false then
-            pb_text = {"-", "-"}
-        elseif pb%60 < 10 then
-            pb_text = {tostr(pb\60), "0"..tostr(pb%60)}
-        else
-            pb_text = {tostr(pb\60), tostr(pb%60)}
-        end
-
-        -- display best score
-        print(pb_text[1]..":"..pb_text[2], 77, 92, 2)
-        --]]
-
+    
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
             -- option background
