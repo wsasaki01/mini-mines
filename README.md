@@ -17,4 +17,4 @@ Currently in development.
 
 ## Installation
 Mini Mines will be available on the PICO-8 BBS and as binaries for Windows and Mac soon.
-Play the development version by downloading all files and running `main.p8` within PICO-8.
+Play the development version by downloading all files and running `mini-mines.p8` within PICO-8.
