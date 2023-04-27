@@ -39,9 +39,17 @@ function _init()
     -- prevents the player holding key down and accidentally digging
     sticky = false
 
-    -- store pb
-    -- empty by default
-    pb = false
+    -- store pbs for each mode
+    -- false by default
+    pb = {
+        easy = false,
+        med = false,
+        hard = false
+    }
+
+    -- has a new pb just been set?
+    -- false if no
+    -- difficulty if yes
     new_pb = false
 
     -- current colour theme
@@ -181,7 +189,7 @@ function _update()
                 lose = false
                 new_pb = false
 
-                initialise()
+                initialise(size)
             end
 
             -- o for return to menu
@@ -373,8 +381,8 @@ function _update()
                     win = true
 
                     -- record the pb if needed
-                    if pb == false or (ct < pb) then
-                        pb = ct
+                    if pb[size] == false or (ct < pb[size]) then
+                        pb[size] = ct
                         -- tell _update() that there's been a new pb
                         new_pb = true
                     end
@@ -703,30 +711,57 @@ function _draw()
         elseif mouse then
             draw_title_menu("RETURN")
         end
+
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
+            -- option background
             rectfill(37, 81, 53, 87, 6)
 
+            -- line connecting option and pb
+            line(55, 84, 75, 84, 6)
+
+            -- options
             print("easy", 38, 82, 7)
             print("medium", 38, 90, 6)
             print("hard", 38, 98, 6)
+
+            -- pbs
+            draw_pb("easy", 77, 82, 13)
+            draw_pb("med", 77, 90, 6)
+            draw_pb("hard", 77, 98, 6)
         elseif menu_y == 88 then
             rectfill(37, 89, 61, 95, 6)
+            line(63, 92, 75, 92, 6)
 
             print("easy", 38, 82, 6)
             print("medium", 38, 90, 7)
             print("hard", 38, 98, 6)
+
+            draw_pb("easy", 77, 82, 6)
+            draw_pb("med", 77, 90, 13)
+            draw_pb("hard", 77, 98, 6)
         elseif menu_y == 96 then
             rectfill(37, 97, 53, 103, 6)
+            line(55, 100, 75, 100, 6)
 
             print("easy", 38, 82, 6)
             print("medium", 38, 90, 6)
             print("hard", 38, 98, 7)
+
+            draw_pb("easy", 77, 82, 6)
+            draw_pb("med", 77, 90, 6)
+            draw_pb("hard", 77, 98, 13)
         else
             print("easy", 38, 82, 6)
             print("medium", 38, 90, 6)
             print("hard", 38, 98, 6)
+
+            draw_pb("easy", 77, 82, 6)
+            draw_pb("med", 77, 90, 6)
+            draw_pb("hard", 77, 98, 6)
         end
+
+        print("BEST", 77, 75, 6)
 
         -- if the player is hovering over an option, draw the flag next to it
         if menu_y != false then
@@ -780,10 +815,6 @@ function _draw()
         if p.my != 0 then
             spr(17, p.x, p.y)
         end
-
-        print(p.mx.." - "..p.x.." - "..mo_x, 0, 0, 0)
-        print(p.my.." - "..p.y.." - "..mo_y)
-        print(xoff)
     elseif menu then
         -- draw main frame and background
         if controller then
@@ -792,6 +823,7 @@ function _draw()
             draw_title_menu()
         end
 
+        --[[
         -- draw best time box
         rectfill(76, 81, 99, 103, 6)
         print("best:", 77, 82, 7)
@@ -807,6 +839,7 @@ function _draw()
 
         -- display best score
         print(pb_text[1]..":"..pb_text[2], 77, 92, 2)
+        --]]
 
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
@@ -1302,4 +1335,18 @@ function win_lose_message()
             print("🅾️ to return to menu", 22, 65)
         end
     end
+end
+
+function draw_pb(diff, x, y, col)
+    -- format the pb as needed
+    if pb[diff] == false then
+        pb_text = {"-", "-"}
+    elseif pb[diff]%60 < 10 then
+        pb_text = {tostr(pb[diff]\60), "0"..tostr(pb[diff]%60)}
+    else
+        pb_text = {tostr(pb[diff]\60), tostr(pb[diff]%60)}
+    end
+
+    -- display best score
+    print(pb_text[1]..":"..pb_text[2], x, y, col)
 end
