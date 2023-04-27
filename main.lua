@@ -825,7 +825,6 @@ function _draw()
 
         --[[
         -- draw best time box
-        rectfill(76, 81, 99, 103, 6)
         print("best:", 77, 82, 7)
 
         -- format the pb as needed
@@ -843,11 +842,16 @@ function _draw()
 
         -- set a background for whichever option is currently selected
         if menu_y == 80 then
+            -- option background
             rectfill(37, 81, 53, 87, 6)
 
+            -- options
             print("play", 38, 82, 7)
             print("guide", 38, 90, 6)
             print("options", 38, 98, 6)
+
+            -- preview sprite
+            sspr(0, 64, 24, 24, 76, 81)
         elseif menu_y == 88 then
             rectfill(37, 89, 57, 95, 6)
 
@@ -1157,7 +1161,7 @@ function draw_title_menu(info_message)
     --rectfill(28, 32, 99, 63, 7)
 
     -- draw "mines" logo
-    sspr(0, 32, 72, 63, 28, 32)
+    sspr(0, 32, 72, 32, 28, 32)
 end
 
 function draw_guide(info_message)
