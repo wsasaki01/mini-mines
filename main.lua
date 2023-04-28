@@ -327,6 +327,10 @@ function _update()
             end
         end
     elseif play then
+        -- check if the player is within the grid
+        -- if not, they won't be able to dig or flag
+        in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
+        
         -- update movement, using cursor limits
         if controller then
             if btnp(0) and p.x != xlim[1] then
@@ -364,10 +368,6 @@ function _update()
             if not (sticky and stat(34) == 1) then
                 sticky = false
             end
-
-            -- check if the player is within the grid
-            -- if not, they won't be able to dig or flag
-            in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
         end
 
         -- if the game has started, update the time
