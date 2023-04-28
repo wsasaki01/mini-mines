@@ -66,30 +66,50 @@ function _init()
     themes = {
         -- blue (white)
         {main = 12, bg = 7, accent = 1, gamebg = 13},
-
-        -- orange (white)
-        {main = 9, bg = 7, accent = 1, gamebg = 3},
-
-        -- red (white)
-        {main = 8, bg = 7, accent = 0, gamebg = 0},
-
-        -- pink (white)
-        {main = 14, bg = 7, accent = 8, gamebg = 2},
-
-        -- light green (dark green)
-        {main = 11, bg = 3, accent = 5, gamebg = 3},
-
-        -- brown (purple)
-        {main = 4, bg = 2, accent = 1, gamebg = 3},
-
-        -- beige (purple)
-        {main = 15, bg = 7, accent = 13, gamebg = 4}
     }
 
+    -- player unlocks more themes by winning games
+    unlockable = {
+        -- unlockable by playing easy mode
+        easy = {
+            -- orange (white)
+            {main = 9, bg = 7, accent = 1, gamebg = 3},
+
+            -- red (white)
+            {main = 8, bg = 7, accent = 0, gamebg = 0}
+        },
+
+        -- unlockable by playing medium mode
+        med = {
+            -- pink (white)
+            {main = 14, bg = 7, accent = 8, gamebg = 2},
+
+            -- light green (dark green)
+            {main = 11, bg = 3, accent = 5, gamebg = 3}
+        },
+
+        -- unlockable by playing hard mode
+        hard = {
+            -- brown (purple)
+            {main = 4, bg = 2, accent = 1, gamebg = 3},
+
+            -- beige (purple)
+            {main = 15, bg = 7, accent = 13, gamebg = 4}
+        }
+    }
+
+    -- counters for number of wins on each mode
+    win_count = {
+        easy = 0,
+        med = 0,
+        hard = 0
+    }
+
+    -- counter for flashing mines on guide page
     mine_flash = 0
     show_mines = false
 
-    printh("", "log", true)
+    --printh("", "log", true)
 end
 
 function initialise(diff)
@@ -101,7 +121,7 @@ function initialise(diff)
     if diff == "easy" then
         width = 7 -- width of board
         height = 7 -- height of board
-        mcount = 9 -- number of mines
+        mcount = 1 -- number of mines
 
         -- player
         p = {
@@ -234,7 +254,7 @@ function _update()
                 if hover_replay then
                     win = false
                     lose = false
-                    initialise()
+                    initialise(size)
                 elseif hover_quit then
                     win = false
                     lose = false
@@ -412,6 +432,22 @@ function _update()
                         pb[size] = ct
                         -- tell _update() that there's been a new pb
                         new_pb = true
+                    end
+
+                    -- add one to win counter for current difficulty
+                    win_count[size] += 1
+
+                    -- if this the player's first win or they set a new PB, and there's still themes to unlcok
+                    if
+                    (win_count[size] == 1 or
+                    win_count[size] % 5 or
+                    new_pb) and
+                    #unlockable[size] != 0 then
+                        -- add the new theme to the player's collection
+                        add(themes, unlockable[size][1])
+
+                        -- remove it from the original list
+                        del(unlockable[size], unlockable[size][1])
                     end
                 end
             end
@@ -678,6 +714,7 @@ end
 
 function _draw()
     if win then
+
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
 
