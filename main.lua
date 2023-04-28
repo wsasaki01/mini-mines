@@ -487,7 +487,13 @@ function _update()
                     -- if there isn't a mine there, dig that space
                     if not lose then
                         --printh("", "log", true)
-                        sfx(2)
+
+                        -- if that space hasn't already been dug, play sfx
+                        if digs[p.mx][p.my] != true then
+                            sfx(2)
+                        end
+
+                        -- chain-uncover the rest of the spaces
                         uncover({p.mx, p.my})
                     end
                 end
