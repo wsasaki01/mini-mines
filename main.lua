@@ -85,6 +85,8 @@ function _init()
 
     mine_flash = 0
     show_mines = false
+
+    printh("", "log", true)
 end
 
 function initialise(diff)
@@ -96,7 +98,7 @@ function initialise(diff)
     if diff == "easy" then
         width = 7 -- width of board
         height = 7 -- height of board
-        mcount = 7 -- number of mines
+        mcount = 9 -- number of mines
 
         -- player
         p = {
@@ -451,7 +453,7 @@ function _update()
                     mine_list = create_mines(width, height, mcount, {p.mx, p.my})
 
                     for mine in all(mine_list) do
-                        --printh(mine[1]..", "..mine[2], "log", false)
+                        printh(mine[1]..", "..mine[2], "log", false)
 
                         -- change all the mine positions to true
                         grid[mine[1]][mine[2]] = true
