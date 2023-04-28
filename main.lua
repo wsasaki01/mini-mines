@@ -9,6 +9,9 @@ function _init()
     -- enable devkit mouse
     poke(0x5F2D, 1)
 
+    -- program version number
+    ver = "0.23.1"
+
     -- which screen is the user on?
     -- boot up to menu screen
     menu = true
@@ -1191,6 +1194,8 @@ function draw_title_menu(info_message)
 
     -- draw "mines" logo
     sspr(0, 32, 72, 32, 28, 32)
+
+    print(ver, 100-string_l(ver), 26, 13)
 end
 
 function draw_guide(info_message)
@@ -1385,4 +1390,9 @@ function draw_pb(diff, x, y, col)
 
     -- display best score
     print(pb_text[1]..":"..pb_text[2], x, y, col)
+end
+
+function string_l(s)
+    -- each character is 3 pixels, with a 1-pixel space between
+    return (#s * 3) + (#s - 1)
 end
