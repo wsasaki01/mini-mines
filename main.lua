@@ -98,6 +98,9 @@ function _init()
         }
     }
 
+    -- has a new theme been unlocked this round?
+    new_theme = false
+
     -- counters for number of wins on each mode
     win_count = {
         easy = 0,
@@ -108,6 +111,10 @@ function _init()
     -- counter for flashing mines on guide page
     mine_flash = 0
     show_mines = false
+
+    -- counter for bouncing letters
+    bcount = 1
+    timer = 0
 
     --printh("", "log", true)
 end
@@ -231,6 +238,7 @@ function _update()
                 win = false
                 lose = false
                 new_pb = false
+                new_theme = false
 
                 initialise(size)
             end
@@ -241,6 +249,7 @@ function _update()
                 lose = false
                 play = false
                 new_pb = false
+                new_theme = false
 
                 menu_y = 80
                 menu = true
@@ -254,11 +263,17 @@ function _update()
                 if hover_replay then
                     win = false
                     lose = false
+                    new_pb = false
+                    new_theme = false
+
                     initialise(size)
                 elseif hover_quit then
                     win = false
                     lose = false
                     play = false
+                    new_pb = false
+                    new_theme = false
+
                     menu = true
                 end
             end
@@ -446,8 +461,12 @@ function _update()
                         -- add the new theme to the player's collection
                         add(themes, unlockable[size][1])
 
+                        -- new theme unlocked
+                        new_theme = unlockable[size][1]
+
                         -- remove it from the original list
                         del(unlockable[size], unlockable[size][1])
+
                     end
                 end
             end
@@ -714,7 +733,6 @@ end
 
 function _draw()
     if win then
-
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
 
@@ -732,9 +750,26 @@ function _draw()
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
 
-        -- draw message box and border
-        rectfill(18, 39, 109, 72, 9)
-        rectfill(19, 40, 108, 71, 7)
+        -- if a new theme was just unlocked
+        if type(new_theme) == "table" then
+            -- draw message box and border with extra space for theme info
+            rectfill(18, 39, 109, 88, 9)
+            rectfill(19, 40, 108, 87, 7)
+            
+            bprint("new theme!", 37, 76, new_theme["accent"], 3)
+
+            -- theme preview
+            rectfill(82, 75, 88, 81, new_theme["main"])
+
+            pset(82, 75, 7)
+            pset(82, 81, 7)
+            pset(88, 75, 7)
+            pset(88, 81, 7)
+        else
+            -- draw message box and border normally
+            rectfill(18, 39, 109, 72, 9)
+            rectfill(19, 40, 108, 71, 7)
+        end
 
         -- draw message shadow
         print("you win!", sin(t()*0.5)*10+49, sin(t())*5+48, 6)
@@ -1432,4 +1467,30 @@ end
 function string_l(s)
     -- each character is 3 pixels, with a 1-pixel space between
     return (#s * 3) + (#s - 1)
+end
+
+-- bounce print: letters bounce like a wave
+-- s: string
+-- x and y: coords
+-- t: speed
+function bprint(s, x, y, col, t)
+    if timer == t then
+        timer = 0
+
+        if bcount != #s then
+            bcount += 1
+        else
+            bcount = 1
+        end
+    else
+        timer += 1
+    end
+
+    local first = sub(s, 0, bcount-1)
+    local letter = s[bcount]
+    local last = sub(s, bcount+1)
+
+    print(first, x, y, col)
+    print(letter, x+(4*#first), y-1, col)
+    print(last, x+(4*(#first))+4, y, col)
 end
