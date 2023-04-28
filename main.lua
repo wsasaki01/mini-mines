@@ -364,6 +364,10 @@ function _update()
             if not (sticky and stat(34) == 1) then
                 sticky = false
             end
+
+            -- check if the player is within the grid
+            -- if not, they won't be able to dig or flag
+            in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
         end
 
         -- if the game has started, update the time
@@ -410,7 +414,9 @@ function _update()
             end
 
             -- x or right click for flag
-            if (btnp("5") or stat(34) == 2) and not wait and p.my != 0 then
+            if
+            (btnp("5") or stat(34) == 2) and
+            not wait and in_bound then
                 -- wait for player to lift key
                 if stat(34) == 2 then
                     wait = true
@@ -444,7 +450,9 @@ function _update()
             end
 
             -- o or left click for dig
-            if (btnp("4") or (stat(34) == 1 and not sticky)) and not wait and p.my != 0 then
+            if
+            (btnp("4") or (stat(34) == 1 and not sticky))and
+            not wait and in_bound then
                 sticky = true
                 
                 if first then
