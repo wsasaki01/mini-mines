@@ -327,6 +327,10 @@ function _update()
             end
         end
     elseif play then
+        -- check if the player is within the grid
+        -- if not, they won't be able to dig or flag
+        in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
+        
         -- update movement, using cursor limits
         if controller then
             if btnp(0) and p.x != xlim[1] then
@@ -364,10 +368,6 @@ function _update()
             if not (sticky and stat(34) == 1) then
                 sticky = false
             end
-
-            -- check if the player is within the grid
-            -- if not, they won't be able to dig or flag
-            in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
         end
 
         -- if the game has started, update the time
@@ -487,7 +487,13 @@ function _update()
                     -- if there isn't a mine there, dig that space
                     if not lose then
                         --printh("", "log", true)
-                        sfx(2)
+
+                        -- if that space hasn't already been dug, play sfx
+                        if digs[p.mx][p.my] != true then
+                            sfx(2)
+                        end
+
+                        -- chain-uncover the rest of the spaces
                         uncover({p.mx, p.my})
                     end
                 end
