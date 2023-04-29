@@ -120,6 +120,9 @@ function _init()
     hold_timer = 2
     ticker = 0
 
+    -- how many frames between each explosion
+    explosion_interval = 5
+
     --printh("", "log", true)
 end
 
@@ -191,14 +194,15 @@ function initialise(diff)
     -- number of correctly placed flags
     ccount = 0
 
-    -- has the player lost?
-    lose = false
-
-    -- has the player won?
+    -- has the player won or lost, or in the loss animation?
     win = false
+    lose = false
+    losing = false
 
-    -- create mine list
+    -- create mine, explosion and particles lists
     mine_list = {}
+    explosions = {}
+    particles = {}
 
     -- make a matrix filled with 0's
     -- 0's represent an empty space
@@ -336,6 +340,24 @@ function _update()
                     menu = true
                 end
             end
+        end
+    elseif losing then
+        if explosion_timer == explosion_interval then
+            local target = flr(rnd(#mine_list)+1)
+            add(explosions, mine_list[target])
+            add_particles(mine_list[target])
+            del(mine_list, mine_list[target])
+
+            explosion_timer = 0
+            explosion_counter += 1
+        else
+            explosion_timer += 1
+        end
+
+        if #mine_list == 0 then
+            losing = false
+            lose = true
+            explosion_counter = 0
         end
     elseif difficulty then
         if controller then
@@ -577,12 +599,20 @@ function _update()
                     -- if that location is in the mine list...
                     if loc[1] == p.mx and loc[2] == p.my then
                         -- the player loses
-                        lose = true
+                        losing = true
+
+                        -- make sure the current mine explodes first
+                        add(explosions, {p.mx, p.my})
+                        del(mine_list, {p.mx, p.my})
+                        add_particles({p.mx, p.my})
+
+                        explosion_timer = flr(explosion_interval * 0.8)
+                        explosion_counter = 0
                     end
                 end
 
                 -- if there isn't a mine there, dig that space
-                if not lose then
+                if not losing then
                     --printh("", "log", true)
 
                     -- if that space hasn't already been dug, play sfx
@@ -828,6 +858,7 @@ function _draw()
         -- draw all dug spaces and flags
         draw_digs()
         draw_flags()
+        foreach(explosions, draw_explosion)
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
@@ -848,6 +879,32 @@ function _draw()
        
         -- draw options
         win_lose_message(ticker)
+
+        draw_particles()
+    elseif losing then
+        -- clear screen with grey background
+        cls(themes[theme_select]["gamebg"])
+
+        -- draw the map
+        map(0, 0, xoff, yoff, width, height+1) 
+
+        -- draw all dug spaces and flags
+        draw_digs()
+        draw_flags()
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
+
+        --foreach(mine_list, draw_mine)
+
+        -- draw explosions
+        foreach(explosions, draw_explosion)
+
+        draw_particles()
     elseif difficulty then
         -- draw main frame and background
         if controller then
@@ -1063,8 +1120,6 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
-    
-    print(ticker, 0, 0, 0)
 end
 
 -- ***********************
@@ -1086,7 +1141,7 @@ function gen_matrix(fill)
 end
 
 function draw_mine(loc)
-    spr(4, loc[1]*8-8, loc[2]*8)
+    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
 end
 
 function draw_flags()
@@ -1537,4 +1592,22 @@ function bprint(s, x, y, col, t)
     print(first, x, y, col)
     print(letter, x+(4*#first), y-1, col)
     print(last, x+(4*(#first))+4, y, col)
+end
+
+function draw_explosion(loc)
+    spr(19, xoff+loc[1]*8-8, yoff+loc[2]*8)
+end
+
+function add_particles(loc)
+    local count = flr(rnd(5))+1
+    local x = xoff+loc[1]*8-4
+    local y = yoff+loc[2]*8+4
+
+    add(particles, {x, y})
+end
+
+function draw_particles()
+    for particle in all(particles) do
+        pset(particle[1], particle[2], 10)
+    end
 end
