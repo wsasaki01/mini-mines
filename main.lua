@@ -120,7 +120,17 @@ function _init()
     hold_timer = 2
     ticker = 0
 
-    --printh("", "log", true)
+    -- how many frames between each explosion
+    explosion_interval = 5
+
+    -- wait counter and actual time for post-explosion
+    wait = 0
+    final_wait = 25
+
+    -- strength of screen shake
+    shake_strength = 0
+
+    printh("", "log", true)
 end
 
 function initialise(diff)
@@ -191,14 +201,15 @@ function initialise(diff)
     -- number of correctly placed flags
     ccount = 0
 
-    -- has the player lost?
-    lose = false
-
-    -- has the player won?
+    -- has the player won or lost, or in the loss animation?
     win = false
+    lose = false
+    losing = false
 
-    -- create mine list
+    -- create mine, explosion and particles lists
     mine_list = {}
+    explosions = {}
+    particles = {}
 
     -- make a matrix filled with 0's
     -- 0's represent an empty space
@@ -336,6 +347,76 @@ function _update()
                     menu = true
                 end
             end
+        end
+    elseif losing then
+        -- when the timer reaches the interval, explode another mine
+        if explosion_timer == explosion_interval then
+            -- wait for a non-flagged mine
+            non_flag = false
+            local target
+            while not non_flag and #mine_list != 0 do
+                -- get a random mine from the list
+                index = flr(rnd(#mine_list))+1
+                target = mine_list[index]
+
+                -- if that mine hasn't been flagged
+                if flags[target[1]][target[2]] != true then
+                    -- break loop
+                    non_flag = true
+                -- if that mine has been flagged
+                else
+                    -- remove it from the list
+                    explosion_counter += 1
+                    del(mine_list, mine_list[index])
+                    target = false
+                end
+            end
+
+            if target then
+                -- indicator of whether the sound has been played for it or not
+                add(target, false)
+
+                -- indicator of sprite phase
+                add(target, 0)
+
+                -- add the explosion, particles
+                add(explosions, target)
+                add_particles(target)
+                del(mine_list, target)
+
+                -- reset timer
+                explosion_timer = 0
+                explosion_counter += 1
+
+                shake_strength = 1
+            end
+        else
+            explosion_timer += 1
+        end
+
+        -- if a sound hasn't been played for an explosion, play it
+        for explosion in all(explosions) do
+            if not explosion[3] and #explosions > 1 then
+                sfx(7)
+                explosion[3] = true
+            end
+
+            if explosion[4] <= 5 then
+                explosion[4] += 1
+            end
+        end
+
+        -- when explosions are done, wait a bit
+        if explosion_counter == mcount and shake_strength == 0 then
+            wait += 1
+        end
+
+        -- after waiting a bit, show the loss screen
+        if wait == final_wait then
+            losing = false
+            lose = true
+            wait = 0
+            explosion_counter = 0
         end
     elseif difficulty then
         if controller then
@@ -577,12 +658,21 @@ function _update()
                     -- if that location is in the mine list...
                     if loc[1] == p.mx and loc[2] == p.my then
                         -- the player loses
-                        lose = true
+                        losing = true
+
+                        -- make sure the current mine explodes first
+                        add(explosions, {p.mx, p.my, "first", 0})
+                        del(mine_list, {p.mx, p.my})
+                        add_particles({p.mx, p.my})
+                        sfx(8)
+
+                        explosion_timer = flr(-2.5*explosion_interval)
+                        explosion_counter = 0
                     end
                 end
 
                 -- if there isn't a mine there, dig that space
-                if not lose then
+                if not losing then
                     --printh("", "log", true)
 
                     -- if that space hasn't already been dug, play sfx
@@ -828,6 +918,7 @@ function _draw()
         -- draw all dug spaces and flags
         draw_digs()
         draw_flags()
+        foreach(explosions, draw_explosion)
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
@@ -836,6 +927,9 @@ function _draw()
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
         
+        -- draw explosion particles
+        draw_particles()
+
         -- draw message box and border
         rectfill(18, 39, 109, 72, 9)
         rectfill(19, 40, 108, 71, 7)
@@ -848,6 +942,39 @@ function _draw()
        
         -- draw options
         win_lose_message(ticker)
+    elseif losing then
+        camera(0, 0)
+
+        -- clear screen with grey background
+        cls(themes[theme_select]["gamebg"])
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
+
+        if #explosions > 1 then
+            shake()
+        end
+
+        -- draw the map
+        map(0, 0, xoff, yoff, width, height+1) 
+
+        -- draw all dug spaces and flags
+        draw_digs()
+        draw_flags()
+
+        --foreach(mine_list, draw_mine)
+
+        if #explosions == 1 then
+            draw_mine(explosions[1])
+        else
+            -- draw explosions
+            foreach(explosions, draw_explosion)
+            draw_particles()
+        end
     elseif difficulty then
         -- draw main frame and background
         if controller then
@@ -1063,8 +1190,6 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
-    
-    print(ticker, 0, 0, 0)
 end
 
 -- ***********************
@@ -1086,7 +1211,7 @@ function gen_matrix(fill)
 end
 
 function draw_mine(loc)
-    spr(4, loc[1]*8-8, loc[2]*8)
+    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
 end
 
 function draw_flags()
@@ -1537,4 +1662,61 @@ function bprint(s, x, y, col, t)
     print(first, x, y, col)
     print(letter, x+(4*#first), y-1, col)
     print(last, x+(4*(#first))+4, y, col)
+end
+
+function draw_explosion(exp)
+    local x = xoff+exp[1]*8-8
+    local y = yoff+exp[2]*8
+
+    -- first phase: initial blast
+    if exp[4] < 2 then
+        spr(6, x, y)
+
+    -- second phase: big blast
+    elseif exp[4] <= 5 then
+        sspr(56, 0, 16, 16, x-4, y-4)
+    
+    -- third phase: crater
+    else
+        spr(19, x, y)
+    end
+end
+
+function add_particles(loc)
+    for i=1, flr(rnd(10))+1 do
+        local x = xoff+loc[1]*8-4+flr(rnd(16))-8
+        local y = yoff+loc[2]*8+4+flr(rnd(16))-8
+        local col = flr(rnd(2))+1
+        if col == 1 then
+            col = 2
+        elseif col == 2 then
+            col = 4
+        elseif col == 3 then
+            col = 5
+        end
+        add(particles, {x, y, col})
+    end
+end
+
+function draw_particles()
+    for particle in all(particles) do
+        pset(particle[1], particle[2], particle[3])
+    end
+end
+
+function shake()
+    -- screen position
+    local x = 20-rnd(40)
+    local y = 20-rnd(40)
+
+    -- apply strength
+    x *= shake_strength
+    y *= shake_strength
+
+    -- move the camera
+    camera(x, y)
+
+    -- decay the shake scrength
+    shake_strength *= 0.75
+    if (shake_strength < 0.05) shake_strength = 0
 end
