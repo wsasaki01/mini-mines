@@ -123,6 +123,13 @@ function _init()
     -- how many frames between each explosion
     explosion_interval = 5
 
+    -- wait counter and actual time for post-explosion
+    wait = 0
+    final_wait = 25
+
+    -- strength of screen shake
+    shake_strength = 0
+
     printh("", "log", true)
 end
 
@@ -374,15 +381,23 @@ function _update()
                 -- reset timer
                 explosion_timer = 0
                 explosion_counter += 1
+
+                shake_strength = 1
             end
         else
             explosion_timer += 1
         end
 
-        -- once all explosions are done, show loss screen
-        if explosion_counter == mcount then
+        -- when explosions are done, wait a bit
+        if explosion_counter == mcount and shake_strength == 0 then
+            wait += 1
+        end
+
+        -- after waiting a bit, show the loss screen
+        if wait == final_wait then
             losing = false
             lose = true
+            wait = 0
             explosion_counter = 0
         end
     elseif difficulty then
@@ -912,6 +927,15 @@ function _draw()
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
 
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
+
+        shake()
+
         -- draw the map
         map(0, 0, xoff, yoff, width, height+1) 
 
@@ -919,12 +943,6 @@ function _draw()
         draw_digs()
         draw_flags()
 
-        -- print time in top right corner
-        print(mins..secs, 108, 1, 7)
-
-        -- draw flag icon and count in top left corner
-        spr(3, 0, 0)
-        print(fcount, 8, 1, 7)
 
         --foreach(mine_list, draw_mine)
 
@@ -1645,4 +1663,17 @@ function draw_particles()
     for particle in all(particles) do
         pset(particle[1], particle[2], particle[3])
     end
+end
+
+function shake()
+    local x = 16-rnd(32)
+    local y = 16-rnd(32)
+
+    x *= shake_strength
+    y *= shake_strength
+
+    camera(x, y)
+
+    shake_strength *= 0.95
+    if (shake_strength < 0.05) shake_strength = 0
 end
