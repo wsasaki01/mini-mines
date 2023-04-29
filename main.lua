@@ -373,6 +373,9 @@ function _update()
             end
 
             if target then
+                -- indicator of whether the sound has been played for it or not
+                add(target, false)
+
                 -- add the explosion, particles
                 add(explosions, target)
                 add_particles(target)
@@ -386,6 +389,13 @@ function _update()
             end
         else
             explosion_timer += 1
+        end
+
+        for explosion in all(explosions) do
+            if not explosion[3] and #explosions > 1 then
+                sfx(7)
+                explosion[3] = true
+            end
         end
 
         -- when explosions are done, wait a bit
@@ -643,11 +653,12 @@ function _update()
                         losing = true
 
                         -- make sure the current mine explodes first
-                        add(explosions, {p.mx, p.my})
+                        add(explosions, {p.mx, p.my, "first"})
                         del(mine_list, {p.mx, p.my})
                         add_particles({p.mx, p.my})
+                        sfx(8)
 
-                        explosion_timer = flr(explosion_interval * 0.8)
+                        explosion_timer = flr(-2.5*explosion_interval)
                         explosion_counter = 0
                     end
                 end
@@ -924,6 +935,8 @@ function _draw()
         -- draw options
         win_lose_message(ticker)
     elseif losing then
+        camera(0, 0)
+
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
 
@@ -934,7 +947,9 @@ function _draw()
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
 
-        shake()
+        if #explosions > 1 then
+            shake()
+        end
 
         -- draw the map
         map(0, 0, xoff, yoff, width, height+1) 
@@ -943,13 +958,15 @@ function _draw()
         draw_digs()
         draw_flags()
 
-
         --foreach(mine_list, draw_mine)
 
-        -- draw explosions
-        foreach(explosions, draw_explosion)
-
-        draw_particles()
+        if #explosions == 1 then
+            draw_mine(explosions[1])
+        else
+            -- draw explosions
+            foreach(explosions, draw_explosion)
+            draw_particles()
+        end
     elseif difficulty then
         -- draw main frame and background
         if controller then
@@ -1666,14 +1683,18 @@ function draw_particles()
 end
 
 function shake()
-    local x = 16-rnd(32)
-    local y = 16-rnd(32)
+    -- screen position
+    local x = 20-rnd(40)
+    local y = 20-rnd(40)
 
+    -- apply strength
     x *= shake_strength
     y *= shake_strength
 
+    -- move the camera
     camera(x, y)
 
-    shake_strength *= 0.95
+    -- decay the shake scrength
+    shake_strength *= 0.75
     if (shake_strength < 0.05) shake_strength = 0
 end
