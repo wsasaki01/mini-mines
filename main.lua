@@ -264,10 +264,14 @@ function _update()
 
     if win or lose then
         if controller then
-            -- x for return
-            --[[
-            if x then
-                ticker += 0.1
+            -- x for replay
+            if main then
+                if main_stick then
+                    ticker += 0.1
+                else
+                    main_stick = true
+                    ticker = 0
+                end
 
                 if flr(ticker) == 2 then
                     ticker = 0
@@ -282,23 +286,19 @@ function _update()
                     
                     initialise(size)
                 end
-            else
-                ticker = 0
-            end
-            --]]
-
+            
             -- o for return to menu
-            --[[
-            if o then
-                if holdo then
+            elseif alt then
+                if alt_stick then
                     ticker += 0.1
                 else
+                    alt_stick = true
                     ticker = 0
                 end
 
-                holdo = true
+                if flr(ticker) == 2 then
+                    ticker = 0
 
-                if ticker == 2 then
                     win = false
                     lose = false
                     play = false
@@ -309,9 +309,8 @@ function _update()
                     menu = true
                 end
             else
-                holdo = false
+                ticker = false
             end
-            --]]
         elseif mouse then
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
             hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
@@ -1068,8 +1067,6 @@ function _draw()
     end
     
     print(ticker, 0, 0, 0)
-    print("main: "..tostr(main).." "..tostr(main_stick))
-    print("alt: "..tostr(alt).." "..tostr(alt_stick))
 end
 
 -- ***********************
