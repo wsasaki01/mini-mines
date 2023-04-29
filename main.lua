@@ -38,9 +38,9 @@ function _init()
     menu_x = 28
     menu_y = 80
 
-    -- sticky key checker when starting game
+    -- main_stick key checker when starting game
     -- prevents the player holding key down and accidentally digging
-    sticky = false
+    main_stick = false
 
     -- store pbs for each mode
     -- false by default
@@ -115,6 +115,10 @@ function _init()
     -- counter for bouncing letters
     bcount = 1
     timer = 0
+
+    -- hold to action on win/loss
+    hold_timer = 2
+    ticker = 0
 
     --printh("", "log", true)
 end
@@ -221,48 +225,102 @@ function _update()
     -- allow user to return to title from pico-8 menu
     menuitem(2, "return to title", ensure)
     
-    -- if mouse enabled, capture positions
-    if mouse then
+    if controller then
+        -- control scheme
+        main = btn(5)
+        alt = btn(4)
+
+        -- sticky trackers for lc/x and rc/o
+        -- when the player clicks either of these, the sticky is enabled
+        -- actions are only allowed while sticky is false
+        -- this ensures the player doesn't hold the button by accident, and press something in the next screen
+        if main_stick and not main then
+            main_stick = false
+        end
+
+        if alt_stick and not alt then
+            alt_stick = false
+        end
+    elseif mouse then
+        -- positions
         mo_x = stat(32)
         mo_y = stat(33)
 
-        if not (sticky and stat(34) == 1) then
-            sticky = false
+        -- left and right click
+        main = stat(34) == 1
+        alt = stat(34) == 2
+
+        -- sticky trackers
+        if main_stick and not main then
+            main_stick = false
+        end
+
+        if alt_stick and not alt then
+            alt_stick = false
         end
     end
 
     if win or lose then
         if controller then
-            -- x for return
-            if btnp(5) then
-                win = false
-                lose = false
-                new_pb = false
-                new_theme = false
+            -- x for replay
+            if main then
+                if main_stick then
+                    ticker += 0.1
+                else
+                    main_stick = true
+                    ticker = 0
+                end
 
-                initialise(size)
-            end
+                if flr(ticker) == hold_timer then
+                    ticker = 0
 
+                    win = false
+                    lose = false
+                    new_pb = false
+                    new_theme = false
+
+                    main_stick = true
+                    alt_stick = true
+                    
+                    initialise(size)
+                end
+            
             -- o for return to menu
-            if btnp(4) then
-                win = false
-                lose = false
-                play = false
-                new_pb = false
-                new_theme = false
+            elseif alt then
+                if alt_stick then
+                    ticker += 0.1
+                else
+                    alt_stick = true
+                    ticker = 0
+                end
 
-                menu_y = 80
-                menu = true
+                if flr(ticker) == hold_timer then
+                    ticker = 0
+
+                    win = false
+                    lose = false
+                    play = false
+                    new_pb = false
+                    new_theme = false
+
+                    menu_y = 80
+                    menu = true
+                end
+            else
+                ticker = false
             end
         elseif mouse then
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
             hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
 
-            if stat(34) == 1 and not sticky then
-                sticky = true
+            -- if left clicking
+            if main and not main_stick then
+                main_stick = true
+
                 if hover_replay then
                     win = false
                     lose = false
+
                     new_pb = false
                     new_theme = false
 
@@ -271,6 +329,7 @@ function _update()
                     win = false
                     lose = false
                     play = false
+
                     new_pb = false
                     new_theme = false
 
@@ -279,7 +338,6 @@ function _update()
             end
         end
     elseif difficulty then
-        -- if using controller
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
@@ -291,14 +349,15 @@ function _update()
             end
 
             -- x to select option
-            if btnp(5) then
-                -- disable menu
+            if main and not main_stick then
+                main_stick = true
+
+                -- disable difficulty menu
                 difficulty = false
                 play = true
                 sfx(5)
 
                 -- difficulty selection
-                -- maybe pass something into initialise()
                 if menu_y == 80 then
                     --easy
                     initialise("easy")
@@ -312,13 +371,17 @@ function _update()
             end
 
             -- o to return to title
-            if btnp(4) then
-                sfx(6)
+            if alt and not alt_stick then
+                alt_stick = true
+
+                -- disable difficulty menu
                 difficulty = false
+                sfx(6)
+
+                -- go back to main menu
                 menu_y = 80
                 menu = true
             end
-        -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_easy = (37 <= mo_x and mo_x <= 53) and (81 <= mo_y and mo_y <= 87)
@@ -338,9 +401,8 @@ function _update()
             end
             
             -- left click to pick difficulty
-            if stat(34) == 1 and not sticky then
-                -- ensure player click accidentally in next screen
-                sticky = true
+            if main and not main_stick then
+                main_stick = true
 
                 if hover_easy then
                     sfx(5)
@@ -365,6 +427,64 @@ function _update()
             end
         end
     elseif play then
+        -- if it isn't the first dig
+        if not first then
+            -- only record time once game has started
+            ct = flr(t()) - record
+
+            -- count the number of correctly placed flags
+            ccount = 0
+            for col=1, #grid do
+                for row=1, #grid[col] do
+                    if grid[col][row] == true and flags[col][row] == true then
+                        ccount += 1
+                    end
+                end
+            end
+
+            -- if the player wins
+            if ccount == mcount then
+                -- if the player has flagged all mined, uncover all the mines
+                for col=1, #grid do
+                    for row=1, #grid[col] do
+                        if type(grid[col][row]) == "number" then
+                            uncover({col, row})
+                        end
+                    end
+                end
+                
+                -- player has won
+                win = true
+
+                -- record the pb if needed
+                if pb[size] == false or (ct < pb[size]) then
+                    pb[size] = ct
+                    -- tell _update() that there's been a new pb
+                    new_pb = true
+                end
+
+                -- add one to win counter for current difficulty
+                win_count[size] += 1
+
+                -- if this the player's first win or they set a new PB, and there's still themes to unlcok
+                if
+                (win_count[size] == 1 or
+                win_count[size] % 5 or
+                new_pb) and
+                #unlockable[size] != 0 then
+                    -- add the new theme to the player's collection
+                    add(themes, unlockable[size][1])
+
+                    -- new theme unlocked
+                    new_theme = unlockable[size][1]
+
+                    -- remove it from the original list
+                    del(unlockable[size], unlockable[size][1])
+
+                end
+            end
+        end
+
         -- check if the player is within the grid
         -- if not, they won't be able to dig or flag
         in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
@@ -401,164 +521,81 @@ function _update()
             -- int. div. of 8 to find how many spaces that is
             p.mx = (mo_x - xoff) \ 8 +1
             p.my = (mo_y - yoff) \ 8
+        end
 
-            -- if not still pressing key from menu, disable sticky
-            if not (sticky and stat(34) == 1) then
-                sticky = false
+        -- x or left click for flag
+        if main and not main_stick and in_bound then
+            -- wait for player to lift key
+            main_stick = true
+
+            -- if that space hasn't already been dug
+            if not digs[p.mx][p.my] then
+                -- if there is already a flag there
+                if flags[p.mx][p.my] == true then
+                    -- remove the flag, and add one to the flag count
+                    sfx(3)
+                    flags[p.mx][p.my] = false
+                    fcount += 1
+                -- if there wasn't already a flag there...
+                else
+                    -- if the player still has flags left...
+                    if fcount != 0 then
+                        -- add a flag and take one from the flag count
+                        sfx(1)
+                        flags[p.mx][p.my] = true
+                        fcount -= 1
+                    end
+                end
             end
         end
 
-        -- if the game has started, update the time
-        if not first then
-            ct = flr(t()) - record
-        end
+        -- o or right click for dig
+        if alt and not alt_stick and in_bound then
+            alt_stick = true
+            
+            if first then
+                -- create a list of mines
+                -- pass in current position to ensure no mine spawns there
+                mine_list = create_mines(width, height, mcount, {p.mx, p.my})
 
-        -- if the player hasn't already lost
-        -- makes sure there's no iteration of matrices that haven't been made yet
-        if not lose then
-            -- if it isn't the first dig
-            if not first then
-                -- count the number of correctly placed flags
-                ccount = 0
-                for col=1, #grid do
-                    for row=1, #grid[col] do
-                        if grid[col][row] == true and flags[col][row] == true then
-                            ccount += 1
-                        end
-                    end
+                -- change all the mine positions to true
+                for mine in all(mine_list) do
+                    --printh(mine[1]..", "..mine[2], "log", false)
+                    grid[mine[1]][mine[2]] = true
                 end
 
-                -- if the player wins
-                if ccount == mcount then
-                    -- if the player has flagged all mined, uncover all the mines
-                    for col=1, #grid do
-                        for row=1, #grid[col] do
-                            if type(grid[col][row]) == "number" then
-                                uncover({col, row})
-                            end
-                        end
-                    end
-                    
-                    -- player has won
-                    win = true
+                -- fill in the rest of the spaces with numbers for adjacent mines
+                grid = fill_adj(grid, width, height)
 
-                    -- record the pb if needed
-                    if pb[size] == false or (ct < pb[size]) then
-                        pb[size] = ct
-                        -- tell _update() that there's been a new pb
-                        new_pb = true
-                    end
-
-                    -- add one to win counter for current difficulty
-                    win_count[size] += 1
-
-                    -- if this the player's first win or they set a new PB, and there's still themes to unlcok
-                    if
-                    (win_count[size] == 1 or
-                    win_count[size] % 5 or
-                    new_pb) and
-                    #unlockable[size] != 0 then
-                        -- add the new theme to the player's collection
-                        add(themes, unlockable[size][1])
-
-                        -- new theme unlocked
-                        new_theme = unlockable[size][1]
-
-                        -- remove it from the original list
-                        del(unlockable[size], unlockable[size][1])
-
-                    end
-                end
+                first = false
+                record = flr(t())
             end
 
-            -- x or right click for flag
-            if
-            (btnp("5") or stat(34) == 2) and
-            not wait and in_bound then
-                -- wait for player to lift key
-                if stat(34) == 2 then
-                    wait = true
-                end
-
-                -- if that space hasn't already been dug
-                if not digs[p.mx][p.my] then
-                    -- if there is already a flag there
-                    if flags[p.mx][p.my] == true then
-                        -- remove the flag, and add one to the flag count
-                        sfx(3)
-                        flags[p.mx][p.my] = false
-                        fcount += 1
-                    -- if there wasn't already a flag there...
-                    else
-                        -- if the player still has flags left...
-                        if fcount != 0 then
-                            -- add a flag and take one from the flag count
-                            sfx(1)
-                            flags[p.mx][p.my] = true
-                            fcount -= 1
-                        end
+            -- don't try and dig a space with a flag
+            if flags[p.mx][p.my] != true then
+                for loc in all(mine_list) do
+                    -- if that location is in the mine list...
+                    if loc[1] == p.mx and loc[2] == p.my then
+                        -- the player loses
+                        lose = true
                     end
                 end
-            end
 
-            -- if waiting and user isn't pressing dig, then stop waiting
-            -- now allows user to press dig normally
-            if wait == true and stat(34) != 2 then
-                wait = false
-            end
+                -- if there isn't a mine there, dig that space
+                if not lose then
+                    --printh("", "log", true)
 
-            -- o or left click for dig
-            if
-            (btnp("4") or (stat(34) == 1 and not sticky))and
-            not wait and in_bound then
-                sticky = true
-                
-                if first then
-                    -- create a list of mines
-                    -- pass in current position to ensure no mine spawns there
-                    mine_list = create_mines(width, height, mcount, {p.mx, p.my})
-
-                    for mine in all(mine_list) do
-                        printh(mine[1]..", "..mine[2], "log", false)
-
-                        -- change all the mine positions to true
-                        grid[mine[1]][mine[2]] = true
+                    -- if that space hasn't already been dug, play sfx
+                    if digs[p.mx][p.my] != true then
+                        sfx(2)
                     end
 
-                    -- fill in the rest of the spaces with numbers for adjacent mines
-                    grid = fill_adj(grid, width, height)
-
-                    first = false
-                    record = flr(t())
-                end
-
-                -- don't try and dig a space with a flag
-                if flags[p.mx][p.my] != true then
-                    for loc in all(mine_list) do
-                        -- if that location is in the mine list...
-                        if loc[1] == p.mx and loc[2] == p.my then
-                            -- the player loses
-                            lose = true
-                        end
-                    end
-
-                    -- if there isn't a mine there, dig that space
-                    if not lose then
-                        --printh("", "log", true)
-
-                        -- if that space hasn't already been dug, play sfx
-                        if digs[p.mx][p.my] != true then
-                            sfx(2)
-                        end
-
-                        -- chain-uncover the rest of the spaces
-                        uncover({p.mx, p.my})
-                    end
+                    -- chain-uncover the rest of the spaces
+                    uncover({p.mx, p.my})
                 end
             end
         end
     elseif menu then
-        -- if using controller
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
@@ -570,7 +607,9 @@ function _update()
             end
 
             -- x to select option
-            if btnp(5) then
+            if main and not main_stick then
+                main_stick = true
+
                 -- disable menu
                 menu = false
                 sfx(5)
@@ -587,7 +626,6 @@ function _update()
                     option = true
                 end
             end
-        -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
@@ -606,9 +644,8 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 and not sticky then
-                -- ensure player click accidentally in next screen
-                sticky = true
+            if main and not main_stick then
+                main_stick = true
 
                 -- if hovering over "play", start the game
                 if hover_play then
@@ -631,23 +668,25 @@ function _update()
     elseif guide then
         -- return to title screen
         if controller then
-            if btnp(4) then
+            -- o to return
+            if alt and not alt_stick then
                 sfx(6)
+                alt_stick = true
                 guide = false
                 menu = true
             end
         elseif mouse then
             -- bounds for "return" in guide menu
             hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
-            if stat(34) == 1 and not sticky and hover_return_guide then
+            
+            if main and not main_stick and hover_return_guide then
                 sfx(6)
-                sticky = true
+                main_stick = true
                 guide = false
                 menu = true
             end
         end
     elseif option then
-        -- if using controller
         if controller then
             -- movement
             if btnp(3) and menu_y != 96 then
@@ -659,33 +698,33 @@ function _update()
             end
 
             -- x to select option
-            if btnp(5) then
+            if main and not main_stick then
+                main_stick = true
                 sfx(5)
+
                 if menu_y == 80 then
+                    -- change theme
                     if theme_select != #themes then
                         theme_select += 1
                     else
                         theme_select = 1
                     end
                 elseif menu_y == 96 then
-                    if controller then
-                        controller = false
-                        mouse = true
-                    else
-                        mouse = false
-                        controller = true
-                    end
+                    -- switch to mouse
+                    controller = false
+                    mouse = true
                 end
             -- o to return to menu
-            elseif btnp(4) then
+            elseif alt and not alt_stick then
+                alt_stick = true
                 sfx(6)
+
                 option = false
                 menu = true
+
                 -- place cursor on "options"
                 menu_y = 96
             end
-
-        -- if using mouse
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
@@ -702,10 +741,11 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 and not sticky then
+            if main and not main_stick then
+                main_stick = true
+
                 if menu_y == 80 then
                     sfx(5)
-                    sticky = true
                     if theme_select != #themes then
                         theme_select += 1
                     else
@@ -713,14 +753,10 @@ function _update()
                     end
                 elseif menu_y == 96 then
                     sfx(5)
-                    sticky = true
-                    if controller then
-                        controller = false
-                        mouse = true
-                    else
-                        mouse = false
-                        controller = true
-                    end
+
+                    -- change to controller
+                    mouse = false
+                    controller = true
                 elseif hover_return_options then
                     sfx(6)
                     options = false
@@ -778,8 +814,7 @@ function _draw()
         print("you win!", sin(t()*0.5)*10+48, sin(t())*5+47, 2)
 
         -- draw options
-        win_lose_message()
-
+        win_lose_message(ticker)
         if new_pb then
             pb_message()
         end
@@ -812,7 +847,7 @@ function _draw()
         print("you lose...", sin(t()*0.5)*6+43, 46, 2)
        
         -- draw options
-        win_lose_message()
+        win_lose_message(ticker)
     elseif difficulty then
         -- draw main frame and background
         if controller then
@@ -1028,6 +1063,8 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
+    
+    print(ticker, 0, 0, 0)
 end
 
 -- ***********************
@@ -1423,11 +1460,18 @@ function pb_message()
     line(x, y+12, x+12, y+12, 0)
 end
 
-function win_lose_message()
+function win_lose_message(timer)
     if controller then
+        -- draw a bar that fills up while the player holds the button
+        if main then
+            rectfill(21, 57, 21+48*timer/hold_timer, 63, 6)
+        elseif alt then
+            rectfill(21, 64, 21+80*timer/hold_timer, 70, 6)
+        end
+
         -- draw options
         print("❎ to replay", 22, 58, 13)
-        print("🅾️ to return to menu")
+        print("🅾️ to return to menu", 22, 65)
     elseif mouse then
         hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
         hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
