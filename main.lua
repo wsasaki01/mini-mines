@@ -116,10 +116,8 @@ function _init()
     bcount = 1
     timer = 0
 
-    -- is the player holding x or o?
-    -- used for win/loss
-    holdx = false
-    holdo = false
+    -- hold to action on win/loss
+    hold_timer = 2
     ticker = 0
 
     --printh("", "log", true)
@@ -273,7 +271,7 @@ function _update()
                     ticker = 0
                 end
 
-                if flr(ticker) == 2 then
+                if flr(ticker) == hold_timer then
                     ticker = 0
 
                     win = false
@@ -296,7 +294,7 @@ function _update()
                     ticker = 0
                 end
 
-                if flr(ticker) == 2 then
+                if flr(ticker) == hold_timer then
                     ticker = 0
 
                     win = false
@@ -816,7 +814,7 @@ function _draw()
         print("you win!", sin(t()*0.5)*10+48, sin(t())*5+47, 2)
 
         -- draw options
-        win_lose_message()
+        win_lose_message(ticker)
         if new_pb then
             pb_message()
         end
@@ -1462,11 +1460,18 @@ function pb_message()
     line(x, y+12, x+12, y+12, 0)
 end
 
-function win_lose_message()
+function win_lose_message(timer)
     if controller then
+        -- draw a bar that fills up while the player holds the button
+        if main then
+            rectfill(21, 57, 21+48*timer/hold_timer, 63, 6)
+        elseif alt then
+            rectfill(21, 64, 21+80*timer/hold_timer, 70, 6)
+        end
+
         -- draw options
         print("❎ to replay", 22, 58, 13)
-        print("🅾️ to return to menu")
+        print("🅾️ to return to menu", 22, 65)
     elseif mouse then
         hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
         hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
