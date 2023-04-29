@@ -503,7 +503,8 @@ function _update()
             -- x or right click for flag
             if
             (btnp("5") or stat(34) == 2) and
-            not wait and in_bound then
+            not wait and
+            in_bound then
                 -- wait for player to lift key
                 if stat(34) == 2 then
                     wait = true
@@ -1058,8 +1059,8 @@ function _draw()
     end
     
     print(ticker, 0, 0, 0)
-    print(wait)
-    print(sticky)
+    print("wait: "..tostr(wait))
+    print("sticky: "..tostr(sticky))
 end
 
 -- ***********************
