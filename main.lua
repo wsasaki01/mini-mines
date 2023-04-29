@@ -376,6 +376,9 @@ function _update()
                 -- indicator of whether the sound has been played for it or not
                 add(target, false)
 
+                -- indicator of sprite phase
+                add(target, 0)
+
                 -- add the explosion, particles
                 add(explosions, target)
                 add_particles(target)
@@ -391,10 +394,15 @@ function _update()
             explosion_timer += 1
         end
 
+        -- if a sound hasn't been played for an explosion, play it
         for explosion in all(explosions) do
             if not explosion[3] and #explosions > 1 then
                 sfx(7)
                 explosion[3] = true
+            end
+
+            if explosion[4] <= 5 then
+                explosion[4] += 1
             end
         end
 
@@ -653,7 +661,7 @@ function _update()
                         losing = true
 
                         -- make sure the current mine explodes first
-                        add(explosions, {p.mx, p.my, "first"})
+                        add(explosions, {p.mx, p.my, "first", 0})
                         del(mine_list, {p.mx, p.my})
                         add_particles({p.mx, p.my})
                         sfx(8)
@@ -1656,14 +1664,28 @@ function bprint(s, x, y, col, t)
     print(last, x+(4*(#first))+4, y, col)
 end
 
-function draw_explosion(loc)
-    spr(19, xoff+loc[1]*8-8, yoff+loc[2]*8)
+function draw_explosion(exp)
+    local x = xoff+exp[1]*8-8
+    local y = yoff+exp[2]*8
+
+    -- first phase: initial blast
+    if exp[4] < 2 then
+        spr(6, x, y)
+
+    -- second phase: big blast
+    elseif exp[4] <= 5 then
+        sspr(56, 0, 16, 16, x-4, y-4)
+    
+    -- third phase: crater
+    else
+        spr(19, x, y)
+    end
 end
 
 function add_particles(loc)
-    for i=1, flr(rnd(5))+1 do
-        local x = xoff+loc[1]*8-4+flr(rnd(15))-7
-        local y = yoff+loc[2]*8+4+flr(rnd(20))-7
+    for i=1, flr(rnd(10))+1 do
+        local x = xoff+loc[1]*8-4+flr(rnd(16))-8
+        local y = yoff+loc[2]*8+4+flr(rnd(16))-8
         local col = flr(rnd(2))+1
         if col == 1 then
             col = 2
