@@ -227,12 +227,16 @@ function _update()
     -- allow user to return to title from pico-8 menu
     menuitem(2, "return to title", ensure)
     
-    -- if mouse enabled, capture positions
     if mouse then
+        -- positions
         mo_x = stat(32)
         mo_y = stat(33)
 
-        if not (sticky and stat(34) == 1) then
+        -- left and right click
+        lc = stat(34) == 1
+        rc = stat(34) == 2
+
+        if not (sticky and lc) then
             sticky = false
         end
     end
@@ -287,7 +291,7 @@ function _update()
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
             hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
 
-            if stat(34) == 1 and not sticky then
+            if lc and not sticky then
                 sticky = true
                 if hover_replay then
                     win = false
@@ -367,7 +371,7 @@ function _update()
             end
             
             -- left click to pick difficulty
-            if stat(34) == 1 and not sticky then
+            if lc and not sticky then
                 -- ensure player click accidentally in next screen
                 sticky = true
 
@@ -432,7 +436,7 @@ function _update()
             p.my = (mo_y - yoff) \ 8
 
             -- if not still pressing key from menu, disable sticky
-            if not (sticky and stat(34) == 1) then
+            if not (lc and sticky) then
                 sticky = false
             end
         end
@@ -502,7 +506,7 @@ function _update()
 
             -- x or right click for flag
             if
-            (btnp("5") or stat(34) == 2) and
+            (btnp("5") or rc) and
             not wait and
             in_bound then
                 -- wait for player to lift key
@@ -533,13 +537,13 @@ function _update()
 
             -- if waiting and user isn't pressing dig, then stop waiting
             -- now allows user to press dig normally
-            if wait == true and stat(34) != 2 then
+            if wait == true and not rc then
                 wait = false
             end
 
             -- o or left click for dig
             if
-            (btnp("4") or (stat(34) == 1 and not sticky)) and
+            (btnp("4") or (lc and not sticky)) and
             not wait and in_bound then
                 sticky = true
                 
@@ -636,7 +640,7 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 and not sticky then
+            if lc and not sticky then
                 -- ensure player click accidentally in next screen
                 sticky = true
 
@@ -669,7 +673,7 @@ function _update()
         elseif mouse then
             -- bounds for "return" in guide menu
             hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
-            if stat(34) == 1 and not sticky and hover_return_guide then
+            if lc and not sticky and hover_return_guide then
                 sfx(6)
                 sticky = true
                 guide = false
@@ -732,7 +736,7 @@ function _update()
             end
             
             -- if left clicking
-            if stat(34) == 1 and not sticky then
+            if lc and not sticky then
                 if menu_y == 80 then
                     sfx(5)
                     sticky = true
@@ -1061,6 +1065,7 @@ function _draw()
     print(ticker, 0, 0, 0)
     print("wait: "..tostr(wait))
     print("sticky: "..tostr(sticky))
+    print("lc: "..tostr(lc).." rc: "..tostr(rc))
 end
 
 -- ***********************
