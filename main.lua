@@ -123,7 +123,7 @@ function _init()
     -- how many frames between each explosion
     explosion_interval = 5
 
-    --printh("", "log", true)
+    printh("", "log", true)
 end
 
 function initialise(diff)
@@ -342,19 +342,45 @@ function _update()
             end
         end
     elseif losing then
+        -- when the timer reaches the interval, explode another mine
         if explosion_timer == explosion_interval then
-            local target = flr(rnd(#mine_list)+1)
-            add(explosions, mine_list[target])
-            add_particles(mine_list[target])
-            del(mine_list, mine_list[target])
+            -- wait for a non-flagged mine
+            non_flag = false
+            local target
+            while not non_flag and #mine_list != 0 do
+                -- get a random mine from the list
+                index = flr(rnd(#mine_list))+1
+                target = mine_list[index]
 
-            explosion_timer = 0
-            explosion_counter += 1
+                -- if that mine hasn't been flagged
+                if flags[target[1]][target[2]] != true then
+                    -- break loop
+                    non_flag = true
+                -- if that mine has been flagged
+                else
+                    -- remove it from the list
+                    explosion_counter += 1
+                    del(mine_list, mine_list[index])
+                    target = false
+                end
+            end
+
+            if target then
+                -- add the explosion, particles
+                add(explosions, target)
+                add_particles(target)
+                del(mine_list, target)
+
+                -- reset timer
+                explosion_timer = 0
+                explosion_counter += 1
+            end
         else
             explosion_timer += 1
         end
 
-        if #mine_list == 0 then
+        -- once all explosions are done, show loss screen
+        if explosion_counter == mcount then
             losing = false
             lose = true
             explosion_counter = 0
@@ -867,6 +893,9 @@ function _draw()
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
         
+        -- draw explosion particles
+        draw_particles()
+
         -- draw message box and border
         rectfill(18, 39, 109, 72, 9)
         rectfill(19, 40, 108, 71, 7)
@@ -879,8 +908,6 @@ function _draw()
        
         -- draw options
         win_lose_message(ticker)
-
-        draw_particles()
     elseif losing then
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
@@ -1599,15 +1626,23 @@ function draw_explosion(loc)
 end
 
 function add_particles(loc)
-    local count = flr(rnd(5))+1
-    local x = xoff+loc[1]*8-4
-    local y = yoff+loc[2]*8+4
-
-    add(particles, {x, y})
+    for i=1, flr(rnd(5))+1 do
+        local x = xoff+loc[1]*8-4+flr(rnd(15))-7
+        local y = yoff+loc[2]*8+4+flr(rnd(20))-7
+        local col = flr(rnd(2))+1
+        if col == 1 then
+            col = 2
+        elseif col == 2 then
+            col = 4
+        elseif col == 3 then
+            col = 5
+        end
+        add(particles, {x, y, col})
+    end
 end
 
 function draw_particles()
     for particle in all(particles) do
-        pset(particle[1], particle[2], 10)
+        pset(particle[1], particle[2], particle[3])
     end
 end
