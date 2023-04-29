@@ -509,79 +509,6 @@ function _update()
                 p.y += 8
                 p.my += 1
             end
-
-            -- x or right click for flag
-            if main and not main_stick and in_bound then
-                -- wait for player to lift key
-                main_stick = true
-
-                -- if that space hasn't already been dug
-                if not digs[p.mx][p.my] then
-                    -- if there is already a flag there
-                    if flags[p.mx][p.my] == true then
-                        -- remove the flag, and add one to the flag count
-                        sfx(3)
-                        flags[p.mx][p.my] = false
-                        fcount += 1
-                    -- if there wasn't already a flag there...
-                    else
-                        -- if the player still has flags left...
-                        if fcount != 0 then
-                            -- add a flag and take one from the flag count
-                            sfx(1)
-                            flags[p.mx][p.my] = true
-                            fcount -= 1
-                        end
-                    end
-                end
-            end
-
-            -- o or left click for dig
-            if alt and not alt_stick and in_bound then
-                alt_stick = true
-                
-                if first then
-                    -- create a list of mines
-                    -- pass in current position to ensure no mine spawns there
-                    mine_list = create_mines(width, height, mcount, {p.mx, p.my})
-
-                    -- change all the mine positions to true
-                    for mine in all(mine_list) do
-                        --printh(mine[1]..", "..mine[2], "log", false)
-                        grid[mine[1]][mine[2]] = true
-                    end
-
-                    -- fill in the rest of the spaces with numbers for adjacent mines
-                    grid = fill_adj(grid, width, height)
-
-                    first = false
-                    record = flr(t())
-                end
-
-                -- don't try and dig a space with a flag
-                if flags[p.mx][p.my] != true then
-                    for loc in all(mine_list) do
-                        -- if that location is in the mine list...
-                        if loc[1] == p.mx and loc[2] == p.my then
-                            -- the player loses
-                            lose = true
-                        end
-                    end
-
-                    -- if there isn't a mine there, dig that space
-                    if not lose then
-                        --printh("", "log", true)
-
-                        -- if that space hasn't already been dug, play sfx
-                        if digs[p.mx][p.my] != true then
-                            sfx(2)
-                        end
-
-                        -- chain-uncover the rest of the spaces
-                        uncover({p.mx, p.my})
-                    end
-                end
-            end
         elseif mouse then
             -- start at offset
             -- find distance from current mouse to offset
@@ -594,6 +521,79 @@ function _update()
             -- int. div. of 8 to find how many spaces that is
             p.mx = (mo_x - xoff) \ 8 +1
             p.my = (mo_y - yoff) \ 8
+        end
+
+        -- x or left click for flag
+        if main and not main_stick and in_bound then
+            -- wait for player to lift key
+            main_stick = true
+
+            -- if that space hasn't already been dug
+            if not digs[p.mx][p.my] then
+                -- if there is already a flag there
+                if flags[p.mx][p.my] == true then
+                    -- remove the flag, and add one to the flag count
+                    sfx(3)
+                    flags[p.mx][p.my] = false
+                    fcount += 1
+                -- if there wasn't already a flag there...
+                else
+                    -- if the player still has flags left...
+                    if fcount != 0 then
+                        -- add a flag and take one from the flag count
+                        sfx(1)
+                        flags[p.mx][p.my] = true
+                        fcount -= 1
+                    end
+                end
+            end
+        end
+
+        -- o or right click for dig
+        if alt and not alt_stick and in_bound then
+            alt_stick = true
+            
+            if first then
+                -- create a list of mines
+                -- pass in current position to ensure no mine spawns there
+                mine_list = create_mines(width, height, mcount, {p.mx, p.my})
+
+                -- change all the mine positions to true
+                for mine in all(mine_list) do
+                    --printh(mine[1]..", "..mine[2], "log", false)
+                    grid[mine[1]][mine[2]] = true
+                end
+
+                -- fill in the rest of the spaces with numbers for adjacent mines
+                grid = fill_adj(grid, width, height)
+
+                first = false
+                record = flr(t())
+            end
+
+            -- don't try and dig a space with a flag
+            if flags[p.mx][p.my] != true then
+                for loc in all(mine_list) do
+                    -- if that location is in the mine list...
+                    if loc[1] == p.mx and loc[2] == p.my then
+                        -- the player loses
+                        lose = true
+                    end
+                end
+
+                -- if there isn't a mine there, dig that space
+                if not lose then
+                    --printh("", "log", true)
+
+                    -- if that space hasn't already been dug, play sfx
+                    if digs[p.mx][p.my] != true then
+                        sfx(2)
+                    end
+
+                    -- chain-uncover the rest of the spaces
+                    uncover({p.mx, p.my})
+                end
+            end
         end
     elseif menu then
         if controller then
@@ -847,7 +847,7 @@ function _draw()
         print("you lose...", sin(t()*0.5)*6+43, 46, 2)
        
         -- draw options
-        win_lose_message()
+        win_lose_message(ticker)
     elseif difficulty then
         -- draw main frame and background
         if controller then
