@@ -116,6 +116,12 @@ function _init()
     bcount = 1
     timer = 0
 
+    -- is the player holding x or o?
+    -- used for win/loss
+    holdx = false
+    holdo = false
+    ticker = 0
+
     --printh("", "log", true)
 end
 
@@ -234,25 +240,48 @@ function _update()
     if win or lose then
         if controller then
             -- x for return
-            if btnp(5) then
-                win = false
-                lose = false
-                new_pb = false
-                new_theme = false
+            if btn(5) then
+                ticker += 0.1
 
-                initialise(size)
+                if flr(ticker) == 2 then
+                    ticker = 0
+
+                    win = false
+                    lose = false
+                    new_pb = false
+                    new_theme = false
+
+                    sticky = true
+                    wait = true
+                    
+                    initialise(size)
+                end
+            else
+                ticker = 0
             end
 
             -- o for return to menu
             if btnp(4) then
-                win = false
-                lose = false
-                play = false
-                new_pb = false
-                new_theme = false
+                if holdo then
+                    ticker += 0.1
+                else
+                    ticker = 0
+                end
 
-                menu_y = 80
-                menu = true
+                holdo = true
+
+                if ticker == 2 then
+                    win = false
+                    lose = false
+                    play = false
+                    new_pb = false
+                    new_theme = false
+
+                    menu_y = 80
+                    menu = true
+                end
+            else
+                holdo = false
             end
         elseif mouse then
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
@@ -509,7 +538,7 @@ function _update()
 
             -- o or left click for dig
             if
-            (btnp("4") or (stat(34) == 1 and not sticky))and
+            (btnp("4") or (stat(34) == 1 and not sticky)) and
             not wait and in_bound then
                 sticky = true
                 
@@ -779,7 +808,6 @@ function _draw()
 
         -- draw options
         win_lose_message()
-
         if new_pb then
             pb_message()
         end
@@ -1028,6 +1056,10 @@ function _draw()
     if mouse then
         spr(20, mo_x, mo_y)
     end
+    
+    print(ticker, 0, 0, 0)
+    print(wait)
+    print(sticky)
 end
 
 -- ***********************
