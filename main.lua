@@ -137,6 +137,9 @@ function _init()
 end
 
 function initialise(diff)
+    -- play start game sound
+    sfx(9)
+
     -- current time
     ct = 0
 
@@ -281,8 +284,10 @@ function _update()
         if controller then
             if btnp(3) and not hide then
                 hide = true
+                sfx(11)
             elseif btnp(2) and hide then
                 hide = false
+                sfx(12)
             end
 
             if not hide then
@@ -290,6 +295,7 @@ function _update()
                 if main then
                     if main_stick then
                         ticker += 0.1
+                        sfx(13)
                     else
                         main_stick = true
                         ticker = 0
@@ -297,7 +303,7 @@ function _update()
 
                     if flr(ticker) == hold_timer then
                         ticker = 0
-
+                        
                         win = false
                         lose = false
                         new_pb = false
@@ -313,6 +319,7 @@ function _update()
                 elseif alt then
                     if alt_stick then
                         ticker += 0.1
+                        sfx(13)
                     else
                         alt_stick = true
                         ticker = 0
@@ -326,6 +333,8 @@ function _update()
                         play = false
                         new_pb = false
                         new_theme = false
+
+                        sfx(6)
 
                         menu_y = 80
                         menu = true
@@ -367,9 +376,20 @@ function _update()
                     new_pb = false
                     new_theme = false
 
+                    sfx(6)
+
                     menu = true
                 elseif hover_hide then
-                    hide = not hide
+                    -- if pressing "hide"
+                    if not hide then
+                        sfx(11)
+                        hide = true
+
+                    -- if pressing "show"
+                    elseif hide then
+                        sfx(12)
+                        hide = false
+                    end
                 end
             end
         end
@@ -466,7 +486,6 @@ function _update()
                 -- disable difficulty menu
                 difficulty = false
                 play = true
-                sfx(5)
 
                 -- difficulty selection
                 if menu_y == 80 then
@@ -516,17 +535,14 @@ function _update()
                 main_stick = true
 
                 if hover_easy then
-                    sfx(5)
                     difficulty = false
                     play = true
                     initialise("easy")
                 elseif hover_medium then
-                    sfx(5)
                     difficulty = false
                     play = true
                     initialise("med")
                 elseif hover_hard then
-                    sfx(5)
                     difficulty = false
                     play = true
                     initialise("hard")
@@ -566,9 +582,10 @@ function _update()
                         end
                     end
                 end
-                
+
                 -- player has won
                 win = true
+                sfx(10)
 
                 -- record the pb if needed
                 if pb[size] == false or (ct < pb[size]) then
@@ -823,9 +840,9 @@ function _update()
             -- x to select option
             if main and not main_stick then
                 main_stick = true
-                sfx(5)
 
                 if menu_y == 80 then
+                    sfx(14)
                     -- change theme
                     if theme_select != #themes then
                         theme_select += 1
@@ -833,6 +850,7 @@ function _update()
                         theme_select = 1
                     end
                 elseif menu_y == 96 then
+                    sfx(5)
                     -- switch to mouse
                     controller = false
                     mouse = true
@@ -868,7 +886,7 @@ function _update()
                 main_stick = true
 
                 if menu_y == 80 then
-                    sfx(5)
+                    sfx(14)
                     if theme_select != #themes then
                         theme_select += 1
                     else
