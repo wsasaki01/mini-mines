@@ -707,34 +707,55 @@ function _update()
 
             -- don't try and dig a space with a flag
             if flags[p.mx][p.my] != true then
-                for loc in all(mine_list) do
-                    -- if that location is in the mine list...
-                    if loc[1] == p.mx and loc[2] == p.my then
-                        -- the player loses
-                        losing = true
-
-                        -- make sure the current mine explodes first
-                        add(explosions, {p.mx, p.my, "first", 0})
-                        del(mine_list, {p.mx, p.my})
-                        add_particles({p.mx, p.my})
-                        sfx(8)
-
-                        explosion_timer = flr(-2.5*explosion_interval)
-                        explosion_counter = 0
-                    end
+                -- if the dug space is in the mine list, the player has lost
+                if check_loss({p.mx, p.my}) then
+                    init_loss({p.mx, p.my})
                 end
 
                 -- if there isn't a mine there, dig that space
                 if not losing then
                     --printh("", "log", true)
 
+                    -- if that space has already been dug, and there's a number there
+                    if
+                    type(grid[p.mx][p.my]) == "number" and
+                    digs[p.mx][p.my] == true then
+                        -- uncover all the spaces around it
+                        for pcol=-1, 1 do
+                            for prow=-1, 1 do
+                                if not (pcol == 0 and prow == 0) then
+                                    -- create a probe (an adjacent location to check)
+                                    local probe = {p.mx+pcol, p.my+prow}
+                                    -- if the probe is within bounds
+                                    if
+                                    probe[1] >= 1 and
+                                    probe[1] <= width and
+                                    probe[2] >= 1 and
+                                    probe[2] <= height then
+                                        -- uncover if there isn't a flag
+                                        if flags[probe[1]][probe[2]] == false then
+                                            uncover(probe)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+
+                        if #explosions > 0 then
+                            losing = true
+                            
+                            explosion_timer = flr(-2.5*explosion_interval)
+                            explosion_counter = 0
+                        end
+                    end
+
                     -- if that space hasn't already been dug, play sfx
                     if digs[p.mx][p.my] != true then
                         sfx(2)
-                    end
 
-                    -- chain-uncover the rest of the spaces
-                    uncover({p.mx, p.my})
+                        -- chain-uncover the rest of the spaces
+                        uncover({p.mx, p.my})
+                    end
                 end
             end
         end
@@ -957,8 +978,17 @@ function _draw()
 
         --foreach(mine_list, draw_mine)
 
-        if #explosions == 1 then
-            draw_mine(explosions[1])
+        local flag = true
+        for exp in all(explosions) do
+            if exp[3] != "first" then
+                flag = false
+            end
+        end
+
+        if flag then
+            for exp in all(explosions) do
+                draw_mine(exp)
+            end
         else
             -- draw explosions
             foreach(explosions, draw_explosion)
@@ -1245,29 +1275,36 @@ function draw_matrix()
 end
 
 function uncover(loc)
-    -- dig the current space
-    digs[loc[1]][loc[2]] = true
+    if check_loss(loc) then
+        add(explosions, {loc[1], loc[2], "first", 0})
+        del(mine_list, {loc[1], loc[2]})
+        add_particles({loc[1], loc[2]})
+        sfx(8)
+    elseif not losing then
+        -- dig the current space
+        digs[loc[1]][loc[2]] = true
 
-    -- if the current location is empty (no adjacent)
-    if grid[loc[1]][loc[2]] == 0 then
-        -- uncover all the spaces around it
-        for pcol=-1, 1 do
-            for prow=-1, 1 do
-                if not (pcol == 0 and prow == 0) then
-                    -- create a probe (an adjacent location to check)
-                    local probe = {loc[1]+pcol, loc[2]+prow}
+        -- if the current location is empty (no adjacent)
+        if grid[loc[1]][loc[2]] == 0 then
+            -- uncover all the spaces around it
+            for pcol=-1, 1 do
+                for prow=-1, 1 do
+                    if not (pcol == 0 and prow == 0) then
+                        -- create a probe (an adjacent location to check)
+                        local probe = {loc[1]+pcol, loc[2]+prow}
 
-                    -- if the probe is within bounds
-                    if
-                    probe[1] >= 1 and
-                    probe[1] <= width and
-                    probe[2] >= 1 and
-                    probe[2] <= height then
-                        -- if that space hasn't already been dug, and doesn't have a flag, uncover it
-                        if 
-                        digs[probe[1]][probe[2]] != true and
-                        flags[probe[1]][probe[2]] != true then
-                            uncover({probe[1], probe[2]})
+                        -- if the probe is within bounds
+                        if
+                        probe[1] >= 1 and
+                        probe[1] <= width and
+                        probe[2] >= 1 and
+                        probe[2] <= height then
+                            -- if that space hasn't already been dug, and doesn't have a flag, uncover it
+                            if 
+                            digs[probe[1]][probe[2]] != true and
+                            flags[probe[1]][probe[2]] != true then
+                                uncover(probe)
+                            end
                         end
                     end
                 end
@@ -1769,4 +1806,28 @@ function draw_menu_background()
         i:fall()
         i:check()
     end
+end
+
+function check_loss(loc)
+    local flag = false
+    for mine in all(mine_list) do
+        if mine[1] == loc[1] and mine[2] == loc[2] then
+            return true
+        end
+    end
+    return false
+end
+
+function init_loss(loc)
+    -- the player loses
+    losing = true
+
+    -- make sure the current mine explodes first
+    add(explosions, {loc[1], loc[2], "first", 0})
+    del(mine_list, {loc[1], loc[2]})
+    add_particles({loc[1], loc[2]})
+    sfx(8)
+
+    explosion_timer = flr(-2.5*explosion_interval)
+    explosion_counter = 0
 end
