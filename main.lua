@@ -133,6 +133,9 @@ function _init()
     -- hide the win/loss screen
     hide = false
 
+    -- which page of the guide screen?
+    page = 1
+
     printh("", "log", true)
 end
 
@@ -808,6 +811,12 @@ function _update()
     elseif guide then
         -- return to title screen
         if controller then
+            if btnp(1) and page != 2 then
+                page = 2
+            elseif btnp(0) and page != 1 then
+                page = 1
+            end
+
             -- o to return
             if alt and not alt_stick then
                 sfx(6)
@@ -1301,65 +1310,7 @@ function to_title(b)
 end
 
 function draw_title_menu(info_message)
-    -- fill with accent background
-    cls(themes[theme_select]["bg"])
-
-    -- set to + draw pattern
-    -- create background
-    -- set back to normal fill
-    fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
-    fillp(█)
-    
-    -- if there are fewer than 15 icons in the background, spawn a new one
-    if #icons < 15 then
-        -- add an icon to the list
-        add(icons, {
-            -- centre of x movement
-            -- sin wave moves greater and less than this value
-            x_base = flr(rnd(120)),
-
-            -- multiplier for range of horizontal movement
-            multi = rnd(1),
-
-            -- position on screen
-            -- spawn off screen
-            x = -20,
-            y = flr(rnd(120))-120,
-
-            -- sprite (random: flag or mine)
-            s = flr(rnd(2))+3,
-
-            -- downwards speed
-            speed = flr(rnd(2))+0.4,
-
-            -- draw icon at coords
-            draw = function(self)
-                spr(self.s, self.x, self.y)
-            end,
-
-            -- fall down
-            -- move left and right, following sin graph
-            fall = function(self)
-                self.y += self.speed
-                self.x = self.x_base + sin(t()*self.multi)*5
-            end,
-
-            -- delete self if off screen
-            check = function(self)
-                if self.y > 130 then
-                    del(icons, self)
-                end
-            end
-        })
-    end
-
-    -- for each icon, draw it, make it fall, and check if it's off screen
-    for i in all(icons) do
-        i:draw()
-        i:fall()
-        i:check()
-    end
+    draw_menu_background()
 
     -- draw background and border
     rectfill(19, 15, 108, 112, themes[theme_select]["accent"])
@@ -1404,65 +1355,7 @@ function draw_title_menu(info_message)
 end
 
 function draw_guide(info_message)
-    -- fill with accent background
-    cls(themes[theme_select]["bg"])
-
-    -- set to + draw pattern
-    -- create background
-    -- set back to normal fill
-    fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
-    fillp(█)
-    
-    -- if there are fewer than 15 icons in the background, spawn a new one
-    if #icons < 15 then
-        -- add an icon to the list
-        add(icons, {
-            -- centre of x movement
-            -- sin wave moves greater and less than this value
-            x_base = flr(rnd(120)),
-
-            -- multiplier for range of horizontal movement
-            multi = rnd(1),
-
-            -- position on screen
-            -- spawn off screen
-            x = -20,
-            y = flr(rnd(120))-120,
-
-            -- sprite (random: flag or mine)
-            s = flr(rnd(2))+3,
-
-            -- downwards speed
-            speed = flr(rnd(2))+0.4,
-
-            -- draw icon at coords
-            draw = function(self)
-                spr(self.s, self.x, self.y)
-            end,
-
-            -- fall down
-            -- move left and right, following sin graph
-            fall = function(self)
-                self.y += self.speed
-                self.x = self.x_base + sin(t()*self.multi)*5
-            end,
-
-            -- delete self if off screen
-            check = function(self)
-                if self.y > 130 then
-                    del(icons, self)
-                end
-            end
-        })
-    end
-
-    -- for each icon, draw it, make it fall, and check if it's off screen
-    for i in all(icons) do
-        i:draw()
-        i:fall()
-        i:check()
-    end
+    draw_menu_background()
 
     -- draw background and border
     rectfill(10, 10, 118, 118, themes[theme_select]["accent"])
@@ -1778,5 +1671,67 @@ function draw_win_loss(win)
             rectfill(111, 122, 127, 127, 9)
             print("SHOW", 112, 122, 7)
         end
+    end
+end
+
+function draw_menu_background()
+    -- fill with accent background
+    cls(themes[theme_select]["bg"])
+
+    -- set to + draw pattern
+    -- create background
+    -- set back to normal fill
+    fillp(◆)
+    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
+    fillp(█)
+    
+    -- if there are fewer than 15 icons in the background, spawn a new one
+    if #icons < 15 then
+        -- add an icon to the list
+        add(icons, {
+            -- centre of x movement
+            -- sin wave moves greater and less than this value
+            x_base = flr(rnd(120)),
+
+            -- multiplier for range of horizontal movement
+            multi = rnd(1),
+
+            -- position on screen
+            -- spawn off screen
+            x = -20,
+            y = flr(rnd(120))-120,
+
+            -- sprite (random: flag or mine)
+            s = flr(rnd(2))+3,
+
+            -- downwards speed
+            speed = flr(rnd(2))+0.4,
+
+            -- draw icon at coords
+            draw = function(self)
+                spr(self.s, self.x, self.y)
+            end,
+
+            -- fall down
+            -- move left and right, following sin graph
+            fall = function(self)
+                self.y += self.speed
+                self.x = self.x_base + sin(t()*self.multi)*5
+            end,
+
+            -- delete self if off screen
+            check = function(self)
+                if self.y > 130 then
+                    del(icons, self)
+                end
+            end
+        })
+    end
+
+    -- for each icon, draw it, make it fall, and check if it's off screen
+    for i in all(icons) do
+        i:draw()
+        i:fall()
+        i:check()
     end
 end
