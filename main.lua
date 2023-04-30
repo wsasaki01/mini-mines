@@ -374,6 +374,11 @@ function _update()
             end
         end
     elseif losing then
+        -- hold x and o to speed up explosions
+        if main and alt then
+            explosion_timer = explosion_interval
+        end
+
         -- when the timer reaches the interval, explode another mine
         if explosion_timer == explosion_interval then
             -- wait for a non-flagged mine
