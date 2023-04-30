@@ -344,14 +344,14 @@ function _update()
                     hover_hide = (92 <= mo_x and mo_x <= 109) and (72 <= mo_y and mo_y <= 77)
                 end
             else
-                hover_hide = (80)
+                hover_hide = (111 <= mo_x and mo_x <= 127) and (122 <= mo_y and mo_y <= 127)
             end
 
             -- if left clicking
             if main and not main_stick then
                 main_stick = true
 
-                if hover_replay then
+                if hover_replay and not hide then
                     win = false
                     lose = false
 
@@ -359,7 +359,7 @@ function _update()
                     new_theme = false
 
                     initialise(size)
-                elseif hover_quit then
+                elseif hover_quit and not hide then
                     win = false
                     lose = false
                     play = false
@@ -1721,7 +1721,6 @@ function draw_win_loss(win)
             elseif mouse then
                 rectfill(92, 72, 109, 77, 9)
                 print("HIDE", 93, 72, 7)
-                
             end
         end
 
@@ -1746,7 +1745,12 @@ function draw_win_loss(win)
         -- draw options
         win_lose_message(ticker)
     else
-        rectfill(99, 121, 127, 127, 9)
-        print("⬆️ SHOW", 100, 122, 7)
+        if controller then
+            rectfill(99, 121, 127, 127, 9)
+            print("⬆️ SHOW", 100, 122, 7)
+        elseif mouse then
+            rectfill(111, 122, 127, 127, 9)
+            print("SHOW", 112, 122, 7)
+        end
     end
 end
