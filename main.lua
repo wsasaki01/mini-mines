@@ -170,7 +170,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 15
+        mcount = 1 --15
         
         p = {
             x = 60,
@@ -185,7 +185,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 30
+        mcount = 1 --30
         
         p = {
             x = 64,
@@ -210,9 +210,10 @@ function initialise(diff)
     -- number of correctly placed flags
     ccount = 0
 
-    -- has the player won or lost, or in the loss animation?
+    -- has the player won or lost, or in the loss or winning animation?
     win = false
     lose = false
+    winning = false
     losing = false
 
     -- create mine, explosion and particles lists
@@ -395,6 +396,13 @@ function _update()
                     end
                 end
             end
+        end
+    elseif winning then
+        if shine-(8*width)-2 < xoff+(8*width)+120 then
+            shine += 10
+        else
+            winning = false
+            win = true
         end
     elseif losing then
         -- hold x and o to speed up explosions
@@ -587,8 +595,11 @@ function _update()
                 end
 
                 -- player has won
-                win = true
+                winning = true
                 sfx(10)
+
+                -- set position of shine
+                shine = xoff-1
 
                 -- record the pb if needed
                 if pb[size] == false or (ct < pb[size]) then
@@ -952,6 +963,31 @@ function _draw()
         draw_win_loss(true)
     elseif lose then
         draw_win_loss(false)
+    elseif winning then
+        -- clear screen with grey background
+        cls(themes[theme_select]["gamebg"])
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+        -- draw flag icon and count in top left corner
+        spr(3, 0, 0)
+        print(fcount, 8, 1, 7)
+
+        -- draw the map
+        map(0, 0, xoff, yoff, width, height+1)
+
+        -- draw all dug spaces and flags
+        draw_digs()
+        draw_flags()
+
+        line(shine-3, 8+yoff, shine-(8*width)-2, 8+yoff+(8*height)-1, 6)
+        line(shine-2, 8+yoff, shine-(8*width)-1, 8+yoff+(8*height)-1, 7)
+        line(shine-1, 8+yoff, shine-(8*width), 8+yoff+(8*height)-1, 7)
+        line(shine, 8+yoff, shine-(8*width)+1, 8+yoff+(8*height)-1, 7)
+
+        rectfill(0, 8, xoff-1, 128, themes[theme_select]["gamebg"])
+        rectfill(xoff+(8*width), 8, 128, 128, themes[theme_select]["gamebg"])
     elseif losing then
         camera(0, 0)
 
