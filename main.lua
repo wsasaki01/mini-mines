@@ -809,6 +809,13 @@ function _update()
             end
         end
     elseif guide then
+        if mine_flash != 30 then
+            mine_flash += 1
+        else
+            mine_flash = 0
+            show_mines = not show_mines
+        end
+
         -- return to title screen
         if controller then
             if btnp(1) and page != 2 then
@@ -822,6 +829,7 @@ function _update()
                 sfx(6)
                 alt_stick = true
                 guide = false
+                page = 1
                 menu = true
             end
         elseif mouse then
@@ -832,6 +840,7 @@ function _update()
                 sfx(6)
                 main_stick = true
                 guide = false
+                page = 1
                 menu = true
             end
         end
@@ -1355,6 +1364,7 @@ function draw_title_menu(info_message)
 end
 
 function draw_guide(info_message)
+    -- draw background and falling icons
     draw_menu_background()
 
     -- draw background and border
@@ -1377,58 +1387,83 @@ function draw_guide(info_message)
 
     -- draw "mines"
     sspr(80, 32, 40, 8, 36, 17)
-    
-    print("❎ / left click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select]["main"])
-    
-    print("🅾️ / right click TO flag\nto mark a mine", 19, 48, 8)
 
-    -- draw grid border
-    rect(27, 67, 100, 108, 13)
+    if page == 1 then
+        print("❎ / right click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select]["main"])
+        
+        print("🅾️ / left click TO flag\nto mark a mine", 19, 48, 8)
 
-    -- draw sample grid
-    for col=28, 92, 16 do
-        for row=68, 115, 16 do
-            spr(1, col, row)
+        -- draw grid border
+        rect(27, 67, 100, 108, 13)
+
+        -- draw sample grid
+        for col=28, 92, 16 do
+            for row=68, 115, 16 do
+                spr(1, col, row)
+            end
         end
-    end
 
-    for col=36, 90, 16 do
-        for row=76, 100, 16 do
-            spr(1, col, row)
+        for col=36, 90, 16 do
+            for row=76, 100, 16 do
+                spr(1, col, row)
+            end
         end
+
+        print("FLAG ALL MINES TO WIN!", 22, 110, 0)
+
+        if show_mines then
+            spr(4, 68, 76)
+            spr(4, 76, 92)
+            spr(4, 36, 92)
+        end
+
+        rectfill(76, 76, 99, 91, themes[theme_select]["main"])
+        rectfill(84, 76, 99, 99, themes[theme_select]["main"])
+        rectfill(68, 84, 75, 107, themes[theme_select]["main"])
+        rectfill(76, 100, 99, 107, themes[theme_select]["main"])
+
+        print("1", 79, 78, 7)
+        print("2", 79, 86, 7)
+        print("2", 71, 86, 7)
+        print("1", 71, 94, 7)
+        print("1", 71, 102, 7)
+        print("1", 79, 102, 7)
+        print("1", 87, 102, 7)
+        print("1", 87, 94, 7)
+        print("1", 87, 86, 7)
+
+        spr(3, 76, 92)
+
+        rectfill(110, 63, 118, 69, themes[theme_select]["accent"])
+        print("➡️", 111, 64, 7)
+    elseif page == 2 then
+        print("UNLOCK themes BY BEATING\nYOUR best times!\n", 19, 27, themes[theme_select]["main"])
+        sspr(72, 0, 94, 5, 47, 27)
+        
+        print("CHANGE controls\nIN options OR\npico-8 menu!", 22, 45)
+        print("controls", 50, 45, themes[theme_select]["accent"])
+        spr(33, 90, 48)
+        spr(34, 99, 48)
+
+        print("HOLD ❎ to\nexplode faster!", 22, 69, 4)
+        spr(19, 90, 69)
+        spr(6, 95, 72)
+
+        print("re-dig TO dig\nsurrounding\nspaces!", 22, 90, 0)
+        spr(18, 94, 96)
+        spr(154, 94, 96)
+        
+        if show_mines then
+            rectfill(86, 88, 101, 111, 12)
+            rectfill(102, 88, 109, 103, 12)
+            sspr(72, 64, 24, 24, 86, 88)
+        end
+        
+        spr(17, 94, 96)
+        
+        rectfill(10, 63, 18, 69, themes[theme_select]["accent"])
+        print("⬅️", 11, 64, 7)
     end
-
-    print("FLAG ALL MINES TO WIN!", 22, 110, 0)
-
-    if mine_flash != 30 then
-        mine_flash += 1
-    else
-        mine_flash = 0
-        show_mines = not show_mines
-    end
-
-    if show_mines then
-        spr(4, 68, 76)
-        spr(4, 76, 92)
-        spr(4, 36, 92)
-    end
-
-    rectfill(76, 76, 99, 91, themes[theme_select]["main"])
-    rectfill(84, 76, 99, 99, themes[theme_select]["main"])
-    rectfill(68, 84, 75, 107, themes[theme_select]["main"])
-    rectfill(76, 100, 99, 107, themes[theme_select]["main"])
-
-    print("1", 79, 78, 7)
-    print("2", 79, 86, 7)
-    print("2", 71, 86, 7)
-    print("1", 71, 94, 7)
-    print("1", 71, 102, 7)
-    print("1", 79, 102, 7)
-    print("1", 87, 102, 7)
-    print("1", 87, 94, 7)
-    print("1", 87, 86, 7)
-
-    spr(3, 76, 92)
 end
 
 function pb_message()
