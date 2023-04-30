@@ -285,56 +285,67 @@ function _update()
                 hide = false
             end
 
-            -- x for replay
-            if main then
-                if main_stick then
-                    ticker += 0.1
+            if not hide then
+                -- x for replay
+                if main then
+                    if main_stick then
+                        ticker += 0.1
+                    else
+                        main_stick = true
+                        ticker = 0
+                    end
+
+                    if flr(ticker) == hold_timer then
+                        ticker = 0
+
+                        win = false
+                        lose = false
+                        new_pb = false
+                        new_theme = false
+
+                        main_stick = true
+                        alt_stick = true
+                        
+                        initialise(size)
+                    end
+                
+                -- o for return to menu
+                elseif alt then
+                    if alt_stick then
+                        ticker += 0.1
+                    else
+                        alt_stick = true
+                        ticker = 0
+                    end
+
+                    if flr(ticker) == hold_timer then
+                        ticker = 0
+
+                        win = false
+                        lose = false
+                        play = false
+                        new_pb = false
+                        new_theme = false
+
+                        menu_y = 80
+                        menu = true
+                    end
                 else
-                    main_stick = true
-                    ticker = 0
+                    ticker = false
                 end
-
-                if flr(ticker) == hold_timer then
-                    ticker = 0
-
-                    win = false
-                    lose = false
-                    new_pb = false
-                    new_theme = false
-
-                    main_stick = true
-                    alt_stick = true
-                    
-                    initialise(size)
-                end
-            
-            -- o for return to menu
-            elseif alt then
-                if alt_stick then
-                    ticker += 0.1
-                else
-                    alt_stick = true
-                    ticker = 0
-                end
-
-                if flr(ticker) == hold_timer then
-                    ticker = 0
-
-                    win = false
-                    lose = false
-                    play = false
-                    new_pb = false
-                    new_theme = false
-
-                    menu_y = 80
-                    menu = true
-                end
-            else
-                ticker = false
             end
         elseif mouse then
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
             hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+            if not hide then
+                if new_theme then
+                    hover_hide = (92 <= mo_x and mo_x <= 109) and (88 <= mo_y and mo_y <= 93)
+                else
+                    hover_hide = (92 <= mo_x and mo_x <= 109) and (72 <= mo_y and mo_y <= 77)
+                end
+            else
+                hover_hide = (80)
+            end
 
             -- if left clicking
             if main and not main_stick then
@@ -357,6 +368,8 @@ function _update()
                     new_theme = false
 
                     menu = true
+                elseif hover_hide then
+                    hide = not hide
                 end
             end
         end
@@ -1690,15 +1703,26 @@ function draw_win_loss(win)
             pset(88, 75, 7)
             pset(88, 81, 7)
 
-            rectfill(80, 88, 109, 94, 9)
-            print("⬇️ HIDE", 81, 89, 7)
+            if controller then
+                rectfill(80, 88, 109, 94, 9)
+                print("⬇️ HIDE", 81, 89, 7)
+            elseif mouse then
+                rectfill(92, 88, 109, 93, 9)
+                print("HIDE", 93, 88, 7)
+            end
         else
             -- draw message box and border normally
             rectfill(18, 39, 109, 72, 9)
             rectfill(19, 40, 108, 71, 7)
 
-            rectfill(80, 72, 109, 78, 9)
-            print("⬇️ HIDE", 81, 73, 7)
+            if controller then
+                rectfill(80, 72, 109, 78, 9)
+                print("⬇️ HIDE", 81, 73, 7)
+            elseif mouse then
+                rectfill(92, 72, 109, 77, 9)
+                print("HIDE", 93, 72, 7)
+                
+            end
         end
 
         if win then
