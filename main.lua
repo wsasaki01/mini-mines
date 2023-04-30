@@ -239,9 +239,9 @@ function initialise(diff)
 end
 
 function _update()
-    -- allow user to return to title from pico-8 menu
-    menuitem(2, "return to title", ensure)
-    
+    -- remove "return to title" by default
+    menuitem(2)
+
     if controller then
         -- control scheme
         main = btn(5)
@@ -538,6 +538,9 @@ function _update()
             end
         end
     elseif play then
+        -- if in game, add the "return to title" option
+        menuitem(2, "return to title", ensure)
+
         -- if the player has started the game (dug their first space)
         if not first then
             -- only record time once game has started
