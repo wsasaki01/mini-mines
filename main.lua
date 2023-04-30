@@ -375,7 +375,7 @@ function _update()
         end
     elseif losing then
         -- hold x and o to speed up explosions
-        if main and alt then
+        if main then
             explosion_timer = explosion_interval
         end
 
