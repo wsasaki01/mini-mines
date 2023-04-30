@@ -538,7 +538,7 @@ function _update()
             end
         end
     elseif play then
-        -- if it isn't the first dig
+        -- if the player has started the game (dug their first space)
         if not first then
             -- only record time once game has started
             ct = flr(t()) - record
