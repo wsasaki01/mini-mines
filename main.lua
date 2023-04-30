@@ -130,6 +130,9 @@ function _init()
     -- strength of screen shake
     shake_strength = 0
 
+    -- hide the win/loss screen
+    hide = false
+
     printh("", "log", true)
 end
 
@@ -230,6 +233,9 @@ function initialise(diff)
     -- is this the player's first dig?
     -- used to wait to create the mine list
     first = true
+
+    -- always show the win/loss screen by default
+    hide = false
 end
 
 function _update()
@@ -273,6 +279,12 @@ function _update()
 
     if win or lose then
         if controller then
+            if btnp(3) and not hide then
+                hide = true
+            elseif btnp(2) and hide then
+                hide = false
+            end
+
             -- x for replay
             if main then
                 if main_stick then
@@ -859,89 +871,9 @@ end
 
 function _draw()
     if win then
-        -- clear screen with grey background
-        cls(themes[theme_select]["gamebg"])
-
-        -- draw the map
-        map(0, 0, xoff, yoff, width, height+1) 
-        
-        -- draw all dug spaces and flags
-        draw_digs()
-        draw_flags()
-
-        -- print time in top right corner
-        print(mins..secs, 108, 1, 7)
-
-        -- draw flag icon and count in top left corner
-        spr(3, 0, 0)
-        print(fcount, 8, 1, 7)
-
-        -- if a new theme was just unlocked
-        if type(new_theme) == "table" then
-            -- draw message box and border with extra space for theme info
-            rectfill(18, 39, 109, 88, 9)
-            rectfill(19, 40, 108, 87, 7)
-            
-            bprint("new theme!", 37, 76, new_theme["accent"], 3)
-
-            -- theme preview
-            rectfill(82, 75, 88, 81, new_theme["main"])
-
-            pset(82, 75, 7)
-            pset(82, 81, 7)
-            pset(88, 75, 7)
-            pset(88, 81, 7)
-        else
-            -- draw message box and border normally
-            rectfill(18, 39, 109, 72, 9)
-            rectfill(19, 40, 108, 71, 7)
-        end
-
-        -- draw message shadow
-        print("you win!", sin(t()*0.5)*10+49, sin(t())*5+48, 6)
-
-        -- draw message
-        print("you win!", sin(t()*0.5)*10+48, sin(t())*5+47, 2)
-
-        -- draw options
-        win_lose_message(ticker)
-        if new_pb then
-            pb_message()
-        end
+        draw_win_loss(true)
     elseif lose then
-        -- clear screen with grey background
-        cls(themes[theme_select]["gamebg"])
-
-        -- draw the map
-        map(0, 0, xoff, yoff, width, height+1) 
-
-        -- draw all dug spaces and flags
-        draw_digs()
-        draw_flags()
-        foreach(explosions, draw_explosion)
-
-        -- print time in top right corner
-        print(mins..secs, 108, 1, 7)
-
-        -- draw flag icon and count in top left corner
-        spr(3, 0, 0)
-        print(fcount, 8, 1, 7)
-        
-        -- draw explosion particles
-        draw_particles()
-
-        -- draw message box and border
-        rectfill(18, 39, 109, 72, 9)
-        rectfill(19, 40, 108, 71, 7)
-
-        -- draw message shadow
-        print("you lose...", sin(t()*0.5)*6+42, 47, 6)
-
-        -- draw message
-        print("you lose...", sin(t()*0.5)*6+43, 46, 2)
-       
-        -- draw options
-        win_lose_message(ticker)
+        draw_win_loss(false)
     elseif losing then
         camera(0, 0)
 
@@ -1719,4 +1651,78 @@ function shake()
     -- decay the shake scrength
     shake_strength *= 0.75
     if (shake_strength < 0.05) shake_strength = 0
+end
+
+function draw_win_loss(win)
+    -- clear screen with grey background
+    cls(themes[theme_select]["gamebg"])
+
+    -- draw the map
+    map(0, 0, xoff, yoff, width, height+1) 
+
+    -- draw all dug spaces and flags
+    draw_digs()
+    draw_flags()
+    foreach(explosions, draw_explosion) -- explosions too, if lost
+    draw_particles()
+
+    -- print time in top right corner
+    print(mins..secs, 108, 1, 7)
+
+    -- draw flag icon and count in top left corner
+    spr(3, 0, 0)
+    print(fcount, 8, 1, 7)
+
+    if not hide then
+        -- if a new theme was just unlocked
+        if type(new_theme) == "table" then
+            -- draw message box and border with extra space for theme info
+            rectfill(18, 39, 109, 88, 9)
+            rectfill(19, 40, 108, 87, 7)
+            
+            bprint("new theme!", 37, 76, new_theme["accent"], 3)
+
+            -- theme preview
+            rectfill(82, 75, 88, 81, new_theme["main"])
+
+            pset(82, 75, 7)
+            pset(82, 81, 7)
+            pset(88, 75, 7)
+            pset(88, 81, 7)
+
+            rectfill(80, 88, 109, 94, 9)
+            print("⬇️ HIDE", 81, 89, 7)
+        else
+            -- draw message box and border normally
+            rectfill(18, 39, 109, 72, 9)
+            rectfill(19, 40, 108, 71, 7)
+
+            rectfill(80, 72, 109, 78, 9)
+            print("⬇️ HIDE", 81, 73, 7)
+        end
+
+        if win then
+            -- draw message shadow
+            print("you win!", sin(t()*0.5)*10+49, sin(t())*5+48, 6)
+    
+            -- draw message
+            print("you win!", sin(t()*0.5)*10+48, sin(t())*5+47, 2)
+    
+            if new_pb then
+                pb_message()
+            end
+        else
+            -- draw message shadow
+            print("you lose...", sin(t()*0.5)*6+42, 47, 6)
+    
+            -- draw message
+            print("you lose...", sin(t()*0.5)*6+43, 46, 2)
+        end
+    
+        -- draw options
+        win_lose_message(ticker)
+    else
+        rectfill(99, 121, 127, 127, 9)
+        print("⬆️ SHOW", 100, 122, 7)
+    end
 end
