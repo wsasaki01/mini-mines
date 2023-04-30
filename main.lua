@@ -10,7 +10,7 @@ function _init()
     poke(0x5F2D, 1)
 
     -- program version number
-    ver = "0.25.2"
+    ver = "0.34.0"
 
     -- which screen is the user on?
     -- boot up to menu screen
