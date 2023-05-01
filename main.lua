@@ -4,6 +4,7 @@ function _init()
     -- *************
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
+    mouse_log = true -- print mouse coords
     -- *************
 
     -- enable devkit mouse
@@ -862,8 +863,10 @@ function _update()
         -- return to title screen
         if controller then
             if btnp(1) and page != 2 then
+                sfx(4)
                 page = 2
             elseif btnp(0) and page != 1 then
+                sfx(4)
                 page = 1
             end
 
@@ -878,13 +881,23 @@ function _update()
         elseif mouse then
             -- bounds for "return" in guide menu
             hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
-            
-            if main and not main_stick and hover_return_guide then
-                sfx(6)
-                main_stick = true
-                guide = false
-                page = 1
-                menu = true
+            hover_p1 = (110 <= mo_x and mo_x <= 118) and (63 <= mo_y and mo_y <= 69)
+            hover_p2 = (10 <= mo_x and mo_x <= 18) and (63 <= mo_y and mo_y <= 69)
+
+            if main and not main_stick then
+                if hover_return_guide then
+                    sfx(6)
+                    main_stick = true
+                    guide = false
+                    page = 1
+                    menu = true
+                elseif hover_p1 then
+                    sfx(4)
+                    page = 2
+                elseif hover_p2 then
+                    sfx(4)
+                    page = 1
+                end
             end
         end
     elseif option then
@@ -1259,6 +1272,11 @@ function _draw()
     -- if mouse control is enabled, draw the cursor
     if mouse then
         spr(20, mo_x, mo_y)
+    end
+
+    -- debug: print mouse coords
+    if mouse_log then
+        draw_mouse_coords()
     end
 end
 
@@ -1935,7 +1953,7 @@ end
 
 -- ** DEBUG **
 function draw_matrix()
--- iterate through the matrix and draw all numbers (for debug use)
+-- draw all adjacency numbers
     for c1=1, #grid do
         for c2=1, #grid[c1] do
             if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
@@ -1943,4 +1961,10 @@ function draw_matrix()
             end
         end
     end
+end
+
+function draw_mouse_coords()
+-- draw mouse coords in top left corner
+    print(mo_x, 0, 0, 0)
+    print(mo_y)
 end
