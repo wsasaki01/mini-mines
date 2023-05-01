@@ -4,14 +4,14 @@ function _init()
     -- *************
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
-    mouse_log = true -- print mouse coords
+    mouse_log = false -- print mouse coords
     -- *************
 
     -- enable devkit mouse
     poke(0x5F2D, 1)
 
     -- program version number
-    ver = "0.34.0"
+    ver = "0.35.1"
 
     -- which screen is the user on?
     -- boot up to menu screen
@@ -152,7 +152,7 @@ function initialise(diff)
     if diff == "easy" then
         width = 7 -- width of board
         height = 7 -- height of board
-        mcount = 1 -- number of mines
+        mcount = 5 -- number of mines
 
         -- player
         p = {
@@ -171,7 +171,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 1 --15
+        mcount = 15
         
         p = {
             x = 60,
@@ -186,7 +186,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 1 --30
+        mcount = 30
         
         p = {
             x = 64,
