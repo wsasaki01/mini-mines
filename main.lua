@@ -742,6 +742,8 @@ function _update()
                     if
                     type(grid[p.mx][p.my]) == "number" and
                     digs[p.mx][p.my] == true then
+                        sfx(2)
+
                         -- uncover all the spaces around it
                         for pcol=-1, 1 do
                             for prow=-1, 1 do
