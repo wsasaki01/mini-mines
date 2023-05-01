@@ -986,7 +986,6 @@ function _update()
 end
 
 function _draw()
-    --[[
     if title_only then
         draw_menu_background()
 
@@ -1006,9 +1005,6 @@ function _draw()
         
 
     elseif win then
-    --]]
-
-    if win then
         -- draw the win screen
         draw_win_loss(true)
     elseif lose then
