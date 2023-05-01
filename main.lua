@@ -5,6 +5,7 @@ function _init()
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
     mouse_log = false -- print mouse coords
+    title_only = false -- for capturing gifs
     -- *************
 
     -- enable devkit mouse
@@ -985,6 +986,28 @@ function _update()
 end
 
 function _draw()
+    --[[
+    if title_only then
+        draw_menu_background()
+
+        -- draw background and border
+        rectfill(19, 33, 108, 90, themes[theme_select]["accent"])
+        rectfill(20, 34, 107, 89, 7)
+
+        -- draw "mini" background and letters
+        rectfill(28, 41, 59, 48, themes[theme_select]["main"])
+        print("m", 30, 43, 7)
+        print("i", 38, 43)
+        print("n", 46, 43)
+        print("i", 54, 43)
+
+        -- draw "mines" logo
+        sspr(0, 32, 72, 32, 28, 50)
+        
+
+    elseif win then
+    --]]
+
     if win then
         -- draw the win screen
         draw_win_loss(true)
