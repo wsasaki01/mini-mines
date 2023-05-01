@@ -136,7 +136,7 @@ function _init()
     -- which page of the guide screen?
     page = 1
 
-    printh("", "log", true)
+    --printh("", "log", true)
 end
 
 function initialise(diff)
@@ -286,6 +286,7 @@ function _update()
 
     if win or lose then
         if controller then
+            -- hide or show win/loss screen
             if btnp(3) and not hide then
                 hide = true
                 sfx(11)
@@ -297,14 +298,17 @@ function _update()
             if not hide then
                 -- x for replay
                 if main then
+                    -- if holding, increase bar
                     if main_stick then
                         ticker += 0.1
                         sfx(13)
+                    -- if let go, reset bar
                     else
                         main_stick = true
                         ticker = 0
                     end
 
+                    -- if the bar is full, reset the game
                     if flr(ticker) == hold_timer then
                         ticker = 0
                         
@@ -321,6 +325,7 @@ function _update()
                 
                 -- o for return to menu
                 elseif alt then
+                    -- same bar system as above
                     if alt_stick then
                         ticker += 0.1
                         sfx(13)
@@ -348,8 +353,11 @@ function _update()
                 end
             end
         elseif mouse then
+            -- hover bounds
             hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
             hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+            
+            -- hide bounds change depending on whether screen is already hidden or not
             if not hide then
                 if new_theme then
                     hover_hide = (92 <= mo_x and mo_x <= 109) and (88 <= mo_y and mo_y <= 93)
@@ -398,8 +406,10 @@ function _update()
             end
         end
     elseif winning then
+        -- if the shine hasn't left the screen yet, move it across
         if shine-(8*width)-2 < xoff+(8*width)+120 then
             shine += 10
+        -- once off the screen, show the win screen
         else
             winning = false
             win = true
@@ -752,6 +762,7 @@ function _update()
                             end
                         end
 
+                        -- if any mines were found by auto-dig, add them to the list
                         if #explosions > 0 then
                             losing = true
                             
@@ -960,8 +971,10 @@ end
 
 function _draw()
     if win then
+        -- draw the win screen
         draw_win_loss(true)
     elseif lose then
+        -- draw the loss screen
         draw_win_loss(false)
     elseif winning then
         -- clear screen with grey background
@@ -981,14 +994,17 @@ function _draw()
         draw_digs()
         draw_flags()
 
+        -- draw the win shine
         line(shine-3, 8+yoff, shine-(8*width)-2, 8+yoff+(8*height)-1, 6)
         line(shine-2, 8+yoff, shine-(8*width)-1, 8+yoff+(8*height)-1, 7)
         line(shine-1, 8+yoff, shine-(8*width), 8+yoff+(8*height)-1, 7)
         line(shine, 8+yoff, shine-(8*width)+1, 8+yoff+(8*height)-1, 7)
 
+        -- cover up the sides of the game grid to hide the shine
         rectfill(0, 8, xoff-1, 128, themes[theme_select]["gamebg"])
         rectfill(xoff+(8*width), 8, 128, 128, themes[theme_select]["gamebg"])
     elseif losing then
+        -- reset the camera so top bar isn't affected by shake
         camera(0, 0)
 
         -- clear screen with grey background
@@ -1001,6 +1017,7 @@ function _draw()
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
 
+        -- if there are any explosions to do, shake the screen
         if #explosions > 1 then
             shake()
         end
@@ -1014,6 +1031,7 @@ function _draw()
 
         --foreach(mine_list, draw_mine)
 
+        -- are all explosions the first ones? (can be multiple through auto-dig)
         local flag = true
         for exp in all(explosions) do
             if exp[3] != "first" then
@@ -1021,6 +1039,8 @@ function _draw()
             end
         end
 
+        -- if so, then only show the mine, not the explosion
+        -- creates a moment before they all start exploding
         if flag then
             for exp in all(explosions) do
                 draw_mine(exp)
@@ -1189,8 +1209,10 @@ function _draw()
         end
     elseif guide then
         if controller then
+            -- draw the guide with the controller prompt
             draw_guide("🅾️ TO RETURN")
         elseif mouse then
+            -- draw the guide with the mouse prompt
             draw_guide("RETURN")
         end
     elseif option then
@@ -1220,19 +1242,12 @@ function _draw()
         -- theme preview
         rectfill(75, 81, 81, 87, themes[theme_select]["main"])
 
-        -- rounded corners
-        --[[
-        pset(75, 81, themes[theme_select]["bg"])
-        pset(81, 81, themes[theme_select]["bg"])
-        pset(75, 87, themes[theme_select]["bg"])
-        pset(81, 87, themes[theme_select]["bg"])
-        --]]
-
         pset(75, 81, 7)
         pset(81, 81, 7)
         pset(75, 87, 7)
         pset(81, 87, 7)
 
+        -- draw controller/mouse sprite
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
 
         -- if the player is hovering over an option, draw the flag next to it
@@ -1248,76 +1263,38 @@ function _draw()
 end
 
 -- ***********************
---     EXTRA FUNCTIONS
+-- *** EXTRA FUNCTIONS ***
 -- ***********************
 
+-- ** INITIALISNG **
 function gen_matrix(fill)
+-- generate a matrix using the height and width
+-- can fill each position with a value
     m = {}
     for c1=1, width do
         local column = {}
         for c2=1, height do
             add(column, fill)
         end
-
         add(m, column)
     end
-
     return m
 end
 
-function draw_mine(loc)
-    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
-end
 
-function draw_flags()
-    -- iterate through matrix and draw all placed flags
-    for c1=1, #flags do
-        for c2=1, #flags[c1] do
-            if flags[c1][c2] == true then
-                -- y value doesn't have -8 because the top bar accounts for it
-                spr(3, xoff+c1*8-8, yoff+c2*8)
-            end
-        end
-    end
-end
 
-function draw_digs()
-    -- iterate through the matrix and draw all dug spaces
-    for c1=1, #digs do
-        for c2=1, #digs[c1] do
-            if digs[c1][c2] then
-                -- draw the coloured background
-                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
-
-                -- draw the number if needed
-                if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
-                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
-                end
-            end
-        end
-    end
-end
-
-function draw_matrix()
-    -- iterate through the matrix and draw all numbers
-    -- for debug use
-    for c1=1, #grid do
-        for c2=1, #grid[c1] do
-            if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
-                print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 8)
-            end
-        end
-    end
-end
-
+-- ** MODIFYING **
 function uncover(loc)
+-- recursively uncover a space, and all other spaces around it
+    -- if the location passed in is a mine, add it to the explosion list
     if check_loss(loc) then
         add(explosions, {loc[1], loc[2], "first", 0})
         del(mine_list, {loc[1], loc[2]})
         add_particles({loc[1], loc[2]})
         sfx(8)
+    
+    -- if it wasn't a mine, dig the current space
     elseif not losing then
-        -- dig the current space
         digs[loc[1]][loc[2]] = true
 
         -- if the current location is empty (no adjacent)
@@ -1349,55 +1326,167 @@ function uncover(loc)
     end
 end
 
-function set_control(b)
-    if(b&1 > 0) then
-        menuitem(1, "control: controller")
-        controller = true
-        mouse = false
-        menu_y = 80
-    end
+function add_particles(loc)
+-- generate particles for an explosion
+    -- up to 10 particles per explosion
+    for i=1, flr(rnd(10))+1 do
+        -- place it randomly around the explosion centre
+        local x = xoff+loc[1]*8-4+flr(rnd(16))-8
+        local y = yoff+loc[2]*8+4+flr(rnd(16))-8
 
-    if(b&2 > 0) then
-        menuitem(1,"control: mouse")
-        mouse = true
-        controller = false
+        -- pick a colour
+        local col = flr(rnd(2))+1
+        if col == 1 then
+            col = 2 -- purple
+        elseif col == 2 then
+            col = 4 -- brown
+        elseif col == 3 then
+            col = 5 -- dark green
+        end
+
+        -- add the particle to the list
+        add(particles, {x, y, col})
     end
-    return true
 end
 
-function ensure(b)
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
+function check_loss(loc)
+-- check if a dig results in a loss (clicked a mine)
+    for mine in all(mine_list) do
+        if mine[1] == loc[1] and mine[2] == loc[2] then
+            -- if a mine, return true
+            return true
+        end
     end
 
-    -- ask the user to confirm their choice
-    menuitem(2, "are you sure?", to_title)
-    return true
+    -- if no mines, return false
+    return false
 end
 
-function to_title(b)
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
+function init_loss(loc)
+-- switch to losing animation
+    -- the player loses
+    losing = true
+
+    -- make sure the current mine explodes first
+    add(explosions, {loc[1], loc[2], "first", 0})
+    del(mine_list, {loc[1], loc[2]})
+    add_particles({loc[1], loc[2]})
+    sfx(8)
+
+    explosion_timer = flr(-2.5*explosion_interval)
+    explosion_counter = 0
+end
+
+
+
+-- ** DRAWING **
+function draw_mine(loc)
+-- draw a mine
+    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
+end
+
+function draw_flags()
+-- draw all placed flags
+    for c1=1, #flags do
+        for c2=1, #flags[c1] do
+            if flags[c1][c2] == true then
+                -- y value doesn't have -8 because the top bar accounts for it
+                spr(3, xoff+c1*8-8, yoff+c2*8)
+            end
+        end
+    end
+end
+
+function draw_digs()
+-- draw all dug spaces
+    for c1=1, #digs do
+        for c2=1, #digs[c1] do
+            if digs[c1][c2] then
+                -- draw the coloured background
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
+
+                -- draw the number if needed
+                if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
+                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
+                end
+            end
+        end
+    end
+end
+
+function draw_menu_background()
+-- draw the menu background and falling icons
+    -- fill with accent background
+    cls(themes[theme_select]["bg"])
+
+    -- set to + draw pattern
+    -- create background
+    -- set back to normal fill
+    fillp(◆)
+    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
+    fillp(█)
+    
+    -- if there are fewer than 15 icons in the background, spawn a new one
+    if #icons < 15 then
+        -- add an icon to the list
+        add(icons, {
+            -- centre of x movement
+            -- sin wave moves greater and less than this value
+            x_base = flr(rnd(120)),
+
+            -- multiplier for range of horizontal movement
+            multi = rnd(1),
+
+            -- position on screen
+            -- spawn off screen
+            x = -20,
+            y = flr(rnd(120))-120,
+
+            -- sprite (random: flag or mine)
+            s = flr(rnd(2))+3,
+
+            -- downwards speed
+            speed = flr(rnd(2))+0.4,
+
+            -- draw icon at coords
+            draw = function(self)
+                spr(self.s, self.x, self.y)
+            end,
+
+            -- fall down
+            -- move left and right, following sin graph
+            fall = function(self)
+                self.y += self.speed
+                self.x = self.x_base + sin(t()*self.multi)*5
+            end,
+
+            -- delete self if off screen
+            check = function(self)
+                if self.y > 130 then
+                    del(icons, self)
+                end
+            end
+        })
     end
 
-    -- set the option back to normal, and return to the menu
-    menuitem(2, "return to title", ensure)
-    play = false
-    option = false
-    guide = false
-    menu_y = 80
-    menu = true
+    -- for each icon, draw it, make it fall, and check if it's off screen
+    for i in all(icons) do
+        i:draw()
+        i:fall()
+        i:check()
+    end
 end
 
 function draw_title_menu(info_message)
+-- draw the title screen
+    -- draw the background and falling icons
     draw_menu_background()
 
     -- draw background and border
     rectfill(19, 15, 108, 112, themes[theme_select]["accent"])
     rectfill(20, 16, 107, 111, 7)
 
+    -- if an info message was passed in, draw it appropriately
     if info_message then
         if info_message == "RETURN" then
             rectfill(82, 112, 108, 118, themes[theme_select]["accent"])
@@ -1428,15 +1517,30 @@ function draw_title_menu(info_message)
     print("n", 46, 26)
     print("i", 54, 26)
 
-    --rectfill(28, 32, 99, 63, 7)
-
     -- draw "mines" logo
     sspr(0, 32, 72, 32, 28, 32)
 
+    -- draw the version number
     print(ver, 100-string_l(ver), 26, 13)
 end
 
+function draw_pb(diff, x, y, col)
+-- draw personal best
+    -- format the pb as needed
+    if pb[diff] == false then
+        pb_text = {"-", "-"}
+    elseif pb[diff]%60 < 10 then
+        pb_text = {tostr(pb[diff]\60), "0"..tostr(pb[diff]%60)}
+    else
+        pb_text = {tostr(pb[diff]\60), tostr(pb[diff]%60)}
+    end
+
+    -- display best score
+    print(pb_text[1]..":"..pb_text[2], x, y, col)
+end
+
 function draw_guide(info_message)
+-- draw the guide screen
     -- draw background and falling icons
     draw_menu_background()
 
@@ -1444,6 +1548,7 @@ function draw_guide(info_message)
     rectfill(10, 10, 118, 118, themes[theme_select]["accent"])
     rectfill(11, 11, 117, 117, 7)
 
+    -- if an info messaeg was passed in, draw it appropriately
     if info_message then
         if info_message == "RETURN" then
             rectfill(92, 119, 118, 123, themes[theme_select]["accent"])
@@ -1461,6 +1566,7 @@ function draw_guide(info_message)
     -- draw "mines"
     sspr(80, 32, 40, 8, 36, 17)
 
+    -- page 1
     if page == 1 then
         print("❎ / right click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select]["main"])
         
@@ -1484,12 +1590,14 @@ function draw_guide(info_message)
 
         print("FLAG ALL MINES TO WIN!", 22, 110, 0)
 
+        -- timer alternates between hiding and showing mines
         if show_mines then
             spr(4, 68, 76)
             spr(4, 76, 92)
             spr(4, 36, 92)
         end
 
+        -- fill in spaces on sample grid
         rectfill(76, 76, 99, 91, themes[theme_select]["main"])
         rectfill(84, 76, 99, 99, themes[theme_select]["main"])
         rectfill(68, 84, 75, 107, themes[theme_select]["main"])
@@ -1505,138 +1613,49 @@ function draw_guide(info_message)
         print("1", 87, 94, 7)
         print("1", 87, 86, 7)
 
+        -- flag sprite
         spr(3, 76, 92)
 
+        -- arrow to move to next page
         rectfill(110, 63, 118, 69, themes[theme_select]["accent"])
         print("➡️", 111, 64, 7)
+    -- page 2
     elseif page == 2 then
         print("UNLOCK themes BY BEATING\nYOUR best times!\n", 19, 27, themes[theme_select]["main"])
-        sspr(72, 0, 94, 5, 47, 27)
+        sspr(72, 0, 94, 5, 47, 27) -- colourful "themes"
         
         print("CHANGE controls\nIN options OR\npico-8 menu!", 22, 45)
         print("controls", 50, 45, themes[theme_select]["accent"])
-        spr(33, 90, 48)
-        spr(34, 99, 48)
+        spr(33, 90, 48) -- mouse icon
+        spr(34, 99, 48) -- controller icon
 
         print("HOLD ❎ to\nexplode faster!", 22, 69, 4)
-        spr(19, 90, 69)
-        spr(6, 95, 72)
+        spr(19, 90, 69) -- crator icon
+        spr(6, 95, 72) -- mini-explosion icon
 
         print("re-dig TO dig\nsurrounding\nspaces!", 22, 90, 0)
-        spr(18, 94, 96)
-        spr(154, 94, 96)
+        spr(18, 94, 96) -- dug space icon
+        spr(154, 94, 96) -- "1" icon
         
+        -- repurpose timer to flash auto-dig spaces
         if show_mines then
+            -- fill in dug spaces
             rectfill(86, 88, 101, 111, 12)
             rectfill(102, 88, 109, 103, 12)
-            sspr(72, 64, 24, 24, 86, 88)
+            sspr(72, 64, 24, 24, 86, 88) -- auto-dig spaces sprites
         end
         
-        spr(17, 94, 96)
+        spr(17, 94, 96) -- cursor sprite
         
+        -- arrow to move to previous page
         rectfill(10, 63, 18, 69, themes[theme_select]["accent"])
         print("⬅️", 11, 64, 7)
     end
 end
 
-function pb_message()
-    -- positioned below timer
-    x = 113
-
-    -- move up and down periodically
-    y = flr(sin(t()*1))+11
-
-    -- colouring
-    pset(x+6, y-3, 1)
-    line(x+5, y-2, x+7, y-2, 1)
-    pset(x+6, y-2, 2)
-    line(x+4, y-1, x+8, y-1, 1)
-    line(x+5, y-1, x+7, y-1, 2)
-    rectfill(x, y, x+12, y+11, 2)
-    print("NEW\nPB!", x+1, y, 7)
-    line(x, y+12, x+12, y+12, 0)
-end
-
-function win_lose_message(timer)
-    if controller then
-        -- draw a bar that fills up while the player holds the button
-        if main then
-            rectfill(21, 57, 21+48*timer/hold_timer, 63, 6)
-        elseif alt then
-            rectfill(21, 64, 21+80*timer/hold_timer, 70, 6)
-        end
-
-        -- draw options
-        print("❎ to replay", 22, 58, 13)
-        print("🅾️ to return to menu", 22, 65)
-    elseif mouse then
-        hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
-        hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
-
-        -- set a background for whichever option is currently selected
-        if hover_replay then
-            rectfill(21, 57, 69, 63, 6)
-
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
-        elseif hover_quit then
-            rectfill(21, 64, 101, 70, 6)
-
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
-        else
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
-        end
-    end
-end
-
-function draw_pb(diff, x, y, col)
-    -- format the pb as needed
-    if pb[diff] == false then
-        pb_text = {"-", "-"}
-    elseif pb[diff]%60 < 10 then
-        pb_text = {tostr(pb[diff]\60), "0"..tostr(pb[diff]%60)}
-    else
-        pb_text = {tostr(pb[diff]\60), tostr(pb[diff]%60)}
-    end
-
-    -- display best score
-    print(pb_text[1]..":"..pb_text[2], x, y, col)
-end
-
-function string_l(s)
-    -- each character is 3 pixels, with a 1-pixel space between
-    return (#s * 3) + (#s - 1)
-end
-
--- bounce print: letters bounce like a wave
--- s: string
--- x and y: coords
--- t: speed
-function bprint(s, x, y, col, t)
-    if timer == t then
-        timer = 0
-
-        if bcount != #s then
-            bcount += 1
-        else
-            bcount = 1
-        end
-    else
-        timer += 1
-    end
-
-    local first = sub(s, 0, bcount-1)
-    local letter = s[bcount]
-    local last = sub(s, bcount+1)
-
-    print(first, x, y, col)
-    print(letter, x+(4*#first), y-1, col)
-    print(last, x+(4*(#first))+4, y, col)
-end
-
 function draw_explosion(exp)
+-- draw an explosion (multi-phase)
+    -- position
     local x = xoff+exp[1]*8-8
     local y = yoff+exp[2]*8
 
@@ -1654,29 +1673,15 @@ function draw_explosion(exp)
     end
 end
 
-function add_particles(loc)
-    for i=1, flr(rnd(10))+1 do
-        local x = xoff+loc[1]*8-4+flr(rnd(16))-8
-        local y = yoff+loc[2]*8+4+flr(rnd(16))-8
-        local col = flr(rnd(2))+1
-        if col == 1 then
-            col = 2
-        elseif col == 2 then
-            col = 4
-        elseif col == 3 then
-            col = 5
-        end
-        add(particles, {x, y, col})
-    end
-end
-
 function draw_particles()
+-- draw particles
     for particle in all(particles) do
         pset(particle[1], particle[2], particle[3])
     end
 end
 
 function shake()
+-- apply screen shake
     -- screen position
     local x = 20-rnd(40)
     local y = 20-rnd(40)
@@ -1694,6 +1699,7 @@ function shake()
 end
 
 function draw_win_loss(win)
+-- draw the win/loss window
     -- clear screen with grey background
     cls(themes[theme_select]["gamebg"])
 
@@ -1782,88 +1788,159 @@ function draw_win_loss(win)
     end
 end
 
-function draw_menu_background()
-    -- fill with accent background
-    cls(themes[theme_select]["bg"])
+function pb_message()
+-- draw the "new PB" message
+    -- positioned below timer
+    x = 113
 
-    -- set to + draw pattern
-    -- create background
-    -- set back to normal fill
-    fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
-    fillp(█)
-    
-    -- if there are fewer than 15 icons in the background, spawn a new one
-    if #icons < 15 then
-        -- add an icon to the list
-        add(icons, {
-            -- centre of x movement
-            -- sin wave moves greater and less than this value
-            x_base = flr(rnd(120)),
+    -- move up and down periodically
+    y = flr(sin(t()*1))+11
 
-            -- multiplier for range of horizontal movement
-            multi = rnd(1),
-
-            -- position on screen
-            -- spawn off screen
-            x = -20,
-            y = flr(rnd(120))-120,
-
-            -- sprite (random: flag or mine)
-            s = flr(rnd(2))+3,
-
-            -- downwards speed
-            speed = flr(rnd(2))+0.4,
-
-            -- draw icon at coords
-            draw = function(self)
-                spr(self.s, self.x, self.y)
-            end,
-
-            -- fall down
-            -- move left and right, following sin graph
-            fall = function(self)
-                self.y += self.speed
-                self.x = self.x_base + sin(t()*self.multi)*5
-            end,
-
-            -- delete self if off screen
-            check = function(self)
-                if self.y > 130 then
-                    del(icons, self)
-                end
-            end
-        })
-    end
-
-    -- for each icon, draw it, make it fall, and check if it's off screen
-    for i in all(icons) do
-        i:draw()
-        i:fall()
-        i:check()
-    end
+    -- colouring
+    pset(x+6, y-3, 1)
+    line(x+5, y-2, x+7, y-2, 1)
+    pset(x+6, y-2, 2)
+    line(x+4, y-1, x+8, y-1, 1)
+    line(x+5, y-1, x+7, y-1, 2)
+    rectfill(x, y, x+12, y+11, 2)
+    print("NEW\nPB!", x+1, y, 7)
+    line(x, y+12, x+12, y+12, 0)
 end
 
-function check_loss(loc)
-    local flag = false
-    for mine in all(mine_list) do
-        if mine[1] == loc[1] and mine[2] == loc[2] then
-            return true
+function win_lose_message(timer)
+-- draw the win/loss options
+    if controller then
+        -- draw a bar that fills up while the player holds the button
+        if main then
+            rectfill(21, 57, 21+48*timer/hold_timer, 63, 6)
+        elseif alt then
+            rectfill(21, 64, 21+80*timer/hold_timer, 70, 6)
+        end
+
+        -- draw options
+        print("❎ to replay", 22, 58, 13)
+        print("🅾️ to return to menu", 22, 65)
+    elseif mouse then
+        hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
+        hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+
+        -- set a background for whichever option is currently selected
+        if hover_replay then
+            rectfill(21, 57, 69, 63, 6)
+
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
+        elseif hover_quit then
+            rectfill(21, 64, 101, 70, 6)
+
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
+        else
+            print("❎ to replay", 22, 58, 13)
+            print("🅾️ to return to menu", 22, 65)
         end
     end
-    return false
 end
 
-function init_loss(loc)
-    -- the player loses
-    losing = true
+function string_l(s)
+-- return the length of a string in pixels
+    -- each character is 3 pixels, with a 1-pixel space between
+    return (#s * 3) + (#s - 1)
+end
 
-    -- make sure the current mine explodes first
-    add(explosions, {loc[1], loc[2], "first", 0})
-    del(mine_list, {loc[1], loc[2]})
-    add_particles({loc[1], loc[2]})
-    sfx(8)
+function bprint(s, x, y, col, t)
+-- print some text, but make the letters periodically bounce like a wave
+    -- s: string
+    -- x and y: coords
+    -- t: speed
 
-    explosion_timer = flr(-2.5*explosion_interval)
-    explosion_counter = 0
+    -- increment a timer
+    if timer == t then
+        timer = 0
+
+        -- increment the letter to bounce
+        if bcount != #s then
+            bcount += 1
+        else
+            bcount = 1
+        end
+    else
+        timer += 1
+    end
+
+    -- substrings
+    local first = sub(s, 0, bcount-1)
+    local letter = s[bcount]
+    local last = sub(s, bcount+1)
+
+    -- print each one, moving the bounced letter up a bit
+    print(first, x, y, col)
+    print(letter, x+(4*#first), y-1, col)
+    print(last, x+(4*(#first))+4, y, col)
+end
+
+
+
+-- ** MENUITEMS **
+function set_control(b)
+-- control scheme menuitem
+    -- left to select controller
+    if(b&1 > 0) then
+        menuitem(1, "control: controller")
+        controller = true
+        mouse = false
+        menu_y = 80
+    end
+
+    -- right to select mouse
+    if(b&2 > 0) then
+        menuitem(1,"control: mouse")
+        mouse = true
+        controller = false
+    end
+
+    -- keep pico-8 menu open even after selecting an option
+    return true
+end
+    
+function ensure(b)
+-- check that user wants to quit to title
+    -- ignore right/left button presses
+    if (b&1 > 0) or (b&2 > 0) then
+        return true
+    end
+
+    -- ask the user to confirm their choice
+    menuitem(2, "are you sure?", to_title)
+    return true
+end
+
+function to_title(b)
+-- once user confirms, actually quit to title
+    -- ignore right/left button presses
+    if (b&1 > 0) or (b&2 > 0) then
+        return true
+    end
+
+    -- set the option back to normal, and return to the menu
+    menuitem(2, "return to title", ensure)
+    play = false
+    option = false
+    guide = false
+    menu_y = 80
+    menu = true
+end
+
+
+
+-- ** DEBUG **
+function draw_matrix()
+-- iterate through the matrix and draw all numbers (for debug use)
+    for c1=1, #grid do
+        for c2=1, #grid[c1] do
+            if type(grid[c1][c2]) == "number" and grid[c1][c2] != 0 then
+                print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 8)
+            end
+        end
+    end
 end
