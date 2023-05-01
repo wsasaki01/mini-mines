@@ -1,2 +1,4 @@
 *.p8l
 .DS_Store
+main.lua
+*.gif
