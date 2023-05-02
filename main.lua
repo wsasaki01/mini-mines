@@ -6,7 +6,10 @@ function _init()
     fill = false -- show values for each space
     mouse_log = false -- print mouse coords
     title_only = false -- for capturing gifs
+
+    printh("", "log", true) -- clear the log
     -- *************
+
 
     -- enable devkit mouse
     poke(0x5F2D, 1)
@@ -95,30 +98,47 @@ function _init()
         -- unlockable by playing easy mode
         easy = {
             -- orange (white)
-            {main = 9, bg = 7, accent = 1, gamebg = 3},
+            {main = 9, bg = 7, accent = 1, gamebg = 3, id = 1},
 
             -- red (white)
-            {main = 8, bg = 7, accent = 0, gamebg = 0}
+            {main = 8, bg = 7, accent = 0, gamebg = 0, id = 2}
         },
 
         -- unlockable by playing medium mode
         med = {
             -- pink (white)
-            {main = 14, bg = 7, accent = 8, gamebg = 2},
+            {main = 14, bg = 7, accent = 8, gamebg = 2, id = 3},
 
             -- light green (dark green)
-            {main = 11, bg = 3, accent = 5, gamebg = 3}
+            {main = 11, bg = 3, accent = 5, gamebg = 3, id = 4}
         },
 
         -- unlockable by playing hard mode
         hard = {
             -- brown (purple)
-            {main = 4, bg = 2, accent = 1, gamebg = 3},
+            {main = 4, bg = 2, accent = 1, gamebg = 3, id = 5},
 
             -- beige (purple)
-            {main = 15, bg = 7, accent = 13, gamebg = 4}
+            {main = 15, bg = 7, accent = 13, gamebg = 4, id = 6}
         }
     }
+
+    for diff_name, diff_themes in pairs(unlockable) do
+        local count = 0
+        for theme in all(diff_themes) do
+            count += 1
+            printh("checking: "..diff_name.." - "..count, "log")
+            if dget(theme["id"]) == 1 then
+                printh("already unlocked!!", "log")
+                printh("original length: "..#unlockable[diff_name], "log")
+                -- add the new theme to the player's collection
+                add(themes, theme)
+                -- remove it from the original list
+                del(unlockable[diff_name], theme)
+                printh("new length: "..#unlockable[diff_name], "log")
+            end
+        end
+    end
 
     -- has a new theme been unlocked this round?
     new_theme = false
@@ -157,8 +177,6 @@ function _init()
 
     -- which page of the guide screen?
     page = 1
-
-    --printh("", "log", true)
 end
 
 function initialise(diff)
@@ -657,6 +675,9 @@ function _update()
                 win_count[size] % 5 or
                 new_pb) and
                 #unlockable[size] != 0 then
+                    -- record the unlock in the user's save file
+                    dset(unlockable[size][1]["id"], 1)
+
                     -- add the new theme to the player's collection
                     add(themes, unlockable[size][1])
 
@@ -665,7 +686,6 @@ function _update()
 
                     -- remove it from the original list
                     del(unlockable[size], unlockable[size][1])
-
                 end
             end
         end
