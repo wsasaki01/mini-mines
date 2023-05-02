@@ -919,7 +919,9 @@ function _update()
                 main_stick = true
 
                 if menu_y == 80 then
-                    sfx(14)
+                    if #themes != 1 then
+                        sfx(14)
+                    end
                     -- change theme
                     if theme_select != #themes then
                         theme_select += 1
@@ -963,7 +965,9 @@ function _update()
                 main_stick = true
 
                 if menu_y == 80 then
-                    sfx(14)
+                    if #themes != 1 then
+                        sfx(14)
+                    end
                     if theme_select != #themes then
                         theme_select += 1
                     else
@@ -1275,11 +1279,13 @@ function _draw()
 
         -- theme preview
         rectfill(75, 81, 81, 87, themes[theme_select]["main"])
-
         pset(75, 81, 7)
         pset(81, 81, 7)
         pset(75, 87, 7)
         pset(81, 87, 7)
+
+        -- theme counter
+        print(theme_select.."/"..#themes, 90, 82, 13)
 
         -- draw controller/mouse sprite
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
