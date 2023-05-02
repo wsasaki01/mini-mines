@@ -919,7 +919,9 @@ function _update()
                 main_stick = true
 
                 if menu_y == 80 then
-                    sfx(14)
+                    if #themes != 1 then
+                        sfx(14)
+                    end
                     -- change theme
                     if theme_select != #themes then
                         theme_select += 1
@@ -963,7 +965,9 @@ function _update()
                 main_stick = true
 
                 if menu_y == 80 then
-                    sfx(14)
+                    if #themes != 1 then
+                        sfx(14)
+                    end
                     if theme_select != #themes then
                         theme_select += 1
                     else
