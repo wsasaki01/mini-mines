@@ -11,6 +11,13 @@ function _init()
     -- enable devkit mouse
     poke(0x5F2D, 1)
 
+    -- enable save file
+    cartdata("someguy17-mini-mines")
+    -- 1 to 6: themes
+    -- 7: easy PB
+    -- 8: med PB
+    -- 9: hard PB
+
     -- program version number
     ver = "0.35.1"
 
@@ -45,12 +52,25 @@ function _init()
     main_stick = false
 
     -- store pbs for each mode
-    -- false by default
+    -- retrieve from user's save data
+    -- if they have data, use that; if not, use false
     pb = {
         easy = false,
         med = false,
         hard = false
     }
+
+    if dget(7) != 0 then
+        pb["easy"] = dget(7)
+    end
+
+    if dget(8) != 0 then
+        pb["med"] = dget(8)
+    end
+
+    if dget(9) != 0 then
+        pb["hard"] = dget(9)
+    end
 
     -- has a new pb just been set?
     -- false if no
@@ -616,6 +636,14 @@ function _update()
                 -- record the pb if needed
                 if pb[size] == false or (ct < pb[size]) then
                     pb[size] = ct
+                    if size == "easy" then
+                        dset(7, ct)
+                    elseif size == "med" then
+                        dset(8, ct)
+                    elseif size == "hard" then
+                        dset(9, ct)
+                    end
+
                     -- tell _update() that there's been a new pb
                     new_pb = true
                 end
