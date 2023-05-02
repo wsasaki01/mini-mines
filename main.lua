@@ -1221,15 +1221,23 @@ function _draw()
             mins = ct \ 60
         end
 
-        -- print time in top right corner
-        print(mins..secs, 108, 1, 7)
-
-        -- draw the map
-        map(0, 0, xoff, yoff, width, height+1) 
-
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
         print(fcount, 8, 1, 7)
+
+        -- print control hints in the middle
+        if controller then
+            print("❎-flag   🅾️-dig", 30, 1, 7)
+        elseif mouse then
+            print("l-flag   r-dig", 34, 1, 7)
+        end
+
+        -- print time in top right corner
+        print(mins..secs, 108, 1, 7)
+
+
+        -- draw the map
+        map(0, 0, xoff, yoff, width, height+1) 
 
         -- DEBUG: draw mines
         if reveal then
