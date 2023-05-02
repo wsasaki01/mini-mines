@@ -10,7 +10,7 @@ Currently in development.
 - Colour themes to unlock
 
 ## Installation
-Mini Mines is available on the PICO-8 BBS [here](https://www.lexaloffle.com/bbs/?tid=52577). Find binaries under Releases.
+Mini Mines is available on the [PICO-8 BBS](https://www.lexaloffle.com/bbs/?tid=52577) and on [itch.io](https://wsasaki01.itch.io/mini-mines). Find binaries under Releases.
 Play the most recent development version by downloading all files and running `mini-mines.p8` within PICO-8.
 
 ## Demos
