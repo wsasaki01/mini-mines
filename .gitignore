@@ -1,8 +1,4 @@
 *.p8l
 .DS_Store
 main.lua
-*.gif
-/mini-mines.bin
-label.png
-mini-mines.p8.png
-testing_guide.txt
+/extras/distributables.bin
