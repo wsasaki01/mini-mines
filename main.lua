@@ -6,6 +6,7 @@ function _init()
     fill = false -- show values for each space
     mouse_log = false -- print mouse coords
     title_only = false -- for capturing gifs
+    one_mine = true -- only one mine
 
     printh("", "log", true) -- clear the log
     -- *************
@@ -209,7 +210,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 1 -- 15
+        mcount = 15
         
         p = {
             x = 60,
@@ -224,7 +225,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 1 -- 30
+        mcount = 30
         
         p = {
             x = 64,
@@ -236,6 +237,11 @@ function initialise(diff)
 
         xlim = {0, 120}
         ylim = {8, 120}
+    end
+
+    -- DEBUG: set no. of mines to 1
+    if one_mine then
+        mcount = 1
     end
 
     -- x and y offsets
