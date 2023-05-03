@@ -915,10 +915,12 @@ function _update()
 
         -- return to title screen
         if controller then
-            if btnp(1) and page != 2 then
+            if btn(1) and page != 2 and not main_stick then
+                main_stick = true
                 sfx(4)
                 page = 2
-            elseif btnp(0) and page != 1 then
+            elseif btn(0) and page != 1 and not main_stick then
+                main_stick = true
                 sfx(4)
                 page = 1
             end
@@ -944,11 +946,13 @@ function _update()
                     guide = false
                     page = 1
                     menu = true
-                elseif hover_p1 then
+                elseif hover_p1 and page == 1 then
                     sfx(4)
+                    main_stick = true
                     page = 2
-                elseif hover_p2 then
+                elseif hover_p2 and page == 2 then
                     sfx(4)
+                    main_stick = true
                     page = 1
                 end
             end
@@ -1234,7 +1238,6 @@ function _draw()
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
-
 
         -- draw the map
         map(0, 0, xoff, yoff, width, height+1) 
