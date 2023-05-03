@@ -6,7 +6,7 @@ function _init()
     fill = false -- show values for each space
     mouse_log = false -- print mouse coords
     title_only = false -- for capturing gifs
-    one_mine = true -- only one mine
+    one_mine = false -- only one mine
 
     printh("", "log", true) -- clear the log
     -- *************
@@ -1269,8 +1269,6 @@ function _draw()
         if p.my > 0 then
             spr(17, p.x, p.y)
         end
-
-        print(p.my, 0, 0, 0)
     elseif menu then
         -- draw main frame and background
         if controller then
