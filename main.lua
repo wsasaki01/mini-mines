@@ -209,7 +209,7 @@ function initialise(diff)
     elseif diff == "med" then
         width = 11
         height = 11
-        mcount = 15
+        mcount = 1 -- 15
         
         p = {
             x = 60,
@@ -224,7 +224,7 @@ function initialise(diff)
     elseif diff == "hard" then
         width = 16
         height = 15
-        mcount = 30
+        mcount = 1 -- 30
         
         p = {
             x = 64,
@@ -1092,9 +1092,12 @@ function _draw()
         line(shine-1, 8+yoff, shine-(8*width), 8+yoff+(8*height)-1, 7)
         line(shine, 8+yoff, shine-(8*width)+1, 8+yoff+(8*height)-1, 7)
 
-        -- cover up the sides of the game grid to hide the shine
-        rectfill(0, 8, xoff-1, 128, themes[theme_select]["gamebg"])
-        rectfill(xoff+(8*width), 8, 128, 128, themes[theme_select]["gamebg"])
+        -- don't need to cover sides on hard mode
+        if size != "hard" then
+            -- cover up the sides of the game grid to hide the shine
+            rectfill(0, 8, xoff-1, 128, themes[theme_select]["gamebg"])
+            rectfill(xoff+(8*width), 8, 128, 128, themes[theme_select]["gamebg"])
+        end
     elseif losing then
         -- reset the camera so top bar isn't affected by shake
         camera(0, 0)
@@ -1255,7 +1258,7 @@ function _draw()
         if fill then
             draw_matrix()
         end
-    
+
         -- draw square cursor
         if p.my != 0 then
             spr(17, p.x, p.y)
