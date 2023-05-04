@@ -37,8 +37,8 @@ function _init()
     icons = {}
 
     -- which control scheme to use?
-    controller = false
-    mouse = true
+    controller = true
+    mouse = false
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: controller", set_control)
@@ -1054,6 +1054,7 @@ function _draw()
         -- draw background and border
         rectfill(19, 33, 108, 90, themes[theme_select]["accent"])
         rectfill(20, 34, 107, 89, 7)
+        draw_menu_border(20, 34, 107, 89)
 
         -- draw "mini" background and letters
         rectfill(28, 41, 59, 48, themes[theme_select]["main"])
@@ -1491,40 +1492,8 @@ end
 
 
 -- ** DRAWING **
-function draw_mine(loc)
--- draw a mine
-    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
-end
 
-function draw_flags()
--- draw all placed flags
-    for c1=1, #flags do
-        for c2=1, #flags[c1] do
-            if flags[c1][c2] == true then
-                -- y value doesn't have -8 because the top bar accounts for it
-                spr(3, xoff+c1*8-8, yoff+c2*8)
-            end
-        end
-    end
-end
-
-function draw_digs()
--- draw all dug spaces
-    for c1=1, #digs do
-        for c2=1, #digs[c1] do
-            if digs[c1][c2] then
-                -- draw the coloured background
-                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
-
-                -- draw the number if needed
-                if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
-                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
-                end
-            end
-        end
-    end
-end
-
+-- ** Menus **
 function draw_menu_background()
 -- draw the menu background and falling icons
     -- fill with accent background
@@ -1588,14 +1557,19 @@ function draw_menu_background()
     end
 end
 
+function draw_menu_border(x1, y1, x2, y2, col)
+-- draw background and border
+    rectfill(x1-1, y1-1, x2+1, y2+1, col)
+    rectfill(x1, y1, x2, y2, 7)
+end
+
 function draw_title_menu(info_message)
 -- draw the title screen
     -- draw the background and falling icons
     draw_menu_background()
 
     -- draw background and border
-    rectfill(19, 15, 108, 112, themes[theme_select]["accent"])
-    rectfill(20, 16, 107, 111, 7)
+    draw_menu_border(20, 16, 107, 111, themes[theme_select]["accent"])
 
     -- if an info message was passed in, draw it appropriately
     if info_message then
@@ -1656,8 +1630,7 @@ function draw_guide(info_message)
     draw_menu_background()
 
     -- draw background and border
-    rectfill(10, 10, 118, 118, themes[theme_select]["accent"])
-    rectfill(11, 11, 117, 117, 7)
+    draw_menu_border(11, 11, 117, 117, themes[theme_select]["accent"])
 
     -- if an info messaeg was passed in, draw it appropriately
     if info_message then
@@ -1764,51 +1737,6 @@ function draw_guide(info_message)
     end
 end
 
-function draw_explosion(exp)
--- draw an explosion (multi-phase)
-    -- position
-    local x = xoff+exp[1]*8-8
-    local y = yoff+exp[2]*8
-
-    -- first phase: initial blast
-    if exp[4] < 2 then
-        spr(6, x, y)
-
-    -- second phase: big blast
-    elseif exp[4] <= 5 then
-        sspr(56, 0, 16, 16, x-4, y-4)
-    
-    -- third phase: crater
-    else
-        spr(19, x, y)
-    end
-end
-
-function draw_particles()
--- draw particles
-    for particle in all(particles) do
-        pset(particle[1], particle[2], particle[3])
-    end
-end
-
-function shake()
--- apply screen shake
-    -- screen position
-    local x = 20-rnd(40)
-    local y = 20-rnd(40)
-
-    -- apply strength
-    x *= shake_strength
-    y *= shake_strength
-
-    -- move the camera
-    camera(x, y)
-
-    -- decay the shake scrength
-    shake_strength *= 0.75
-    if (shake_strength < 0.05) shake_strength = 0
-end
-
 function draw_win_loss(win)
 -- draw the win/loss window
     -- clear screen with grey background
@@ -1834,8 +1762,7 @@ function draw_win_loss(win)
         -- if a new theme was just unlocked
         if type(new_theme) == "table" then
             -- draw message box and border with extra space for theme info
-            rectfill(18, 39, 109, 88, 9)
-            rectfill(19, 40, 108, 87, 7)
+            draw_menu_border(19, 40, 108, 87, 9)
             
             bprint("new theme!", 37, 76, new_theme["accent"], 3)
 
@@ -1856,8 +1783,7 @@ function draw_win_loss(win)
             end
         else
             -- draw message box and border normally
-            rectfill(18, 39, 109, 72, 9)
-            rectfill(19, 40, 108, 71, 7)
+            draw_menu_border(19, 40, 108, 71, 9)
 
             if controller then
                 rectfill(80, 72, 109, 78, 9)
@@ -1950,12 +1876,6 @@ function win_lose_message(timer)
     end
 end
 
-function string_l(s)
--- return the length of a string in pixels
-    -- each character is 3 pixels, with a 1-pixel space between
-    return (#s * 3) + (#s - 1)
-end
-
 function bprint(s, x, y, col, t)
 -- print some text, but make the letters periodically bounce like a wave
     -- s: string
@@ -1985,6 +1905,87 @@ function bprint(s, x, y, col, t)
     print(first, x, y, col)
     print(letter, x+(4*#first), y-1, col)
     print(last, x+(4*(#first))+4, y, col)
+end
+
+
+-- ** In-game **
+function draw_mine(loc)
+-- draw a mine
+    spr(4, xoff+loc[1]*8-8, yoff+loc[2]*8)
+end
+
+function draw_flags()
+-- draw all placed flags
+    for c1=1, #flags do
+        for c2=1, #flags[c1] do
+            if flags[c1][c2] == true then
+                -- y value doesn't have -8 because the top bar accounts for it
+                spr(3, xoff+c1*8-8, yoff+c2*8)
+            end
+        end
+    end
+end
+
+function draw_digs()
+-- draw all dug spaces
+    for c1=1, #digs do
+        for c2=1, #digs[c1] do
+            if digs[c1][c2] then
+                -- draw the coloured background
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
+
+                -- draw the number if needed
+                if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
+                    print(grid[c1][c2], xoff+c1*8-5, yoff+c2*8+2, 7)
+                end
+            end
+        end
+    end
+end
+
+function draw_explosion(exp)
+-- draw an explosion (multi-phase)
+    -- position
+    local x = xoff+exp[1]*8-8
+    local y = yoff+exp[2]*8
+
+    -- first phase: initial blast
+    if exp[4] < 2 then
+        spr(6, x, y)
+
+    -- second phase: big blast
+    elseif exp[4] <= 5 then
+        sspr(56, 0, 16, 16, x-4, y-4)
+    
+    -- third phase: crater
+    else
+        spr(19, x, y)
+    end
+end
+
+function draw_particles()
+-- draw particles
+    for particle in all(particles) do
+        pset(particle[1], particle[2], particle[3])
+    end
+end
+
+function shake()
+-- apply screen shake
+    -- screen position
+    local x = 20-rnd(40)
+    local y = 20-rnd(40)
+
+    -- apply strength
+    x *= shake_strength
+    y *= shake_strength
+
+    -- move the camera
+    camera(x, y)
+
+    -- decay the shake scrength
+    shake_strength *= 0.75
+    if (shake_strength < 0.05) shake_strength = 0
 end
 
 
@@ -2073,6 +2074,12 @@ end
 
 
 -- ** OTHER ** --
+function string_l(s)
+-- return the length of a string in pixels
+    -- each character is 3 pixels, with a 1-pixel space between
+    return (#s * 3) + (#s - 1)
+end
+
 function hover(x1, y1, x2, y2)
 -- check if the mouse is hovering over a certain region
     return (x1 <= mo_x and mo_x <= x2) and (y1 <= mo_y and mo_y <= y2)
