@@ -37,8 +37,8 @@ function _init()
     icons = {}
 
     -- which control scheme to use?
-    controller = true
-    mouse = false
+    controller = false
+    mouse = true
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: controller", set_control)
@@ -400,7 +400,7 @@ function _update()
         elseif mouse then
             -- hover bounds
             hover_replay = hover(21, 57, 69, 63)
-            hover_quit = hover(21, 63, 101, 70)
+            hover_quit = hover(21, 64, 101, 71)
             
             -- hide bounds change depending on whether screen is already hidden or not
             if not hide then
@@ -872,9 +872,9 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_play = hover(36, 80, 54, 88)
+            hover_play = hover(37, 81, 53, 87)
             hover_guide = hover(37, 89, 57, 95)
-            hover_options = hover(36, 96, 66, 104)
+            hover_options = hover(37, 97, 65, 103)
 
             -- set cursor position if hovering over an option
             if hover_play then
@@ -1005,8 +1005,8 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_theme = hover(36, 80, 58, 88)
-            hover_control = hover(36, 96, 66, 104)
+            hover_theme = hover(37, 81, 57, 87)
+            hover_control = hover(37, 97, 65, 103)
             hover_return_options = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
@@ -1932,9 +1932,6 @@ function win_lose_message(timer)
         print("❎ to replay", 22, 58, 13)
         print("🅾️ to return to menu", 22, 65)
     elseif mouse then
-        hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
-        hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
-
         -- set a background for whichever option is currently selected
         if hover_replay then
             rectfill(21, 57, 69, 63, 6)
