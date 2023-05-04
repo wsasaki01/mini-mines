@@ -12,18 +12,6 @@ function _init()
     printh("", "log", true) -- clear the log
     -- *************
 
-    debug_count_thing = 0
-    for i=1, 10000 do
-        local temp = create_mines(7, 7, 5, {4, 4})
-        for mine in all(temp) do
-            printh(mine[1].."-"..mine[2], "log")
-            if mine[1] == 4 and mine[2] == 4 then
-                printh("HERE!!!!!!!!!", "log")
-                debug_count_thing += 1
-            end
-        end
-    end
-
     -- enable devkit mouse
     poke(0x5F2D, 1)
 
