@@ -1117,7 +1117,9 @@ function _draw()
         draw_digs()
         draw_flags()
 
-        --foreach(mine_list, draw_mine)
+        if reveal then
+            foreach(mine_list, draw_mine)
+        end
 
         -- are all explosions the first ones? (can be multiple through auto-dig)
         local flag = true
