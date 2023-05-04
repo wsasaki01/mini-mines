@@ -1783,21 +1783,7 @@ end
 
 function pb_message()
 -- draw the "new PB" message
-    -- positioned below timer
-    x = 113
-
-    -- move up and down periodically
-    y = flr(sin(t()*1))+11
-
-    -- colouring
-    pset(x+6, y-3, 1)
-    line(x+5, y-2, x+7, y-2, 1)
-    pset(x+6, y-2, 2)
-    line(x+4, y-1, x+8, y-1, 1)
-    line(x+5, y-1, x+7, y-1, 2)
-    rectfill(x, y, x+12, y+11, 2)
-    print("NEW\nPB!", x+1, y, 7)
-    line(x, y+12, x+12, y+12, 0)
+    sspr(72, 8, 13, 15, 113, flr(sin(t()))+8)
 end
 
 function win_lose_message(timer)
