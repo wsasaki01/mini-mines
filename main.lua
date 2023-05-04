@@ -2,14 +2,27 @@ function _init()
     -- *************
     --     DEBUG
     -- *************
-    reveal = false -- reveal mine locations during game
+    reveal = true -- reveal mine locations during game
     fill = false -- show values for each space
-    mouse_log = false -- print mouse coords
+    grid_log = true -- print grid position
+    mouse_log = true -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
     printh("", "log", true) -- clear the log
     -- *************
+
+    debug_count_thing = 0
+    for i=1, 10000 do
+        local temp = create_mines(7, 7, 5, {4, 4})
+        for mine in all(temp) do
+            printh(mine[1].."-"..mine[2], "log")
+            if mine[1] == 4 and mine[2] == 4 then
+                printh("HERE!!!!!!!!!", "log")
+                debug_count_thing += 1
+            end
+        end
+    end
 
     -- enable devkit mouse
     poke(0x5F2D, 1)
@@ -127,15 +140,11 @@ function _init()
         local count = 0
         for theme in all(diff_themes) do
             count += 1
-            printh("checking: "..diff_name.." - "..count, "log")
             if dget(theme["id"]) == 1 then
-                printh("already unlocked!!", "log")
-                printh("original length: "..#unlockable[diff_name], "log")
                 -- add the new theme to the player's collection
                 add(themes, theme)
                 -- remove it from the original list
                 del(unlockable[diff_name], theme)
-                printh("new length: "..#unlockable[diff_name], "log")
             end
         end
     end
@@ -1371,10 +1380,8 @@ function _draw()
         spr(20, mo_x, mo_y)
     end
 
-    -- debug: print mouse coords
-    if mouse_log then
-        draw_mouse_coords()
-    end
+    -- debug: print mouse and/or grid coords
+    draw_coords()
 end
 
 -- ***********************
@@ -2091,8 +2098,17 @@ function draw_matrix()
     end
 end
 
-function draw_mouse_coords()
+function draw_coords()
 -- draw mouse coords in top left corner
-    print(mo_x, 0, 0, 0)
-    print(mo_y)
+    cursor(0, 0, 0)
+
+    if mouse_log then
+        print(mo_x)
+        print(mo_y)
+    end
+
+    if grid_log and play then
+        print(p.mx)
+        print(p.my)
+    end
 end
