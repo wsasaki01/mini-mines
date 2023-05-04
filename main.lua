@@ -2,10 +2,10 @@ function _init()
     -- *************
     --     DEBUG
     -- *************
-    reveal = true -- reveal mine locations during game
+    reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
-    grid_log = true -- print grid position
-    mouse_log = true -- print mouse coords
+    grid_log = false -- print grid position
+    mouse_log = false -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
@@ -23,7 +23,7 @@ function _init()
     -- 9: hard PB
 
     -- program version number
-    ver = "0.35.1"
+    ver = "1.0.0"
 
     -- which screen is the user on?
     -- boot up to menu screen
@@ -399,18 +399,18 @@ function _update()
             end
         elseif mouse then
             -- hover bounds
-            hover_replay = (21 <= mo_x and mo_x <= 69) and (57 <= mo_y and mo_y <= 63)
-            hover_quit = (21 <= mo_x and mo_x <= 101) and (63 <= mo_y and mo_y <= 70)
+            hover_replay = hover(21, 57, 69, 63)
+            hover_quit = hover(21, 63, 101, 70)
             
             -- hide bounds change depending on whether screen is already hidden or not
             if not hide then
                 if new_theme then
-                    hover_hide = (92 <= mo_x and mo_x <= 109) and (88 <= mo_y and mo_y <= 93)
+                    hover_hide = hover(92, 88, 109, 93)
                 else
-                    hover_hide = (92 <= mo_x and mo_x <= 109) and (72 <= mo_y and mo_y <= 77)
+                    hover_hide = hover(92, 72, 109, 77)
                 end
             else
-                hover_hide = (111 <= mo_x and mo_x <= 127) and (122 <= mo_y and mo_y <= 127)
+                hover_hide = hover(111, 122, 127, 127)
             end
 
             -- if left clicking
@@ -580,10 +580,10 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_easy = (37 <= mo_x and mo_x <= 53) and (81 <= mo_y and mo_y <= 87)
-            hover_medium = (37 <= mo_x and mo_x <= 61) and (89 <= mo_y and mo_y <= 95)
-            hover_hard = (37 <= mo_x and mo_x <= 53) and (97 <= mo_y and mo_y <= 103)
-            hover_return_difficulty = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
+            hover_easy = hover(37, 81, 53, 87)
+            hover_medium = hover(37, 89, 61, 95)
+            hover_hard = hover(37, 97, 53, 103)
+            hover_return_difficulty = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
             if hover_easy then
@@ -823,6 +823,7 @@ function _update()
                         if #explosions > 0 then
                             losing = true
                             
+                            -- leave a pause before exploding
                             explosion_timer = flr(-2.5*explosion_interval)
                             explosion_counter = 0
                         end
@@ -871,9 +872,9 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_play = (36 < mo_x and mo_x < 54) and (80 < mo_y and mo_y < 88)
-            hover_guide = (37 < mo_x and mo_x < 57) and (89 < mo_y and mo_y < 95)
-            hover_options = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
+            hover_play = hover(36, 80, 54, 88)
+            hover_guide = hover(37, 89, 57, 95)
+            hover_options = hover(36, 96, 66, 104)
 
             -- set cursor position if hovering over an option
             if hover_play then
@@ -938,9 +939,9 @@ function _update()
             end
         elseif mouse then
             -- bounds for "return" in guide menu
-            hover_return_guide = (92 <= mo_x and mo_x <= 118) and (119 <= mo_y and mo_y <= 123)
-            hover_p1 = (110 <= mo_x and mo_x <= 118) and (63 <= mo_y and mo_y <= 69)
-            hover_p2 = (10 <= mo_x and mo_x <= 18) and (63 <= mo_y and mo_y <= 69)
+            hover_return_guide = hover(92, 119, 118, 123)
+            hover_p1 = hover(110, 63, 118, 69)
+            hover_p2 = hover(10, 63, 18, 69)
 
             if main and not main_stick then
                 if hover_return_guide then
@@ -1004,9 +1005,9 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_theme = (36 < mo_x and mo_x < 58) and (80 < mo_y and mo_y < 88)
-            hover_control = (36 < mo_x and mo_x < 66) and (96 < mo_y and mo_y < 104)
-            hover_return_options = (82 < mo_x and mo_x < 108) and (113 < mo_y and mo_y < 118)
+            hover_theme = hover(36, 80, 58, 88)
+            hover_control = hover(36, 96, 66, 104)
+            hover_return_options = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
             if hover_theme then
@@ -2072,6 +2073,13 @@ function delete_save(b)
     run()
 end
 
+
+
+-- ** OTHER ** --
+function hover(x1, y1, x2, y2)
+-- check if the mouse is hovering over a certain region
+    return (x1 <= mo_x and mo_x <= x2) and (y1 <= mo_y and mo_y <= y2)
+end
 
 
 -- ** DEBUG **
