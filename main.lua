@@ -5,7 +5,7 @@ function _init()
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
     grid_log = false -- print grid position
-    mouse_log = false -- print mouse coords
+    mouse_log = true -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
@@ -48,8 +48,7 @@ function _init()
     mo_y = 0
 
     -- menu cursor x and y
-    menu_x = 28
-    menu_y = 80
+    menu_c = 1
 
     -- main_stick key checker when starting game
     -- prevents the player holding key down and accidentally digging
@@ -390,7 +389,7 @@ function _update()
 
                         sfx(6)
 
-                        menu_y = 80
+                        menu_c = 1
                         menu = true
                     end
                 else
@@ -537,12 +536,12 @@ function _update()
     elseif difficulty then
         if controller then
             -- movement
-            if btnp(3) and menu_y != 96 then
+            if btnp(3) and menu_c != 3 then
                 sfx(4)
-                menu_y += 8
-            elseif btnp(2) and menu_y != 80 then
+                menu_c += 1
+            elseif btnp(2) and menu_c != 1 then
                 sfx(4)
-                menu_y -= 8
+                menu_c -= 1
             end
 
             -- x to select option
@@ -554,13 +553,13 @@ function _update()
                 play = true
 
                 -- difficulty selection
-                if menu_y == 80 then
+                if menu_c == 1 then
                     --easy
                     initialise("easy")
-                elseif menu_y == 88 then
+                elseif menu_c == 2 then
                     --medium
                     initialise("med")
-                elseif menu_y == 96 then
+                elseif menu_c == 3 then
                     --hard
                     initialise("hard")
                 end
@@ -575,7 +574,7 @@ function _update()
                 sfx(6)
 
                 -- go back to main menu
-                menu_y = 80
+                menu_c = 1
                 menu = true
             end
         elseif mouse then
@@ -587,13 +586,13 @@ function _update()
 
             -- set cursor position if hovering over an option
             if hover_easy then
-                menu_y = 80
+                menu_c = 1
             elseif hover_medium then
-                menu_y = 88
+                menu_c = 2
             elseif hover_hard then
-                menu_y = 96
+                menu_c = 3
             else
-                menu_y = false
+                menu_c = false
             end
             
             -- left click to pick difficulty
@@ -842,12 +841,12 @@ function _update()
     elseif menu then
         if controller then
             -- movement
-            if btnp(3) and menu_y != 96 then
+            if btnp(3) and menu_c != 3 then
                 sfx(4)
-                menu_y += 8
-            elseif btnp(2) and menu_y != 80 then
+                menu_c += 1
+            elseif btnp(2) and menu_c != 1 then
                 sfx(4)
-                menu_y -= 8
+                menu_c -= 1
             end
 
             -- x to select option
@@ -859,14 +858,14 @@ function _update()
                 sfx(5)
 
                 -- if "play" selected, start the game
-                if menu_y == 80 then
+                if menu_c == 1 then
                     difficulty = true
                 -- if "guide" selected, go to guide screen
-                elseif menu_y == 88 then
+                elseif menu_c == 2 then
                     guide = true
                 -- if "options" selected, go to options
-                elseif menu_y == 96 then
-                    menu_y = 80
+                elseif menu_c == 3 then
+                    menu_c = 1
                     option = true
                 end
             end
@@ -878,13 +877,13 @@ function _update()
 
             -- set cursor position if hovering over an option
             if hover_play then
-                menu_y = 80
+                menu_c = 1
             elseif hover_guide then
-                menu_y = 88
+                menu_c = 2
             elseif hover_options then
-                menu_y = 96
+                menu_c = 3
             else
-                menu_y = false
+                menu_c = false
             end
             
             -- if left clicking
@@ -964,19 +963,19 @@ function _update()
     elseif option then
         if controller then
             -- movement
-            if btnp(3) and menu_y != 96 then
+            if btnp(3) and menu_c != 2 then
                 sfx(4)
-                menu_y += 16
-            elseif btnp(2) and menu_y != 80 then
+                menu_c += 1
+            elseif btnp(2) and menu_c != 1 then
                 sfx(4)
-                menu_y -= 16
+                menu_c -= 1
             end
 
             -- x to select option
             if main and not main_stick then
                 main_stick = true
 
-                if menu_y == 80 then
+                if menu_c == 1 then
                     if #themes != 1 then
                         sfx(14)
                     end
@@ -986,7 +985,7 @@ function _update()
                     else
                         theme_select = 1
                     end
-                elseif menu_y == 96 then
+                elseif menu_c == 2 then
                     sfx(5)
                     -- switch to mouse
                     controller = false
@@ -1001,7 +1000,7 @@ function _update()
                 menu = true
 
                 -- place cursor on "options"
-                menu_y = 96
+                menu_c = 1
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
@@ -1011,18 +1010,18 @@ function _update()
 
             -- set cursor position if hovering over an option
             if hover_theme then
-                menu_y = 80
+                menu_c = 1
             elseif hover_control then
-                menu_y = 96
+                menu_c = 2
             else
-                menu_y = false
+                menu_c = false
             end
             
             -- if left clicking
             if main and not main_stick then
                 main_stick = true
 
-                if menu_y == 80 then
+                if menu_c == 1 then
                     if #themes != 1 then
                         sfx(14)
                     end
@@ -1031,7 +1030,7 @@ function _update()
                     else
                         theme_select = 1
                     end
-                elseif menu_y == 96 then
+                elseif menu_c == 2 then
                     sfx(5)
 
                     -- change to controller
@@ -1049,30 +1048,19 @@ end
 
 function _draw()
     if title_only then
+        -- draw background
         draw_menu_background()
 
         -- draw background and border
-        rectfill(19, 33, 108, 90, themes[theme_select]["accent"])
-        rectfill(20, 34, 107, 89, 7)
         draw_menu_border(20, 34, 107, 89)
 
-        -- draw "mini" background and letters
+        -- draw "mini mines"
         rectfill(28, 41, 59, 48, themes[theme_select]["main"])
-        print("m", 30, 43, 7)
-        print("i", 38, 43)
-        print("n", 46, 43)
-        print("i", 54, 43)
-
-        -- draw "mines" logo
+        sspr(80, 40, 32, 8, 28, 41)
         sspr(0, 32, 72, 32, 28, 50)
-        
-
-    elseif win then
-        -- draw the win screen
-        draw_win_loss(true)
-    elseif lose then
-        -- draw the loss screen
-        draw_win_loss(false)
+    elseif win or lose then
+        -- draw the win or loss screen
+        draw_win_loss(win)
     elseif winning then
         -- clear screen with grey background
         cls(themes[theme_select]["gamebg"])
@@ -1159,7 +1147,7 @@ function _draw()
         end
 
         -- set a background for whichever option is currently selected
-        if menu_y == 80 then
+        if menu_c == 1 then
             -- option background
             rectfill(37, 81, 53, 87, 6)
 
@@ -1175,7 +1163,7 @@ function _draw()
             draw_pb("easy", 77, 82, 13)
             draw_pb("med", 77, 90, 6)
             draw_pb("hard", 77, 98, 6)
-        elseif menu_y == 88 then
+        elseif menu_c == 2 then
             rectfill(37, 89, 61, 95, 6)
             line(63, 92, 75, 92, 6)
 
@@ -1186,7 +1174,7 @@ function _draw()
             draw_pb("easy", 77, 82, 6)
             draw_pb("med", 77, 90, 13)
             draw_pb("hard", 77, 98, 6)
-        elseif menu_y == 96 then
+        elseif menu_c == 3 then
             rectfill(37, 97, 53, 103, 6)
             line(55, 100, 75, 100, 6)
 
@@ -1210,8 +1198,8 @@ function _draw()
         print("BEST", 77, 75, 6)
 
         -- if the player is hovering over an option, draw the flag next to it
-        if menu_y != false then
-            spr(3, menu_x, menu_y)
+        if menu_c != false then
+            spr(3, 15, menu_c)
         end
     elseif play then
         -- clear screen with background
@@ -1239,9 +1227,9 @@ function _draw()
 
         -- print control hints in the middle
         if controller then
-            print("❎-flag   🅾️-dig", 30, 1, 7)
+            print("❎-flag   🅾️-dig", 30, 1, themes[theme_select]["accent"])
         elseif mouse then
-            print("l-flag   r-dig", 34, 1, 7)
+            print("l-flag   r-dig", 34, 1, themes[theme_select]["accent"])
         end
 
         -- print time in top right corner
@@ -1277,7 +1265,8 @@ function _draw()
         end
     
         -- set a background for whichever option is currently selected
-        if menu_y == 80 then
+        -- if the player is hovering over an option, draw the flag next to it
+        if menu_c == 1 then
             -- option background
             rectfill(37, 81, 53, 87, 6)
 
@@ -1288,7 +1277,10 @@ function _draw()
 
             -- preview sprite
             sspr(0, 64, 24, 24, 76, 81)
-        elseif menu_y == 88 then
+            
+            -- flag
+            spr(3, 28, 80)
+        elseif menu_c == 2 then
             rectfill(37, 89, 57, 95, 6)
 
             print("play", 38, 82, 6)
@@ -1296,7 +1288,9 @@ function _draw()
             print("options", 38, 98, 6)
             
             sspr(24, 64, 24, 24, 76, 81)
-        elseif menu_y == 96 then
+            
+            spr(3, 28, 88)
+        elseif menu_c == 3 then
             rectfill(37, 97, 65, 103, 6)
 
             print("play", 38, 82, 6)
@@ -1304,15 +1298,12 @@ function _draw()
             print("options", 38, 98, 7)
 
             sspr(48, 64, 24, 24, 76, 81)
+
+            spr(3, 28, 96)
         else
             print("play", 38, 82, 6)
             print("guide", 38, 90, 6)
             print("options", 38, 98, 6)
-        end
-
-        -- if the player is hovering over an option, draw the flag next to it
-        if menu_y != false then
-            spr(3, menu_x, menu_y)
         end
     elseif guide then
         if controller then
@@ -1331,16 +1322,20 @@ function _draw()
         end
         
         -- set a background for whichever option is currently selected
-        if menu_y == 80 then
+        if menu_c == 1 then
             rectfill(37, 81, 57, 87, 6)
 
             print("theme", 38, 82, 7)
             print("control", 38, 98, 6)
-        elseif menu_y == 96 then
+
+            spr(3, 28, 80)
+        elseif menu_c == 2 then
             rectfill(37, 97, 65, 103, 6)
 
             print("theme", 38, 82, 6)
             print("control", 38, 98, 7)
+
+            spr(3, 28, 96)
         else
             print("theme", 38, 82, 6)
             print("control", 38, 98, 6)
@@ -1348,21 +1343,13 @@ function _draw()
 
         -- theme preview
         rectfill(75, 81, 81, 87, themes[theme_select]["main"])
-        pset(75, 81, 7)
-        pset(81, 81, 7)
-        pset(75, 87, 7)
-        pset(81, 87, 7)
+        spr(35, 75, 81)
 
         -- theme counter
         print(theme_select.."/"..#themes, 90, 82, 13)
 
         -- draw controller/mouse sprite
         if controller then spr(34, 75, 97) else spr(33, 75, 97) end
-
-        -- if the player is hovering over an option, draw the flag next to it
-        if menu_y != false then
-            spr(3, menu_x, menu_y)
-        end
     end
 
     -- if mouse control is enabled, draw the cursor
@@ -1583,24 +1570,11 @@ function draw_title_menu(info_message)
     end
 
     -- draw grid as title background
-    for c1=16, 64, 16 do
-        for c2=20, 100, 16 do
-            spr(1, c2, c1)
-        end
-    end
-
-    for c1=24, 64, 16 do
-        for c2=28, 100, 16 do
-            spr(1, c2, c1)
-        end
-    end
+    map(0, 0, 20, 8, 11, 8)
 
     -- draw "mini" background and letters
     rectfill(28, 24, 59, 31, themes[theme_select]["main"])
-    print("m", 30, 26, 7)
-    print("i", 38, 26)
-    print("n", 46, 26)
-    print("i", 54, 26)
+    sspr(80, 40, 32, 8, 28, 24)
 
     -- draw "mines" logo
     sspr(0, 32, 72, 32, 28, 32)
@@ -1659,18 +1633,8 @@ function draw_guide(info_message)
         -- draw grid border
         rect(27, 67, 100, 108, 13)
 
-        -- draw sample grid
-        for col=28, 92, 16 do
-            for row=68, 115, 16 do
-                spr(1, col, row)
-            end
-        end
-
-        for col=36, 90, 16 do
-            for row=76, 100, 16 do
-                spr(1, col, row)
-            end
-        end
+        -- draw grid
+        map(0, 0, 28, 60, 9, 6)
 
         print("FLAG ALL MINES TO WIN!", 22, 110, 0)
 
@@ -1687,15 +1651,8 @@ function draw_guide(info_message)
         rectfill(68, 84, 75, 107, themes[theme_select]["main"])
         rectfill(76, 100, 99, 107, themes[theme_select]["main"])
 
-        print("1", 79, 78, 7)
-        print("2", 79, 86, 7)
-        print("2", 71, 86, 7)
-        print("1", 71, 94, 7)
-        print("1", 71, 102, 7)
-        print("1", 79, 102, 7)
-        print("1", 87, 102, 7)
-        print("1", 87, 94, 7)
-        print("1", 87, 86, 7)
+        -- draw numbers
+        sspr(0, 96, 24, 36, 68, 76)
 
         -- flag sprite
         spr(3, 76, 92)
@@ -1724,8 +1681,8 @@ function draw_guide(info_message)
         -- repurpose timer to flash auto-dig spaces
         if show_mines then
             -- fill in dug spaces
-            rectfill(86, 88, 101, 111, 12)
-            rectfill(102, 88, 109, 103, 12)
+            rectfill(86, 88, 101, 111, themes[theme_select]["main"])
+            rectfill(102, 88, 109, 103, themes[theme_select]["main"])
             sspr(72, 64, 24, 24, 86, 88) -- auto-dig spaces sprites
         end
         
@@ -1758,6 +1715,7 @@ function draw_win_loss(win)
     spr(3, 0, 0)
     print(fcount, 8, 1, 7)
 
+    -- the actual window
     if not hide then
         -- if a new theme was just unlocked
         if type(new_theme) == "table" then
@@ -1768,11 +1726,7 @@ function draw_win_loss(win)
 
             -- theme preview
             rectfill(82, 75, 88, 81, new_theme["main"])
-
-            pset(82, 75, 7)
-            pset(82, 81, 7)
-            pset(88, 75, 7)
-            pset(88, 81, 7)
+            spr(35, 82, 75)
 
             if controller then
                 rectfill(80, 88, 109, 94, 9)
@@ -1998,7 +1952,7 @@ function set_control(b)
         menuitem(1, "control: controller")
         controller = true
         mouse = false
-        menu_y = 80
+        menu_c = 1
     end
 
     -- right to select mouse
@@ -2036,7 +1990,7 @@ function to_title(b)
     play = false
     option = false
     guide = false
-    menu_y = 80
+    menu_c = 1
     menu = true
 end
 
