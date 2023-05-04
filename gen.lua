@@ -1,4 +1,6 @@
 function create_mines(width, height, mines, current)
+    printh("CURRENT[1]: "..current[1], "log")
+    printh("CURRENT[2]: "..current[2], "log")
     -- store mines
     local grid = {}
 
@@ -11,14 +13,16 @@ function create_mines(width, height, mines, current)
 
         -- check if there's already a mine there, or that's where the player pressed
         local flag = false
-        for mine in all(grid) do
-            --printh("checking against: "..mine[1]..", "..mine[2], "log")
-            if
-            (loc[1] == mine[1] and loc[2] == mine[2]) or
-            (loc[1] == current[1] and loc[2] == current[2]) then
-                --printh("!!!", "log")
-                -- if so, don't add that location to the list
-                flag = true
+        if (loc[1] == current[1] and loc[2] == current[2]) then
+            flag = true
+        else
+            for mine in all(grid) do
+                --printh("checking against: "..mine[1]..", "..mine[2], "log")
+                if (loc[1] == mine[1] and loc[2] == mine[2]) then
+                    --printh("!!!", "log")
+                    -- if so, don't add that location to the list
+                    flag = true
+                end
             end
         end
 
