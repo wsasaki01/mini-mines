@@ -2,9 +2,10 @@ function _init()
     -- *************
     --     DEBUG
     -- *************
-    reveal = false -- reveal mine locations during game
+    reveal = true -- reveal mine locations during game
     fill = false -- show values for each space
-    mouse_log = false -- print mouse coords
+    grid_log = true -- print grid position
+    mouse_log = true -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
@@ -1371,10 +1372,8 @@ function _draw()
         spr(20, mo_x, mo_y)
     end
 
-    -- debug: print mouse coords
-    if mouse_log then
-        draw_mouse_coords()
-    end
+    -- debug: print mouse and/or grid coords
+    draw_coords()
 end
 
 -- ***********************
@@ -2091,8 +2090,17 @@ function draw_matrix()
     end
 end
 
-function draw_mouse_coords()
+function draw_coords()
 -- draw mouse coords in top left corner
-    print(mo_x, 0, 0, 0)
-    print(mo_y)
+    cursor(0, 0, 0)
+
+    if mouse_log then
+        print(mo_x)
+        print(mo_y)
+    end
+
+    if grid_log and play then
+        print(p.mx)
+        print(p.my)
+    end
 end
