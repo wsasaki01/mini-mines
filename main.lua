@@ -291,9 +291,6 @@ function _update()
     -- remove "return to title" by default
     menuitem(2)
 
-    -- allow user to delete their save data from pico-8 menu
-    menuitem(5, "delete save data", save_security)
-
     if controller then
         -- control scheme
         main = btn(5)
@@ -1078,7 +1075,7 @@ function _update()
             -- if the bar is full, delete save
             if flr(ticker) == (hold_timer*2) then
                 ticker = 0
-                
+
                 -- delete save data
                 for c=0, 9 do
                     dset(c, 0)
@@ -2067,29 +2064,6 @@ function to_title(b)
     menu = true
 end
 
-function save_security(b)
--- check that the user wants to delete their save
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
-    end
-
-    -- ask the user to confirm their choice
-    menuitem(5, "100% sure?", delete_save)
-    return true
-end
-
-function delete_save(b)
--- delete all save data
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
-    end
-
-    -- set the option back to normal
-    menuitem(5, "delete save data", save_security)
-    
-end
 
 
 
