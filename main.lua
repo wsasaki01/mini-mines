@@ -5,7 +5,7 @@ function _init()
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
     grid_log = false -- print grid position
-    mouse_log = true -- print mouse coords
+    mouse_log = false -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
