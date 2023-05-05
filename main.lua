@@ -963,7 +963,7 @@ function _update()
     elseif option then
         if controller then
             -- movement
-            if btnp(3) and menu_c != 2 then
+            if btnp(3) and menu_c != 3 then
                 sfx(4)
                 menu_c += 1
             elseif btnp(2) and menu_c != 1 then
@@ -1004,8 +1004,9 @@ function _update()
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_theme = hover(37, 81, 57, 87)
-            hover_control = hover(37, 89, 65, 95)
+            hover_theme = hover(37, 79, 57, 85)
+            hover_control = hover(37, 90, 65, 96)
+            hover_del_save = hover(37, 101, 81, 107)
             hover_return_options = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
@@ -1013,6 +1014,8 @@ function _update()
                 menu_c = 1
             elseif hover_control then
                 menu_c = 2
+            elseif hover_del_save then
+                menu_c = 3
             else
                 menu_c = false
             end
@@ -1325,33 +1328,44 @@ function _draw()
         
         -- set a background for whichever option is currently selected
         if menu_c == 1 then
-            rectfill(37, 81, 57, 87, 6)
+            rectfill(37, 79, 57, 85, 6)
 
-            print("theme", 38, 82, 7)
-            print("control", 38, 90, 6)
+            print("theme", 38, 80, 7)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 2)
 
-            spr(3, 28, 80)
+            spr(3, 28, 78)
         elseif menu_c == 2 then
-            rectfill(37, 89, 65, 95, 6)
+            rectfill(37, 90, 65, 96, 6)
 
-            print("theme", 38, 82, 6)
-            print("control", 38, 90, 7)
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 7)
+            print("delete save", 38, 102, 2)
 
-            spr(3, 28, 88)
+            spr(3, 28, 89)
+        elseif menu_c == 3 then
+            rectfill(37, 101, 81, 107, 6)
+
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 0)
+
+            spr(3, 28, 100)
         else
-            print("theme", 38, 82, 6)
-            print("control", 38, 90, 6)
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 2)
         end
 
         -- theme preview
-        rectfill(75, 81, 81, 87, themes[theme_select]["main"])
-        spr(35, 75, 81)
+        rectfill(75, 79, 81, 85, themes[theme_select]["main"])
+        spr(35, 75, 79)
 
         -- theme counter
-        print(theme_select.."/"..#themes, 90, 82, 13)
+        print(theme_select.."/"..#themes, 90, 80, 13)
 
         -- draw controller/mouse sprite
-        if controller then spr(34, 75, 89) else spr(33, 75, 89) end
+        if controller then spr(34, 75, 90) else spr(33, 75, 90) end
     end
 
     -- if mouse control is enabled, draw the cursor
