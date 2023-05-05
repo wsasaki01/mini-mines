@@ -23,7 +23,7 @@ function _init()
     -- 9: hard PB
 
     -- program version number
-    ver = "1.0.0"
+    ver = "1.12.2"
 
     -- which screen is the user on?
     -- boot up to menu screen
