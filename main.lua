@@ -31,6 +31,7 @@ function _init()
     play = false
     difficulty = false
     option = false
+    deleting = false
     guide = false
 
     -- list of falling icons on menu screen
@@ -990,6 +991,12 @@ function _update()
                     -- switch to mouse
                     controller = false
                     mouse = true
+                elseif menu_c == 3 then
+                    sfx(5)
+                    -- go to delete save data screen
+                    option = false
+                    deleting = true
+                    control_store = "controller"
                 end
             -- o to return to menu
             elseif alt and not alt_stick then
@@ -1035,15 +1042,69 @@ function _update()
                     end
                 elseif menu_c == 2 then
                     sfx(5)
-
                     -- change to controller
                     mouse = false
                     controller = true
+                elseif menu_c == 3 then
+                    sfx(5)
+                    -- go to delete save data screen
+                    option = false
+                    deleting = true
+                    -- only allow controller
+                    -- if using mouse, remember that and put it back on after
+                    controller = true
+                    mouse = false
+                    control_store = "mouse"
                 elseif hover_return_options then
                     sfx(6)
                     options = false
                     menu = true
                 end
+            end
+        end
+    elseif deleting then
+        -- x to delete
+        if main then
+            -- if holding, increase bar
+            if main_stick then
+                ticker += 0.1
+                sfx(13)
+            -- if let go, reset bar
+            else
+                main_stick = true
+                ticker = 0
+            end
+
+            -- if the bar is full, delete save
+            if flr(ticker) == (hold_timer*2) then
+                ticker = 0
+                
+                -- delete save data
+                for c=0, 9 do
+                    dset(c, 0)
+                end
+
+                -- reset the cart
+                run()
+            end
+        else
+            ticker = 0
+        end
+
+        -- o to return to options
+        if alt and not alt_stick then
+            alt_stick = true
+            sfx(6)
+
+            option = true
+            deleting = false
+
+            -- return to original control method
+            if control_store == "controller" then
+                menu_c = 3
+            elseif control_store == "mouse" then
+                controller = false
+                mouse = true
             end
         end
     end
@@ -1366,6 +1427,16 @@ function _draw()
 
         -- draw controller/mouse sprite
         if controller then spr(34, 75, 90) else spr(33, 75, 90) end
+    elseif deleting then
+        -- draw main frame and background
+        draw_title_menu("🅾️ TO RETURN")
+
+        print("ARE YOU SURE\nYOU WANT TO\ndelete save data?", 25, 78, 0)
+
+        if main then
+            rectfill(27, 99, 27+(49*ticker/(hold_timer*2)), 105, 6)
+        end
+        print("❎ TO delete", 28, 100, 13)
     end
 
     -- if mouse control is enabled, draw the cursor
@@ -2018,13 +2089,6 @@ function delete_save(b)
     -- set the option back to normal
     menuitem(5, "delete save data", save_security)
     
-    -- delete save data
-    for c=0, 9 do
-        dset(c, 0)
-    end
-
-    -- reset the cart
-    run()
 end
 
 
