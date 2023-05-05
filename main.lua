@@ -1000,12 +1000,12 @@ function _update()
                 menu = true
 
                 -- place cursor on "options"
-                menu_c = 1
+                menu_c = 3
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
             hover_theme = hover(37, 81, 57, 87)
-            hover_control = hover(37, 97, 65, 103)
+            hover_control = hover(37, 89, 65, 95)
             hover_return_options = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
@@ -1328,19 +1328,19 @@ function _draw()
             rectfill(37, 81, 57, 87, 6)
 
             print("theme", 38, 82, 7)
-            print("control", 38, 98, 6)
+            print("control", 38, 90, 6)
 
             spr(3, 28, 80)
         elseif menu_c == 2 then
-            rectfill(37, 97, 65, 103, 6)
+            rectfill(37, 89, 65, 95, 6)
 
             print("theme", 38, 82, 6)
-            print("control", 38, 98, 7)
+            print("control", 38, 90, 7)
 
-            spr(3, 28, 96)
+            spr(3, 28, 88)
         else
             print("theme", 38, 82, 6)
-            print("control", 38, 98, 6)
+            print("control", 38, 90, 6)
         end
 
         -- theme preview
@@ -1351,7 +1351,7 @@ function _draw()
         print(theme_select.."/"..#themes, 90, 82, 13)
 
         -- draw controller/mouse sprite
-        if controller then spr(34, 75, 97) else spr(33, 75, 97) end
+        if controller then spr(34, 75, 89) else spr(33, 75, 89) end
     end
 
     -- if mouse control is enabled, draw the cursor
