@@ -31,6 +31,7 @@ function _init()
     play = false
     difficulty = false
     option = false
+    deleting = false
     guide = false
 
     -- list of falling icons on menu screen
@@ -289,9 +290,6 @@ end
 function _update()
     -- remove "return to title" by default
     menuitem(2)
-
-    -- allow user to delete their save data from pico-8 menu
-    menuitem(5, "delete save data", save_security)
 
     if controller then
         -- control scheme
@@ -963,7 +961,7 @@ function _update()
     elseif option then
         if controller then
             -- movement
-            if btnp(3) and menu_c != 2 then
+            if btnp(3) and menu_c != 3 then
                 sfx(4)
                 menu_c += 1
             elseif btnp(2) and menu_c != 1 then
@@ -990,6 +988,12 @@ function _update()
                     -- switch to mouse
                     controller = false
                     mouse = true
+                elseif menu_c == 3 then
+                    sfx(5)
+                    -- go to delete save data screen
+                    option = false
+                    deleting = true
+                    control_store = "controller"
                 end
             -- o to return to menu
             elseif alt and not alt_stick then
@@ -1000,12 +1004,13 @@ function _update()
                 menu = true
 
                 -- place cursor on "options"
-                menu_c = 1
+                menu_c = 3
             end
         elseif mouse then
             -- bounds for "play" and "options" on main menu
-            hover_theme = hover(37, 81, 57, 87)
-            hover_control = hover(37, 97, 65, 103)
+            hover_theme = hover(37, 79, 57, 85)
+            hover_control = hover(37, 90, 65, 96)
+            hover_del_save = hover(37, 101, 81, 107)
             hover_return_options = hover(82, 113, 108, 118)
 
             -- set cursor position if hovering over an option
@@ -1013,6 +1018,8 @@ function _update()
                 menu_c = 1
             elseif hover_control then
                 menu_c = 2
+            elseif hover_del_save then
+                menu_c = 3
             else
                 menu_c = false
             end
@@ -1032,15 +1039,69 @@ function _update()
                     end
                 elseif menu_c == 2 then
                     sfx(5)
-
                     -- change to controller
                     mouse = false
                     controller = true
+                elseif menu_c == 3 then
+                    sfx(5)
+                    -- go to delete save data screen
+                    option = false
+                    deleting = true
+                    -- only allow controller
+                    -- if using mouse, remember that and put it back on after
+                    controller = true
+                    mouse = false
+                    control_store = "mouse"
                 elseif hover_return_options then
                     sfx(6)
                     options = false
                     menu = true
                 end
+            end
+        end
+    elseif deleting then
+        -- x to delete
+        if main then
+            -- if holding, increase bar
+            if main_stick then
+                ticker += 0.1
+                sfx(13)
+            -- if let go, reset bar
+            else
+                main_stick = true
+                ticker = 0
+            end
+
+            -- if the bar is full, delete save
+            if flr(ticker) == (hold_timer*2) then
+                ticker = 0
+
+                -- delete save data
+                for c=0, 9 do
+                    dset(c, 0)
+                end
+
+                -- reset the cart
+                run()
+            end
+        else
+            ticker = 0
+        end
+
+        -- o to return to options
+        if alt and not alt_stick then
+            alt_stick = true
+            sfx(6)
+
+            option = true
+            deleting = false
+
+            -- return to original control method
+            if control_store == "controller" then
+                menu_c = 3
+            elseif control_store == "mouse" then
+                controller = false
+                mouse = true
             end
         end
     end
@@ -1325,33 +1386,54 @@ function _draw()
         
         -- set a background for whichever option is currently selected
         if menu_c == 1 then
-            rectfill(37, 81, 57, 87, 6)
+            rectfill(37, 79, 57, 85, 6)
 
-            print("theme", 38, 82, 7)
-            print("control", 38, 98, 6)
+            print("theme", 38, 80, 7)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 2)
 
-            spr(3, 28, 80)
+            spr(3, 28, 78)
         elseif menu_c == 2 then
-            rectfill(37, 97, 65, 103, 6)
+            rectfill(37, 90, 65, 96, 6)
 
-            print("theme", 38, 82, 6)
-            print("control", 38, 98, 7)
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 7)
+            print("delete save", 38, 102, 2)
 
-            spr(3, 28, 96)
+            spr(3, 28, 89)
+        elseif menu_c == 3 then
+            rectfill(37, 101, 81, 107, 6)
+
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 0)
+
+            spr(3, 28, 100)
         else
-            print("theme", 38, 82, 6)
-            print("control", 38, 98, 6)
+            print("theme", 38, 80, 6)
+            print("control", 38, 91, 6)
+            print("delete save", 38, 102, 2)
         end
 
         -- theme preview
-        rectfill(75, 81, 81, 87, themes[theme_select]["main"])
-        spr(35, 75, 81)
+        rectfill(75, 79, 81, 85, themes[theme_select]["main"])
+        spr(35, 75, 79)
 
         -- theme counter
-        print(theme_select.."/"..#themes, 90, 82, 13)
+        print(theme_select.."/"..#themes, 90, 80, 13)
 
         -- draw controller/mouse sprite
-        if controller then spr(34, 75, 97) else spr(33, 75, 97) end
+        if controller then spr(34, 75, 90) else spr(33, 75, 90) end
+    elseif deleting then
+        -- draw main frame and background
+        draw_title_menu("🅾️ TO RETURN")
+
+        print("ARE YOU SURE\nYOU WANT TO\ndelete save data?", 25, 78, 0)
+
+        if main then
+            rectfill(27, 99, 27+(49*ticker/(hold_timer*2)), 105, 6)
+        end
+        print("❎ TO delete", 28, 100, 13)
     end
 
     -- if mouse control is enabled, draw the cursor
@@ -1982,36 +2064,6 @@ function to_title(b)
     menu = true
 end
 
-function save_security(b)
--- check that the user wants to delete their save
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
-    end
-
-    -- ask the user to confirm their choice
-    menuitem(5, "100% sure?", delete_save)
-    return true
-end
-
-function delete_save(b)
--- delete all save data
-    -- ignore right/left button presses
-    if (b&1 > 0) or (b&2 > 0) then
-        return true
-    end
-
-    -- set the option back to normal
-    menuitem(5, "delete save data", save_security)
-    
-    -- delete save data
-    for c=0, 9 do
-        dset(c, 0)
-    end
-
-    -- reset the cart
-    run()
-end
 
 
 
