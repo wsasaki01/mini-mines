@@ -134,6 +134,26 @@ function _init()
         hard = 0
     }
 
+    -- title option coords
+    tc = {
+        {37, 81, 53, 87},
+        {37, 89, 57, 95},
+        {37, 97, 65, 103}
+    }
+
+    -- difficulty/pb coords
+    dc = {
+        {37, 81, 53, 87},
+        {37, 89, 61, 95},
+        {37, 97, 53, 103}
+    }
+
+    pbc = {
+        {55, 84, 75, 84},
+        {63, 92, 75, 92},
+        {55, 100, 75, 100}
+    }
+
     -- flashing on guide page
     mine_flash = 0
     show_mines = false
@@ -1211,61 +1231,9 @@ function _draw()
             draw_title_menu("RETURN")
         end
 
-        -- set a background for whichever option is currently selected
-        if menu_c == 1 then
-            -- option background
-            rectfill(37, 81, 53, 87, 6)
-
-            -- line connecting option and pb
-            line(55, 84, 75, 84, 6)
-
-            -- options
-            print("easy", 38, 82, 7)
-            print("medium", 38, 90, 6)
-            print("hard", 38, 98, 6)
-
-            -- pbs
-            draw_pb("easy", 77, 82, 13)
-            draw_pb("med", 77, 90, 6)
-            draw_pb("hard", 77, 98, 6)
-        elseif menu_c == 2 then
-            rectfill(37, 89, 61, 95, 6)
-            line(63, 92, 75, 92, 6)
-
-            print("easy", 38, 82, 6)
-            print("medium", 38, 90, 7)
-            print("hard", 38, 98, 6)
-
-            draw_pb("easy", 77, 82, 6)
-            draw_pb("med", 77, 90, 13)
-            draw_pb("hard", 77, 98, 6)
-        elseif menu_c == 3 then
-            rectfill(37, 97, 53, 103, 6)
-            line(55, 100, 75, 100, 6)
-
-            print("easy", 38, 82, 6)
-            print("medium", 38, 90, 6)
-            print("hard", 38, 98, 7)
-
-            draw_pb("easy", 77, 82, 6)
-            draw_pb("med", 77, 90, 6)
-            draw_pb("hard", 77, 98, 13)
-        else
-            print("easy", 38, 82, 6)
-            print("medium", 38, 90, 6)
-            print("hard", 38, 98, 6)
-
-            draw_pb("easy", 77, 82, 6)
-            draw_pb("med", 77, 90, 6)
-            draw_pb("hard", 77, 98, 6)
-        end
+        draw_difficulty(menu_c)
 
         print("BEST", 77, 75, 6)
-
-        -- if the player is hovering over an option, draw the flag next to it
-        if menu_c != false then
-            spr(3, 15, menu_c)
-        end
     elseif play then
         -- clear screen with background
         cls(themes[ct]["gamebg"])
@@ -1335,45 +1303,7 @@ function _draw()
     
         -- set a background for whichever option is currently selected
         -- if the player is hovering over an option, draw the flag next to it
-        if menu_c == 1 then
-            -- option background
-            rectfill(37, 81, 53, 87, 6)
-
-            -- options
-            print("play", 38, 82, 7)
-            print("guide", 38, 90, 6)
-            print("options", 38, 98, 6)
-
-            -- preview sprite
-            sspr(0, 64, 24, 24, 76, 81)
-            
-            -- flag
-            spr(3, 28, 80)
-        elseif menu_c == 2 then
-            rectfill(37, 89, 57, 95, 6)
-
-            print("play", 38, 82, 6)
-            print("guide", 38, 90, 7)
-            print("options", 38, 98, 6)
-            
-            sspr(24, 64, 24, 24, 76, 81)
-            
-            spr(3, 28, 88)
-        elseif menu_c == 3 then
-            rectfill(37, 97, 65, 103, 6)
-
-            print("play", 38, 82, 6)
-            print("guide", 38, 90, 6)
-            print("options", 38, 98, 7)
-
-            sspr(48, 64, 24, 24, 76, 81)
-
-            spr(3, 28, 96)
-        else
-            print("play", 38, 82, 6)
-            print("guide", 38, 90, 6)
-            print("options", 38, 98, 6)
-        end
+        draw_title_options(menu_c)
     elseif guide then
         if controller then
             -- draw the guide with the controller prompt
@@ -1678,6 +1608,45 @@ function draw_title_menu(info_message)
 
     -- draw the version number
     print(ver, 100-string_l(ver), 26, 13)
+end
+
+function draw_title_options(c)
+-- draw title options
+    -- option background
+    rectfill(tc[c][1], tc[c][2], tc[c][3], tc[c][4], 6)
+
+    -- options
+    print("play", 38, 82, c==1 and 7 or 6)
+    print("guide", 38, 90, c==2 and 7 or 6)
+    print("options", 38, 98, c==3 and 7 or 6)
+
+    -- preview sprite
+    sspr(c*24-24, 64, 24, 24, 76, 81)
+    
+    -- flag
+    spr(3, 28, 80+8*c-8)
+end
+
+function draw_difficulty(c)
+-- draw difficulty options
+    -- option background
+    rectfill(dc[c][1], dc[c][2], dc[c][3], dc[c][4], 6)
+
+    -- line connecting option and pb
+    line(pbc[c][1], pbc[c][2], pbc[c][3], pbc[c][4], 6)
+
+    -- flag cursor
+    spr(3, 28, 80+8*c-8)
+
+    -- options
+    print("easy", 38, 82, c == 1 and 7 or 6)
+    print("medium", 38, 90, c == 2 and 7 or 6)
+    print("hard", 38, 98, c == 3 and 7 or 6)
+
+    -- pbs
+    draw_pb("easy", 77, 82, c == 1 and 13 or 6)
+    draw_pb("med", 77, 90, c == 2 and 13 or 6)
+    draw_pb("hard", 77, 98, c == 3 and 13 or 6)
 end
 
 function draw_pb(diff, x, y, col)
