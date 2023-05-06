@@ -19,7 +19,7 @@ function _init()
     -- 7-9: PBs
 
     -- version number
-    ver = "1.12.2"
+    ver = "1.17.0"
 
     -- screens
     -- boot to title
@@ -879,6 +879,7 @@ function _update()
                 sfx(5)
                 menu = false
                 option = true
+                menu_c = 1
             end
         end
     elseif guide then
