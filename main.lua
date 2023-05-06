@@ -1419,7 +1419,13 @@ function _draw()
         print(ct.."/"..#themes, 90, 80, 13)
 
         -- draw controller/mouse sprite
-        if controller then spr(34, 75, 90) else spr(33, 75, 90) end
+        if controller then
+            spr(34, 75, 90)
+        elseif mouse[2] == 1 then
+            spr(49, 75, 90)
+        else
+            spr(50, 75, 90)
+        end
     elseif deleting then
         -- draw main frame and background
         draw_title_menu("🅾️ TO RETURN")
@@ -1436,7 +1442,7 @@ function _draw()
     if mouse[1] then
         spr(20, mo_x, mo_y)
     end
-    
+
     -- debug: print mouse and/or grid coords
     draw_coords()
 end
