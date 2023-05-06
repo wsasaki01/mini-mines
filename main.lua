@@ -440,8 +440,8 @@ function _update()
             win = true
         end
     elseif losing then
-        -- hold x and o to speed up explosions
-        if main then
+        -- hold x to speed up explosions
+        if main and not main_stick then
             explosion_timer = explosion_interval
         end
 
@@ -805,6 +805,8 @@ function _update()
                         if #explosions > 0 then
                             losing = true
                             play = false
+                            main_stick = true
+                            alt_stick = true
                             
                             -- leave a pause before exploding
                             explosion_timer = flr(-2.5*explosion_interval)
@@ -1550,6 +1552,8 @@ function init_loss(loc)
     -- the player loses
     losing = true
     play = false
+    main_stick = true
+    alt_stick = true
 
     -- make sure the current mine explodes first
     add(explosions, {loc[1], loc[2], "first", 0})
