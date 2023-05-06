@@ -1219,6 +1219,9 @@ function _draw()
             -- line connecting option and pb
             line(55, 84, 75, 84, 6)
 
+            -- flag cursor
+            spr(3, 28, 80)
+
             -- options
             print("easy", 38, 82, 7)
             print("medium", 38, 90, 6)
@@ -1231,6 +1234,7 @@ function _draw()
         elseif menu_c == 2 then
             rectfill(37, 89, 61, 95, 6)
             line(63, 92, 75, 92, 6)
+            spr(3, 28, 88)
 
             print("easy", 38, 82, 6)
             print("medium", 38, 90, 7)
@@ -1242,6 +1246,7 @@ function _draw()
         elseif menu_c == 3 then
             rectfill(37, 97, 53, 103, 6)
             line(55, 100, 75, 100, 6)
+            spr(3, 28, 96)
 
             print("easy", 38, 82, 6)
             print("medium", 38, 90, 6)
@@ -1261,11 +1266,6 @@ function _draw()
         end
 
         print("BEST", 77, 75, 6)
-
-        -- if the player is hovering over an option, draw the flag next to it
-        if menu_c != false then
-            spr(3, 15, menu_c)
-        end
     elseif play then
         -- clear screen with background
         cls(themes[ct]["gamebg"])
