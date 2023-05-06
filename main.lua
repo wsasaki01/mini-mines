@@ -3,7 +3,7 @@ function _init()
     reveal = false -- reveal mines 
     fill = false -- show spaces
     grid_log = false -- print grid pos
-    mouse_log = true -- print mouse coords
+    mouse_log = false -- print mouse coords
     title_only = false -- for gifs
     one_mine = false
 
@@ -395,6 +395,7 @@ function _update()
             -- if left clicking
             if main and not main_stick then
                 main_stick = true
+                alt_stick = true
 
                 if hover_replay and not hide then
                     win = false
@@ -578,6 +579,7 @@ function _update()
             -- left click to pick difficulty
             if main and not main_stick then
                 main_stick = true
+                alt_stick = true
 
                 if hover_easy then
                     difficulty = false
@@ -802,6 +804,7 @@ function _update()
                         -- if any mines were found by auto-dig, add them to the list
                         if #explosions > 0 then
                             losing = true
+                            play = false
                             
                             -- leave a pause before exploding
                             explosion_timer = flr(-2.5*explosion_interval)
@@ -1433,7 +1436,7 @@ function _draw()
     if mouse[1] then
         spr(20, mo_x, mo_y)
     end
-
+    
     -- debug: print mouse and/or grid coords
     draw_coords()
 end
