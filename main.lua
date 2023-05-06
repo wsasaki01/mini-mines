@@ -39,7 +39,7 @@ function _init()
 
     -- which control scheme to use?
     controller = true
-    mouse = false
+    mouse = {false, 1}
 
     -- allow user to change controls from pico-8 menu
     menuitem(1, "control: gamepad", set_control)
@@ -307,7 +307,7 @@ function _update()
         if alt_stick and not alt then
             alt_stick = false
         end
-    elseif mouse then
+    elseif mouse[1] then
         -- positions
         mo_x = stat(32)
         mo_y = stat(33)
@@ -394,7 +394,7 @@ function _update()
                     ticker = 0
                 end
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- hover bounds
             hover_replay = hover(36, 57, 60, 63)
             hover_quit = hover(36, 64, 92, 70)
@@ -575,7 +575,7 @@ function _update()
                 menu_c = 1
                 menu = true
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_easy = hover(37, 81, 53, 87)
             hover_medium = hover(37, 89, 61, 95)
@@ -716,7 +716,7 @@ function _update()
                 p.y += 8
                 p.my += 1
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- start at offset
             -- find distance from current mouse to offset
             -- int. div. of 8 to find how many spaces that is
@@ -867,7 +867,7 @@ function _update()
                     option = true
                 end
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_play = hover(37, 81, 53, 87)
             hover_guide = hover(37, 89, 57, 95)
@@ -934,7 +934,7 @@ function _update()
                 page = 1
                 menu = true
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "return" in guide menu
             hover_return_guide = hover(92, 119, 118, 123)
             hover_p1 = hover(110, 63, 118, 69)
@@ -987,7 +987,7 @@ function _update()
                     sfx(5)
                     -- switch to mouse
                     controller = false
-                    mouse = true
+                    mouse[1] = true
                 elseif menu_c == 3 then
                     sfx(5)
                     -- go to delete save data screen
@@ -1006,7 +1006,7 @@ function _update()
                 -- place cursor on "options"
                 menu_c = 3
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_theme = hover(37, 79, 57, 85)
             hover_control = hover(37, 90, 65, 96)
@@ -1040,7 +1040,7 @@ function _update()
                 elseif menu_c == 2 then
                     sfx(5)
                     -- change to controller
-                    mouse = false
+                    mouse[1] = false
                     controller = true
                 elseif menu_c == 3 then
                     sfx(5)
@@ -1050,7 +1050,7 @@ function _update()
                     -- only allow controller
                     -- if using mouse, remember that and put it back on after
                     controller = true
-                    mouse = false
+                    mouse[1] = false
                     control_store = "mouse"
                 elseif hover_return_options then
                     sfx(6)
@@ -1101,7 +1101,7 @@ function _update()
                 menu_c = 3
             elseif control_store == "mouse" then
                 controller = false
-                mouse = true
+                mouse[1] = true
             end
         end
     end
@@ -1205,7 +1205,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("❎ TO SELECT")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu("RETURN")
         end
 
@@ -1291,7 +1291,7 @@ function _draw()
         -- print control hints in the middle
         if controller then
             print("❎-flag   🅾️-dig", 30, 1, themes[theme_select]["accent"])
-        elseif mouse then
+        elseif mouse[1] then
             print("l-flag   r-dig", 34, 1, themes[theme_select]["accent"])
         end
 
@@ -1323,7 +1323,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("❎ TO SELECT")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu()
         end
     
@@ -1372,7 +1372,7 @@ function _draw()
         if controller then
             -- draw the guide with the controller prompt
             draw_guide("🅾️ TO RETURN")
-        elseif mouse then
+        elseif mouse[1] then
             -- draw the guide with the mouse prompt
             draw_guide("RETURN")
         end
@@ -1380,7 +1380,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("🅾️ TO RETURN")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu("RETURN")
         end
         
@@ -1437,7 +1437,7 @@ function _draw()
     end
 
     -- if mouse control is enabled, draw the cursor
-    if mouse then
+    if mouse[1] then
         spr(20, mo_x, mo_y)
     end
 
@@ -1815,7 +1815,7 @@ function draw_win_loss(win)
             if controller then
                 rectfill(80, 88, 109, 94, 9)
                 print("⬇️ HIDE", 81, 89, 7)
-            elseif mouse then
+            elseif mouse[1] then
                 rectfill(92, 88, 109, 93, 9)
                 print("HIDE", 93, 88, 7)
             end
@@ -1826,7 +1826,7 @@ function draw_win_loss(win)
             if controller then
                 rectfill(80, 72, 109, 78, 9)
                 print("⬇️ HIDE", 81, 73, 7)
-            elseif mouse then
+            elseif mouse[1] then
                 rectfill(92, 72, 109, 77, 9)
                 print("HIDE", 93, 72, 7)
             end
@@ -1856,7 +1856,7 @@ function draw_win_loss(win)
         if controller then
             rectfill(99, 121, 127, 127, 9)
             print("⬆️ SHOW", 100, 122, 7)
-        elseif mouse then
+        elseif mouse[1] then
             rectfill(111, 122, 127, 127, 9)
             print("SHOW", 112, 122, 7)
         end
@@ -1881,7 +1881,7 @@ function win_lose_message(timer)
         -- draw options
         print("❎ to replay", 22, 58, 13)
         print("🅾️ to return to menu", 22, 65)
-    elseif mouse then
+    elseif mouse[1] then
         -- set a background for whichever option is currently selected
         if hover_replay then
             rectfill(36, 57, 60, 63, 6)
@@ -2021,12 +2021,12 @@ function set_control(b)
     if(b&1 > 0) or (b&2 > 0) then
         if controller then
             menuitem(1, "control: mouse")
-            mouse = true
+            mouse[1] = true
             controller = false
-        elseif mouse then
+        elseif mouse[1] then
             menuitem(1, "control: gamepad")
             controller = true
-            mouse = false
+            mouse[1] = false
         end
     end
 
