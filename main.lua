@@ -5,7 +5,7 @@ function _init()
     reveal = false -- reveal mine locations during game
     fill = false -- show values for each space
     grid_log = false -- print grid position
-    mouse_log = false -- print mouse coords
+    mouse_log = true -- print mouse coords
     title_only = false -- for capturing gifs
     one_mine = false -- only one mine
 
@@ -396,8 +396,8 @@ function _update()
             end
         elseif mouse then
             -- hover bounds
-            hover_replay = hover(21, 57, 69, 63)
-            hover_quit = hover(21, 64, 101, 71)
+            hover_replay = hover(36, 57, 60, 63)
+            hover_quit = hover(36, 64, 92, 70)
             
             -- hide bounds change depending on whether screen is already hidden or not
             if not hide then
@@ -1884,18 +1884,18 @@ function win_lose_message(timer)
     elseif mouse then
         -- set a background for whichever option is currently selected
         if hover_replay then
-            rectfill(21, 57, 69, 63, 6)
+            rectfill(36, 57, 60, 63, 6)
 
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
+            print("replay", 37, 58, 13)
+            print("return to menu", 37, 65)
         elseif hover_quit then
-            rectfill(21, 64, 101, 70, 6)
+            rectfill(36, 64, 92, 70, 6)
 
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
+            print("replay", 37, 58, 13)
+            print("return to menu", 37, 65)
         else
-            print("❎ to replay", 22, 58, 13)
-            print("🅾️ to return to menu", 22, 65)
+            print("replay", 37, 58, 13)
+            print("return to menu", 37, 65)
         end
     end
 end
