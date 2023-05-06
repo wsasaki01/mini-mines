@@ -1,5 +1,5 @@
 *.p8l
 .DS_Store
 main.lua
-extras/Distributables.bin
+extras/distributables
 
