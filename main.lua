@@ -273,6 +273,8 @@ function _update()
         main = btn(5)
         alt = btn(4)
 
+        menuitem(1, "control: gamepad", set_control)
+
         -- sticky trackers for lc/x and rc/o
         -- when the player clicks either of these, the sticky is enabled
         -- actions are only allowed while sticky is false
@@ -288,6 +290,12 @@ function _update()
         -- positions
         mo_x = stat(32)
         mo_y = stat(33)
+
+        if mouse[2] == 1 then
+            menuitem(1, "control: mouse 1", set_control)
+        elseif mouse[2] == 2 then
+            menuitem(1, "control: mouse 2", set_control)
+        end
 
         -- left and right click
         if play and mouse[2] == 1 then
@@ -1759,9 +1767,9 @@ function draw_guide(info_message)
         spr(33, 90, 48) -- mouse icon
         spr(34, 99, 48) -- controller icon
 
-        print("HOLD ❎ to\nexplode faster!", 22, 69, 4)
-        spr(19, 90, 69) -- crator icon
-        spr(6, 95, 72) -- mini-explosion icon
+        print("HOLD ❎ OR lC to\nexplode faster!", 22, 69, 4)
+        spr(19, 95, 69) -- crator icon
+        spr(6, 100, 72) -- mini-explosion icon
 
         print("re-dig TO dig\nsurrounding\nspaces!", 22, 90, 0)
         spr(18, 94, 96) -- dug space icon
