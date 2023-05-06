@@ -2027,6 +2027,10 @@ function set_control(b)
             menuitem(1, "control: gamepad")
             controller = true
             mouse[1] = false
+            
+            if not menu_c then
+                menu_c = 1
+            end
         end
     end
 
