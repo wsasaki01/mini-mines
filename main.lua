@@ -42,7 +42,7 @@ function _init()
     mouse = false
 
     -- allow user to change controls from pico-8 menu
-    menuitem(1, "control: controller", set_control)
+    menuitem(1, "control: gamepad", set_control)
 
     -- mouse x and y
     mo_x = 0
@@ -391,7 +391,7 @@ function _update()
                         menu = true
                     end
                 else
-                    ticker = false
+                    ticker = 0
                 end
             end
         elseif mouse then
@@ -2017,19 +2017,17 @@ end
 -- ** MENUITEMS **
 function set_control(b)
 -- control scheme menuitem
-    -- left to select controller
-    if(b&1 > 0) then
-        menuitem(1, "control: controller")
-        controller = true
-        mouse = false
-        menu_c = 1
-    end
-
-    -- right to select mouse
-    if(b&2 > 0) then
-        menuitem(1,"control: mouse")
-        mouse = true
-        controller = false
+    -- left or right to select controller
+    if(b&1 > 0) or (b&2 > 0) then
+        if controller then
+            menuitem(1, "control: mouse")
+            mouse = true
+            controller = false
+        elseif mouse then
+            menuitem(1, "control: gamepad")
+            controller = true
+            mouse = false
+        end
     end
 
     -- keep pico-8 menu open even after selecting an option
