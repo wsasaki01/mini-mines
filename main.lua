@@ -318,11 +318,7 @@ function _update()
         mo_x = stat(32)
         mo_y = stat(33)
 
-        if mouse[2] == 1 then
-            menuitem(1, "control: mouse 1", set_control)
-        elseif mouse[2] == 2 then
-            menuitem(1, "control: mouse 2", set_control)
-        end
+        menuitem(1, "control: mouse "..mouse[2], set_control)
 
         -- left and right click
         if play and mouse[2] == 1 then
@@ -559,40 +555,6 @@ function _update()
                 sfx(4)
                 menu_c -= 1
             end
-
-            -- x to select option
-            if main and not main_stick then
-                main_stick = true
-
-                -- disable difficulty menu
-                difficulty = false
-                play = true
-
-                -- difficulty selection
-                if menu_c == 1 then
-                    --easy
-                    initialise("easy")
-                elseif menu_c == 2 then
-                    --medium
-                    initialise("med")
-                elseif menu_c == 3 then
-                    --hard
-                    initialise("hard")
-                end
-            end
-
-            -- o to return to title
-            if alt and not alt_stick then
-                alt_stick = true
-
-                -- disable difficulty menu
-                difficulty = false
-                sfx(6)
-
-                -- go back to main menu
-                menu_c = 1
-                menu = true
-            end
         elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_easy = hover(37, 81, 53, 87)
@@ -610,30 +572,43 @@ function _update()
             else
                 menu_c = false
             end
-            
-            -- left click to pick difficulty
-            if main and not main_stick then
-                main_stick = true
-                alt_stick = true
+        end
 
-                if hover_easy then
-                    difficulty = false
-                    play = true
-                    initialise("easy")
-                elseif hover_medium then
-                    difficulty = false
-                    play = true
-                    initialise("med")
-                elseif hover_hard then
-                    difficulty = false
-                    play = true
-                    initialise("hard")
-                elseif hover_return_difficulty then
-                    sfx(6)
-                    difficulty = false
-                    menu = true
-                end
+        -- x to select option
+        if main and not main_stick then
+            main_stick = true
+
+            -- difficulty selection
+            if menu_c == 1 then
+                difficulty = false
+                play = true
+                initialise("easy")
+            elseif menu_c == 2 then
+                difficulty = false
+                play = true
+                initialise("med")
+            elseif menu_c == 3 then
+                difficulty = false
+                play = true
+                initialise("hard")
+            elseif mouse[1] and hover_return_difficulty then
+                sfx(6)
+                difficulty = false
+                menu = true
             end
+        end
+
+        -- o to return to title
+        if controller and alt and not alt_stick then
+            alt_stick = true
+
+            -- disable difficulty menu
+            difficulty = false
+            sfx(6)
+
+            -- go back to main menu
+            menu_c = 1
+            menu = true
         end
     elseif play then
         -- if in game, add the "return to title" option
@@ -869,28 +844,7 @@ function _update()
                 sfx(4)
                 menu_c -= 1
             end
-
-            -- x to select option
-            if main and not main_stick then
-                main_stick = true
-
-                -- disable menu
-                menu = false
-                sfx(5)
-
-                -- if "play" selected, start the game
-                if menu_c == 1 then
-                    difficulty = true
-                -- if "guide" selected, go to guide screen
-                elseif menu_c == 2 then
-                    guide = true
-                -- if "options" selected, go to options
-                elseif menu_c == 3 then
-                    menu_c = 1
-                    option = true
-                end
-            end
-        elseif mouse[1] then
+        else
             -- bounds for "play" and "options" on main menu
             hover_play = hover(37, 81, 53, 87)
             hover_guide = hover(37, 89, 57, 95)
@@ -906,27 +860,24 @@ function _update()
             else
                 menu_c = false
             end
-            
-            -- if left clicking
-            if main and not main_stick then
-                main_stick = true
+        end
 
-                -- if hovering over "play", start the game
-                if hover_play then
-                    sfx(5)
-                    menu = false
-                    difficulty = true
-                -- if hovering over "play", start the game
-                elseif hover_guide then
-                    sfx(5)
-                    menu = false
-                    guide = true
-                -- if hovering over "options", go to options
-                elseif hover_options then
-                    sfx(5)
-                    menu = false
-                    option = true
-                end
+        -- x to select option
+        if main and not main_stick then
+            main_stick = true
+
+            if menu_c == 1 then -- play
+                sfx(5)
+                menu = false
+                difficulty = true
+            elseif menu_c == 2 then -- guide
+                sfx(5)
+                menu = false
+                guide = true
+            elseif menu_c == 3 then -- options
+                sfx(5)
+                menu = false
+                option = true
             end
         end
     elseif guide then
@@ -939,12 +890,10 @@ function _update()
 
         -- return to title screen
         if controller then
-            if btn(1) and page != 2 and not main_stick then
-                main_stick = true
+            if btnp(1) and page != 2 then
                 sfx(4)
                 page = 2
-            elseif btn(0) and page != 1 and not main_stick then
-                main_stick = true
+            elseif btnp(0) and page != 1 then
                 sfx(4)
                 page = 1
             end
@@ -957,7 +906,7 @@ function _update()
                 page = 1
                 menu = true
             end
-        elseif mouse[1] then
+        else
             -- bounds for "return" in guide menu
             hover_return_guide = hover(92, 119, 118, 123)
             hover_p1 = hover(110, 63, 118, 69)
@@ -991,45 +940,6 @@ function _update()
                 sfx(4)
                 menu_c -= 1
             end
-
-            -- x to select option
-            if main and not main_stick then
-                main_stick = true
-
-                if menu_c == 1 then
-                    if #themes != 1 then
-                        sfx(14)
-                    end
-                    -- change theme
-                    if ct != #themes then
-                        ct += 1
-                    else
-                        ct = 1
-                    end
-                elseif menu_c == 2 then
-                    sfx(5)
-                    -- switch to mouse
-                    controller = false
-                    mouse[1] = true
-                    mouse[2] = 1
-                elseif menu_c == 3 then
-                    sfx(5)
-                    -- go to delete save data screen
-                    option = false
-                    deleting = true
-                    control_store = "controller"
-                end
-            -- o to return to menu
-            elseif alt and not alt_stick then
-                alt_stick = true
-                sfx(6)
-
-                option = false
-                menu = true
-
-                -- place cursor on "options"
-                menu_c = 3
-            end
         elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_theme = hover(37, 79, 57, 85)
@@ -1047,46 +957,61 @@ function _update()
             else
                 menu_c = false
             end
-            
-            -- if left clicking
-            if main and not main_stick then
-                main_stick = true
+        end
 
-                if menu_c == 1 then
-                    if #themes != 1 then
-                        sfx(14)
-                    end
-                    if ct != #themes then
-                        ct += 1
-                    else
-                        ct = 1
-                    end
-                elseif menu_c == 2 then
-                    sfx(5)
-                    if mouse[2] == 1 then
-                        -- change to mouse scheme 2
-                        mouse[2] = 2
-                    elseif mouse[2] == 2 then
-                        -- change to controller
-                        mouse[1] = false
-                        controller = true
-                    end
-                elseif menu_c == 3 then
-                    sfx(5)
-                    -- go to delete save data screen
-                    option = false
-                    deleting = true
+        -- x to select option
+        if main and not main_stick then
+            main_stick = true
+
+            if menu_c == 1 then
+                if #themes != 1 then sfx(14) end
+
+                -- change theme
+                ct = (ct!=#themes and ct+1 or 1)
+            elseif menu_c == 2 then
+                sfx(5)
+                -- switch to mouse
+                if controller then
+                    controller = false
+                    mouse[1] = true
+                    mouse[2] = 1
+                elseif mouse[2] == 1 then
+                    -- change to mouse scheme 2
+                    mouse[2] = 2
+                else
+                    -- change to controller
+                    mouse[1] = false
+                    controller = true
+                end
+            elseif menu_c == 3 then
+                sfx(5)
+                -- go to delete save data screen
+                option = false
+                deleting = true
+                if controller then
+                    control_store = "controller"
+                else
                     -- only allow controller
                     -- if using mouse, remember that and put it back on after
                     controller = true
                     mouse[1] = false
                     control_store = "mouse"
-                elseif hover_return_options then
-                    sfx(6)
-                    options = false
-                    menu = true
                 end
+            elseif mouse[1] and hover_return_options then
+                sfx(6)
+                options = false
+                menu = true
             end
+        -- o to return to menu
+        elseif controller and alt and not alt_stick then
+            alt_stick = true
+            sfx(6)
+
+            option = false
+            menu = true
+
+            -- place cursor on "options"
+            menu_c = 3
         end
     elseif deleting then
         -- x to delete
