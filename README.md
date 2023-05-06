@@ -1,13 +1,13 @@
 ![title](https://user-images.githubusercontent.com/65739117/235383527-4652a200-4b5d-45d7-894a-9bf550953d95.gif)
 
 A small version of Minesweeper, made for PICO-8.
-Currently in development.
 
 ## Features
 - Full controller and mouse support
 - Multiple difficulties 
 - Personal best times
 - Colour themes to unlock
+- Save data
 
 ## Installation
 Mini Mines is available on the [PICO-8 BBS](https://www.lexaloffle.com/bbs/?tid=52577) and on [itch.io](https://wsasaki01.itch.io/mini-mines). Find binaries under Releases.
