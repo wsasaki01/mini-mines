@@ -19,7 +19,7 @@ function _init()
     -- 7-9: PBs
 
     -- version number
-    ver = "1.17.0"
+    ver = "1.17.1"
 
     -- screens
     -- boot to title
