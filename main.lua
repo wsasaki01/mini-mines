@@ -577,6 +577,7 @@ function _update()
         -- x to select option
         if main and not main_stick then
             main_stick = true
+            alt_stick = true
 
             -- difficulty selection
             if menu_c == 1 then
