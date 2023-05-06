@@ -154,6 +154,13 @@ function _init()
         {55, 100, 75, 100}
     }
 
+    -- option menu coords
+    oc = {
+        {37, 79, 57, 85},
+        {37, 90, 65, 96},
+        {37, 101, 81, 107}
+    }
+
     -- flashing on guide page
     mine_flash = 0
     show_mines = false
@@ -1232,27 +1239,17 @@ function _draw()
         end
 
         draw_difficulty(menu_c)
-
-        print("BEST", 77, 75, 6)
     elseif play then
         -- clear screen with background
         cls(themes[ct]["gamebg"])
 
         -- record current seconds
         -- add leading 0 if needed
-        if time % 60 < 10 then
-            secs = ":0"..time % 60
-        else
-            secs = ":"..time % 60
-        end
+        secs = (time%60<10 and ":0" or ":")..time % 60
 
         -- record current mins
         -- add leading space if needed
-        if time \ 60 < 10 then
-            mins = " "..time \ 60
-        else
-            mins = time \ 60
-        end
+        mins = (time\60<10 and " " or "")..time \ 60
 
         -- draw flag icon and count in top left corner
         spr(3, 0, 0)
@@ -1261,12 +1258,10 @@ function _draw()
         -- print control hints in the middle
         if controller then
             print("❎-flag   🅾️-dig", 30, 1, themes[ct]["accent"])
-        elseif mouse[1] then
-            if mouse[2] == 1 then
-                print("r-flag   l-dig", 34, 1, themes[ct]["accent"])
-            elseif mouse[2] == 2 then
-                print("l-flag   r-dig", 34, 1, themes[ct]["accent"])
-            end
+        elseif mouse[2] == 2 then
+            print("l-dig   r-flag", 34, 1, themes[ct]["accent"])
+        else
+            print("l-flag   r-dig", 34, 1, themes[ct]["accent"])
         end
 
         -- print time in top right corner
@@ -1321,35 +1316,7 @@ function _draw()
         end
         
         -- set a background for whichever option is currently selected
-        if menu_c == 1 then
-            rectfill(37, 79, 57, 85, 6)
-
-            print("theme", 38, 80, 7)
-            print("control", 38, 91, 6)
-            print("delete save", 38, 102, 2)
-
-            spr(3, 28, 78)
-        elseif menu_c == 2 then
-            rectfill(37, 90, 65, 96, 6)
-
-            print("theme", 38, 80, 6)
-            print("control", 38, 91, 7)
-            print("delete save", 38, 102, 2)
-
-            spr(3, 28, 89)
-        elseif menu_c == 3 then
-            rectfill(37, 101, 81, 107, 6)
-
-            print("theme", 38, 80, 6)
-            print("control", 38, 91, 6)
-            print("delete save", 38, 102, 0)
-
-            spr(3, 28, 100)
-        else
-            print("theme", 38, 80, 6)
-            print("control", 38, 91, 6)
-            print("delete save", 38, 102, 2)
-        end
+        draw_option_options(menu_c)
 
         -- theme preview
         rectfill(75, 79, 81, 85, themes[ct]["main"])
@@ -1612,31 +1579,38 @@ end
 
 function draw_title_options(c)
 -- draw title options
-    -- option background
-    rectfill(tc[c][1], tc[c][2], tc[c][3], tc[c][4], 6)
+    if c then
+        -- option background
+        rectfill(tc[c][1], tc[c][2], tc[c][3], tc[c][4], 6)
+        
+        -- preview sprite
+        sspr(c*24-24, 64, 24, 24, 76, 81)
+        
+        -- flag
+        spr(3, 28, 80+8*c-8)
+    end
 
     -- options
     print("play", 38, 82, c==1 and 7 or 6)
     print("guide", 38, 90, c==2 and 7 or 6)
     print("options", 38, 98, c==3 and 7 or 6)
 
-    -- preview sprite
-    sspr(c*24-24, 64, 24, 24, 76, 81)
-    
-    -- flag
-    spr(3, 28, 80+8*c-8)
 end
 
 function draw_difficulty(c)
 -- draw difficulty options
-    -- option background
-    rectfill(dc[c][1], dc[c][2], dc[c][3], dc[c][4], 6)
+    if c then
+        -- option background
+        rectfill(dc[c][1], dc[c][2], dc[c][3], dc[c][4], 6)
 
-    -- line connecting option and pb
-    line(pbc[c][1], pbc[c][2], pbc[c][3], pbc[c][4], 6)
+        -- line connecting option and pb
+        line(pbc[c][1], pbc[c][2], pbc[c][3], pbc[c][4], 6)
 
-    -- flag cursor
-    spr(3, 28, 80+8*c-8)
+        -- flag cursor
+        spr(3, 28, 80+8*c-8)
+    end
+
+    print("BEST", 77, 75, 6)
 
     -- options
     print("easy", 38, 82, c == 1 and 7 or 6)
@@ -1758,6 +1732,22 @@ function draw_guide(info_message)
         rectfill(10, 63, 18, 69, themes[ct]["accent"])
         print("⬅️", 11, 64, 7)
     end
+end
+
+function draw_option_options(c)
+-- draw options menu options
+    if c then
+        -- option background
+        rectfill(oc[c][1], oc[c][2], oc[c][3], oc[c][4], 6)
+
+        -- flag cursor
+        spr(3, 28, 78+11*c-11)
+    end
+    
+    print("theme", 38, 80, c==1 and 7 or 6)
+    print("control", 38, 91, c==2 and 7 or 6)
+    print("delete save", 38, 102, c==3 and 0 or 2)
+
 end
 
 function draw_win_loss(win)
