@@ -1,15 +1,13 @@
 function _init()
-    -- *************
-    --     DEBUG
-    -- *************
-    reveal = false -- reveal mine locations during game
-    fill = false -- show values for each space
-    grid_log = false -- print grid position
-    mouse_log = true -- print mouse coords
-    title_only = false -- for capturing gifs
-    one_mine = false -- only one mine
+    -- *** DEBUG ***
+    reveal = false -- reveal mines 
+    fill = false -- show spaces
+    grid_log = false -- print grid pos
+    mouse_log = false -- print mouse coords
+    title_only = false -- for gifs
+    one_mine = false
 
-    printh("", "log", true) -- clear the log
+    printh("", "log", true) -- clear log
     -- *************
 
     -- enable devkit mouse
@@ -17,16 +15,14 @@ function _init()
 
     -- enable save file
     cartdata("someguy17-mini-mines")
-    -- 1 to 6: themes
-    -- 7: easy PB
-    -- 8: med PB
-    -- 9: hard PB
+    -- 1-6: themes
+    -- 7-9: PBs
 
-    -- program version number
+    -- version number
     ver = "1.12.2"
 
-    -- which screen is the user on?
-    -- boot up to menu screen
+    -- screens
+    -- boot to title
     menu = true
     play = false
     difficulty = false
@@ -34,14 +30,14 @@ function _init()
     deleting = false
     guide = false
 
-    -- list of falling icons on menu screen
+    -- falling icons on title
     icons = {}
 
-    -- which control scheme to use?
+    -- control scheme
     controller = true
-    mouse = false
+    mouse = {false, 1}
 
-    -- allow user to change controls from pico-8 menu
+    -- change controls in p8 menu
     menuitem(1, "control: gamepad", set_control)
 
     -- mouse x and y
@@ -51,13 +47,10 @@ function _init()
     -- menu cursor x and y
     menu_c = 1
 
-    -- main_stick key checker when starting game
-    -- prevents the player holding key down and accidentally digging
+    -- prevents accidental key press
     main_stick = false
 
-    -- store pbs for each mode
-    -- retrieve from user's save data
-    -- if they have data, use that; if not, use false
+    -- pbs; retrieve from save data
     pb = {
         easy = false,
         med = false,
@@ -76,27 +69,22 @@ function _init()
         pb["hard"] = dget(9)
     end
 
-    -- has a new pb just been set?
     -- false if no
     -- difficulty if yes
     new_pb = false
 
     -- current colour theme
-    theme_select = 1
+    ct = 1
 
     -- list of themes
-    -- main: primary colour (digs)
-    -- bg: background (behind menus)
-    -- accent: menu borders
-    -- gamebg: background for actual game
     themes = {
         -- blue (white)
         {main = 12, bg = 7, accent = 1, gamebg = 13},
     }
 
-    -- player unlocks more themes by winning games
-    unlockable = {
-        -- unlockable by playing easy mode
+    -- unlockable themes
+    unlock = {
+        -- unlock by playing easy mode
         easy = {
             -- orange (white)
             {main = 9, bg = 7, accent = 1, gamebg = 3, id = 1},
@@ -105,7 +93,7 @@ function _init()
             {main = 8, bg = 7, accent = 0, gamebg = 0, id = 2}
         },
 
-        -- unlockable by playing medium mode
+        -- unlock by playing medium mode
         med = {
             -- pink (white)
             {main = 14, bg = 7, accent = 8, gamebg = 2, id = 3},
@@ -114,7 +102,7 @@ function _init()
             {main = 11, bg = 3, accent = 5, gamebg = 3, id = 4}
         },
 
-        -- unlockable by playing hard mode
+        -- unlock by playing hard mode
         hard = {
             -- brown (purple)
             {main = 4, bg = 2, accent = 1, gamebg = 3, id = 5},
@@ -124,34 +112,33 @@ function _init()
         }
     }
 
-    for diff_name, diff_themes in pairs(unlockable) do
+    for diff_name, diff_themes in pairs(unlock) do
         local count = 0
         for theme in all(diff_themes) do
             count += 1
             if dget(theme["id"]) == 1 then
-                -- add the new theme to the player's collection
+                -- add new theme
                 add(themes, theme)
-                -- remove it from the original list
-                del(unlockable[diff_name], theme)
+                -- remove from list
+                del(unlock[diff_name], theme)
             end
         end
     end
 
-    -- has a new theme been unlocked this round?
+    -- new theme unlocked?
     new_theme = false
 
-    -- counters for number of wins on each mode
     win_count = {
         easy = 0,
         med = 0,
         hard = 0
     }
 
-    -- counter for flashing mines on guide page
+    -- flashing on guide page
     mine_flash = 0
     show_mines = false
 
-    -- counter for bouncing letters
+    -- bouncing letters
     bcount = 1
     timer = 0
 
@@ -159,54 +146,54 @@ function _init()
     hold_timer = 2
     ticker = 0
 
-    -- how many frames between each explosion
+    -- frames between explosions
     explosion_interval = 5
 
     -- wait counter and actual time for post-explosion
     wait = 0
     final_wait = 25
 
-    -- strength of screen shake
+    -- screen shake strength
     shake_strength = 0
 
-    -- hide the win/loss screen
+    -- hide win/loss screen
     hide = false
 
-    -- which page of the guide screen?
+    -- guide page
     page = 1
 end
 
 function initialise(diff)
-    -- play start game sound
+    play = true
     sfx(9)
 
-    -- current time
-    ct = 0
+    time = 0
 
-    -- store the current difficulty
+    -- current difficulty
     size = diff
+    
     if diff == "easy" then
-        width = 7 -- width of board
-        height = 7 -- height of board
+        w = 7 -- width of board
+        h = 7 -- height of board
         mcount = 5 -- number of mines
 
         -- player
         p = {
-            -- pixel coordinates
+            -- pixel coords
             x = 60,
             y = 64,
 
-            -- map coordinates
+            -- map coords
             mx = 4,
             my = 4
         }
 
-        -- the limits for the cursor on the grid
+        -- grid limits
         xlim = {36, 84}
         ylim = {40, 88}
     elseif diff == "med" then
-        width = 11
-        height = 11
+        w = 11
+        h = 11
         mcount = 15
         
         p = {
@@ -220,8 +207,8 @@ function initialise(diff)
         xlim = {20, 100}
         ylim = {24, 104}
     elseif diff == "hard" then
-        width = 16
-        height = 15
+        w = 16
+        h = 15
         mcount = 30
         
         p = {
@@ -236,54 +223,44 @@ function initialise(diff)
         ylim = {8, 120}
     end
 
-    -- DEBUG: set no. of mines to 1
+    -- DEBUG
     if one_mine then
         mcount = 1
     end
 
     -- x and y offsets
-    -- how far into the screen should the map be drawn?
-    xoff = 64-(8*width/2)
-    yoff = 60-(8*height/2)
+    xoff = 64-(8*w/2)
+    yoff = 60-(8*h/2)
 
-    -- number of flags available (automaticall set to no. of mines)
+    -- available flags
     fcount = mcount
 
-    -- number of correctly placed flags
+    -- correctly placed flags
     ccount = 0
 
-    -- has the player won or lost, or in the loss or winning animation?
     win = false
     lose = false
     winning = false
     losing = false
 
-    -- create mine, explosion and particles lists
     mine_list = {}
     explosions = {}
     particles = {}
 
-    -- make a matrix filled with 0's
-    -- 0's represent an empty space
-    -- numbers represent the number of adjacent mines
-    -- true represents a mine
+    -- 0 = empty; num = no. adj mines; true = mine
     grid = gen_matrix(0)
 
-    -- create a matrix for flags
-    -- false represents no flag
-    -- true represents flag
+    -- false = no flag; true = flag
     flags = gen_matrix(false)
 
-    -- create a matrix for dug places
-    -- false represents not yet dug
-    -- true represents dug
+    -- false = not dug; true = dug
     digs = gen_matrix(false)
 
-    -- is this the player's first dig?
-    -- used to wait to create the mine list
+    -- player's first dig?
+    -- wait to create mine list
     first = true
 
-    -- always show the win/loss screen by default
+    -- show win/loss screen by default
     hide = false
 end
 
@@ -307,14 +284,19 @@ function _update()
         if alt_stick and not alt then
             alt_stick = false
         end
-    elseif mouse then
+    elseif mouse[1] then
         -- positions
         mo_x = stat(32)
         mo_y = stat(33)
 
         -- left and right click
-        main = stat(34) == 1
-        alt = stat(34) == 2
+        if play and mouse[2] == 1 then
+            main = stat(34) == 2
+            alt = stat(34) == 1
+        else
+            main = stat(34) == 1
+            alt = stat(34) == 2
+        end
 
         -- sticky trackers
         if main_stick and not main then
@@ -394,7 +376,7 @@ function _update()
                     ticker = 0
                 end
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- hover bounds
             hover_replay = hover(36, 57, 60, 63)
             hover_quit = hover(36, 64, 92, 70)
@@ -413,6 +395,7 @@ function _update()
             -- if left clicking
             if main and not main_stick then
                 main_stick = true
+                alt_stick = true
 
                 if hover_replay and not hide then
                     win = false
@@ -449,7 +432,7 @@ function _update()
         end
     elseif winning then
         -- if the shine hasn't left the screen yet, move it across
-        if shine-(8*width)-2 < xoff+(8*width)+120 then
+        if shine-(8*w)-2 < xoff+(8*w)+120 then
             shine += 10
         -- once off the screen, show the win screen
         else
@@ -457,8 +440,8 @@ function _update()
             win = true
         end
     elseif losing then
-        -- hold x and o to speed up explosions
-        if main then
+        -- hold x to speed up explosions
+        if main and not main_stick then
             explosion_timer = explosion_interval
         end
 
@@ -575,7 +558,7 @@ function _update()
                 menu_c = 1
                 menu = true
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_easy = hover(37, 81, 53, 87)
             hover_medium = hover(37, 89, 61, 95)
@@ -596,6 +579,7 @@ function _update()
             -- left click to pick difficulty
             if main and not main_stick then
                 main_stick = true
+                alt_stick = true
 
                 if hover_easy then
                     difficulty = false
@@ -623,7 +607,7 @@ function _update()
         -- if the player has started the game (dug their first space)
         if not first then
             -- only record time once game has started
-            ct = flr(t()) - record
+            time = flr(t()) - record
 
             -- count the number of correctly placed flags
             ccount = 0
@@ -648,20 +632,21 @@ function _update()
 
                 -- player has won
                 winning = true
+                play = false
                 sfx(10)
 
                 -- set position of shine
                 shine = xoff-1
 
                 -- record the pb if needed
-                if pb[size] == false or (ct < pb[size]) then
-                    pb[size] = ct
+                if pb[size] == false or (time < pb[size]) then
+                    pb[size] = time
                     if size == "easy" then
-                        dset(7, ct)
+                        dset(7, time)
                     elseif size == "med" then
-                        dset(8, ct)
+                        dset(8, time)
                     elseif size == "hard" then
-                        dset(9, ct)
+                        dset(9, time)
                     end
 
                     -- tell _update() that there's been a new pb
@@ -676,25 +661,25 @@ function _update()
                 (win_count[size] == 1 or
                 win_count[size] % 5 or
                 new_pb) and
-                #unlockable[size] != 0 then
+                #unlock[size] != 0 then
                     -- record the unlock in the user's save file
-                    dset(unlockable[size][1]["id"], 1)
+                    dset(unlock[size][1]["id"], 1)
 
                     -- add the new theme to the player's collection
-                    add(themes, unlockable[size][1])
+                    add(themes, unlock[size][1])
 
                     -- new theme unlocked
-                    new_theme = unlockable[size][1]
+                    new_theme = unlock[size][1]
 
                     -- remove it from the original list
-                    del(unlockable[size], unlockable[size][1])
+                    del(unlock[size], unlock[size][1])
                 end
             end
         end
 
         -- check if the player is within the grid
         -- if not, they won't be able to dig or flag
-        in_bound = (1 <= p.mx and p.mx <= width) and (1 <= p.my and p.my <= height)
+        in_bound = (1 <= p.mx and p.mx <= w) and (1 <= p.my and p.my <= h)
         
         -- update movement, using cursor limits
         if controller then
@@ -716,7 +701,7 @@ function _update()
                 p.y += 8
                 p.my += 1
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- start at offset
             -- find distance from current mouse to offset
             -- int. div. of 8 to find how many spaces that is
@@ -763,7 +748,7 @@ function _update()
             if first then
                 -- create a list of mines
                 -- pass in current position to ensure no mine spawns there
-                mine_list = create_mines(width, height, mcount, {p.mx, p.my})
+                mine_list = create_mines(w, h, mcount, {p.mx, p.my})
 
                 -- change all the mine positions to true
                 for mine in all(mine_list) do
@@ -772,7 +757,7 @@ function _update()
                 end
 
                 -- fill in the rest of the spaces with numbers for adjacent mines
-                grid = fill_adj(grid, width, height)
+                grid = fill_adj(grid, w, h)
 
                 first = false
                 record = flr(t())
@@ -804,9 +789,9 @@ function _update()
                                     -- if the probe is within bounds
                                     if
                                     probe[1] >= 1 and
-                                    probe[1] <= width and
+                                    probe[1] <= w and
                                     probe[2] >= 1 and
-                                    probe[2] <= height then
+                                    probe[2] <= h then
                                         -- uncover if there isn't a flag
                                         if flags[probe[1]][probe[2]] == false then
                                             uncover(probe)
@@ -819,6 +804,9 @@ function _update()
                         -- if any mines were found by auto-dig, add them to the list
                         if #explosions > 0 then
                             losing = true
+                            play = false
+                            main_stick = true
+                            alt_stick = true
                             
                             -- leave a pause before exploding
                             explosion_timer = flr(-2.5*explosion_interval)
@@ -867,7 +855,7 @@ function _update()
                     option = true
                 end
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_play = hover(37, 81, 53, 87)
             hover_guide = hover(37, 89, 57, 95)
@@ -934,7 +922,7 @@ function _update()
                 page = 1
                 menu = true
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "return" in guide menu
             hover_return_guide = hover(92, 119, 118, 123)
             hover_p1 = hover(110, 63, 118, 69)
@@ -978,16 +966,17 @@ function _update()
                         sfx(14)
                     end
                     -- change theme
-                    if theme_select != #themes then
-                        theme_select += 1
+                    if ct != #themes then
+                        ct += 1
                     else
-                        theme_select = 1
+                        ct = 1
                     end
                 elseif menu_c == 2 then
                     sfx(5)
                     -- switch to mouse
                     controller = false
-                    mouse = true
+                    mouse[1] = true
+                    mouse[2] = 1
                 elseif menu_c == 3 then
                     sfx(5)
                     -- go to delete save data screen
@@ -1006,7 +995,7 @@ function _update()
                 -- place cursor on "options"
                 menu_c = 3
             end
-        elseif mouse then
+        elseif mouse[1] then
             -- bounds for "play" and "options" on main menu
             hover_theme = hover(37, 79, 57, 85)
             hover_control = hover(37, 90, 65, 96)
@@ -1032,16 +1021,21 @@ function _update()
                     if #themes != 1 then
                         sfx(14)
                     end
-                    if theme_select != #themes then
-                        theme_select += 1
+                    if ct != #themes then
+                        ct += 1
                     else
-                        theme_select = 1
+                        ct = 1
                     end
                 elseif menu_c == 2 then
                     sfx(5)
-                    -- change to controller
-                    mouse = false
-                    controller = true
+                    if mouse[2] == 1 then
+                        -- change to mouse scheme 2
+                        mouse[2] = 2
+                    elseif mouse[2] == 2 then
+                        -- change to controller
+                        mouse[1] = false
+                        controller = true
+                    end
                 elseif menu_c == 3 then
                     sfx(5)
                     -- go to delete save data screen
@@ -1050,7 +1044,7 @@ function _update()
                     -- only allow controller
                     -- if using mouse, remember that and put it back on after
                     controller = true
-                    mouse = false
+                    mouse[1] = false
                     control_store = "mouse"
                 elseif hover_return_options then
                     sfx(6)
@@ -1101,7 +1095,7 @@ function _update()
                 menu_c = 3
             elseif control_store == "mouse" then
                 controller = false
-                mouse = true
+                mouse[1] = true
             end
         end
     end
@@ -1116,7 +1110,7 @@ function _draw()
         draw_menu_border(20, 34, 107, 89)
 
         -- draw "mini mines"
-        rectfill(28, 41, 59, 48, themes[theme_select]["main"])
+        rectfill(28, 41, 59, 48, themes[ct]["main"])
         sspr(80, 40, 32, 8, 28, 41)
         sspr(0, 32, 72, 32, 28, 50)
     elseif win or lose then
@@ -1124,7 +1118,7 @@ function _draw()
         draw_win_loss(win)
     elseif winning then
         -- clear screen with grey background
-        cls(themes[theme_select]["gamebg"])
+        cls(themes[ct]["gamebg"])
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
@@ -1134,30 +1128,30 @@ function _draw()
         print(fcount, 8, 1, 7)
 
         -- draw the map
-        map(0, 0, xoff, yoff, width, height+1)
+        map(0, 0, xoff, yoff, w, h+1)
 
         -- draw all dug spaces and flags
         draw_digs()
         draw_flags()
 
         -- draw the win shine
-        line(shine-3, 8+yoff, shine-(8*width)-2, 8+yoff+(8*height)-1, 6)
-        line(shine-2, 8+yoff, shine-(8*width)-1, 8+yoff+(8*height)-1, 7)
-        line(shine-1, 8+yoff, shine-(8*width), 8+yoff+(8*height)-1, 7)
-        line(shine, 8+yoff, shine-(8*width)+1, 8+yoff+(8*height)-1, 7)
+        line(shine-3, 8+yoff, shine-(8*w)-2, 8+yoff+(8*h)-1, 6)
+        line(shine-2, 8+yoff, shine-(8*w)-1, 8+yoff+(8*h)-1, 7)
+        line(shine-1, 8+yoff, shine-(8*w), 8+yoff+(8*h)-1, 7)
+        line(shine, 8+yoff, shine-(8*w)+1, 8+yoff+(8*h)-1, 7)
 
         -- don't need to cover sides on hard mode
         if size != "hard" then
             -- cover up the sides of the game grid to hide the shine
-            rectfill(0, 8, xoff-1, 128, themes[theme_select]["gamebg"])
-            rectfill(xoff+(8*width), 8, 128, 128, themes[theme_select]["gamebg"])
+            rectfill(0, 8, xoff-1, 128, themes[ct]["gamebg"])
+            rectfill(xoff+(8*w), 8, 128, 128, themes[ct]["gamebg"])
         end
     elseif losing then
         -- reset the camera so top bar isn't affected by shake
         camera(0, 0)
 
         -- clear screen with grey background
-        cls(themes[theme_select]["gamebg"])
+        cls(themes[ct]["gamebg"])
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
@@ -1172,7 +1166,7 @@ function _draw()
         end
 
         -- draw the map
-        map(0, 0, xoff, yoff, width, height+1) 
+        map(0, 0, xoff, yoff, w, h+1) 
 
         -- draw all dug spaces and flags
         draw_digs()
@@ -1205,7 +1199,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("❎ TO SELECT")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu("RETURN")
         end
 
@@ -1266,22 +1260,22 @@ function _draw()
         end
     elseif play then
         -- clear screen with background
-        cls(themes[theme_select]["gamebg"])
+        cls(themes[ct]["gamebg"])
 
         -- record current seconds
         -- add leading 0 if needed
-        if ct % 60 < 10 then
-            secs = ":0"..ct % 60
+        if time % 60 < 10 then
+            secs = ":0"..time % 60
         else
-            secs = ":"..ct % 60
+            secs = ":"..time % 60
         end
 
         -- record current mins
         -- add leading space if needed
-        if ct \ 60 < 10 then
-            mins = " "..ct \ 60
+        if time \ 60 < 10 then
+            mins = " "..time \ 60
         else
-            mins = ct \ 60
+            mins = time \ 60
         end
 
         -- draw flag icon and count in top left corner
@@ -1290,16 +1284,20 @@ function _draw()
 
         -- print control hints in the middle
         if controller then
-            print("❎-flag   🅾️-dig", 30, 1, themes[theme_select]["accent"])
-        elseif mouse then
-            print("l-flag   r-dig", 34, 1, themes[theme_select]["accent"])
+            print("❎-flag   🅾️-dig", 30, 1, themes[ct]["accent"])
+        elseif mouse[1] then
+            if mouse[2] == 1 then
+                print("r-flag   l-dig", 34, 1, themes[ct]["accent"])
+            elseif mouse[2] == 2 then
+                print("l-flag   r-dig", 34, 1, themes[ct]["accent"])
+            end
         end
 
         -- print time in top right corner
         print(mins..secs, 108, 1, 7)
 
         -- draw the map
-        map(0, 0, xoff, yoff, width, height+1) 
+        map(0, 0, xoff, yoff, w, h+1) 
 
         -- DEBUG: draw mines
         if reveal then
@@ -1323,7 +1321,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("❎ TO SELECT")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu()
         end
     
@@ -1372,7 +1370,7 @@ function _draw()
         if controller then
             -- draw the guide with the controller prompt
             draw_guide("🅾️ TO RETURN")
-        elseif mouse then
+        elseif mouse[1] then
             -- draw the guide with the mouse prompt
             draw_guide("RETURN")
         end
@@ -1380,7 +1378,7 @@ function _draw()
         -- draw main frame and background
         if controller then
             draw_title_menu("🅾️ TO RETURN")
-        elseif mouse then
+        elseif mouse[1] then
             draw_title_menu("RETURN")
         end
         
@@ -1416,14 +1414,20 @@ function _draw()
         end
 
         -- theme preview
-        rectfill(75, 79, 81, 85, themes[theme_select]["main"])
+        rectfill(75, 79, 81, 85, themes[ct]["main"])
         spr(35, 75, 79)
 
         -- theme counter
-        print(theme_select.."/"..#themes, 90, 80, 13)
+        print(ct.."/"..#themes, 90, 80, 13)
 
         -- draw controller/mouse sprite
-        if controller then spr(34, 75, 90) else spr(33, 75, 90) end
+        if controller then
+            spr(34, 75, 90)
+        elseif mouse[2] == 1 then
+            spr(49, 75, 90)
+        else
+            spr(50, 75, 90)
+        end
     elseif deleting then
         -- draw main frame and background
         draw_title_menu("🅾️ TO RETURN")
@@ -1437,7 +1441,7 @@ function _draw()
     end
 
     -- if mouse control is enabled, draw the cursor
-    if mouse then
+    if mouse[1] then
         spr(20, mo_x, mo_y)
     end
 
@@ -1445,18 +1449,16 @@ function _draw()
     draw_coords()
 end
 
--- ***********************
 -- *** EXTRA FUNCTIONS ***
--- ***********************
 
 -- ** INITIALISNG **
 function gen_matrix(fill)
--- generate a matrix using the height and width
+-- generate a matrix using the h and w
 -- can fill each position with a value
     m = {}
-    for c1=1, width do
+    for c1=1, w do
         local column = {}
-        for c2=1, height do
+        for c2=1, h do
             add(column, fill)
         end
         add(m, column)
@@ -1492,9 +1494,9 @@ function uncover(loc)
                         -- if the probe is within bounds
                         if
                         probe[1] >= 1 and
-                        probe[1] <= width and
+                        probe[1] <= w and
                         probe[2] >= 1 and
-                        probe[2] <= height then
+                        probe[2] <= h then
                             -- if that space hasn't already been dug, and doesn't have a flag, uncover it
                             if 
                             digs[probe[1]][probe[2]] != true and
@@ -1549,6 +1551,9 @@ function init_loss(loc)
 -- switch to losing animation
     -- the player loses
     losing = true
+    play = false
+    main_stick = true
+    alt_stick = true
 
     -- make sure the current mine explodes first
     add(explosions, {loc[1], loc[2], "first", 0})
@@ -1568,13 +1573,13 @@ end
 function draw_menu_background()
 -- draw the menu background and falling icons
     -- fill with accent background
-    cls(themes[theme_select]["bg"])
+    cls(themes[ct]["bg"])
 
     -- set to + draw pattern
     -- create background
     -- set back to normal fill
     fillp(◆)
-    rectfill(0, 0, 128, 128, themes[theme_select]["main"])
+    rectfill(0, 0, 128, 128, themes[ct]["main"])
     fillp(█)
     
     -- if there are fewer than 15 icons in the background, spawn a new one
@@ -1640,15 +1645,15 @@ function draw_title_menu(info_message)
     draw_menu_background()
 
     -- draw background and border
-    draw_menu_border(20, 16, 107, 111, themes[theme_select]["accent"])
+    draw_menu_border(20, 16, 107, 111, themes[ct]["accent"])
 
     -- if an info message was passed in, draw it appropriately
     if info_message then
         if info_message == "RETURN" then
-            rectfill(82, 112, 108, 118, themes[theme_select]["accent"])
+            rectfill(82, 112, 108, 118, themes[ct]["accent"])
             print(info_message, 84, 113, 7)
         else
-            rectfill(59, 112, 108, 118, themes[theme_select]["accent"])
+            rectfill(59, 112, 108, 118, themes[ct]["accent"])
             print(info_message, 60, 113, 7)
         end
     end
@@ -1657,7 +1662,7 @@ function draw_title_menu(info_message)
     map(0, 0, 20, 8, 11, 8)
 
     -- draw "mini" background and letters
-    rectfill(28, 24, 59, 31, themes[theme_select]["main"])
+    rectfill(28, 24, 59, 31, themes[ct]["main"])
     sspr(80, 40, 32, 8, 28, 24)
 
     -- draw "mines" logo
@@ -1688,21 +1693,21 @@ function draw_guide(info_message)
     draw_menu_background()
 
     -- draw background and border
-    draw_menu_border(11, 11, 117, 117, themes[theme_select]["accent"])
+    draw_menu_border(11, 11, 117, 117, themes[ct]["accent"])
 
     -- if an info messaeg was passed in, draw it appropriately
     if info_message then
         if info_message == "RETURN" then
-            rectfill(92, 119, 118, 123, themes[theme_select]["accent"])
+            rectfill(92, 119, 118, 123, themes[ct]["accent"])
             print(info_message, 94, 118, 7)
         else
-            rectfill(69, 119, 118, 124, themes[theme_select]["accent"])
+            rectfill(69, 119, 118, 124, themes[ct]["accent"])
             print(info_message, 70, 119, 7)
         end
     end
 
     -- draw "mini" background and letters
-    rectfill(18, 18, 34, 24, themes[theme_select]["main"])
+    rectfill(18, 18, 34, 24, themes[ct]["main"])
     print("mini", 19, 19, 7)
 
     -- draw "mines"
@@ -1710,7 +1715,7 @@ function draw_guide(info_message)
 
     -- page 1
     if page == 1 then
-        print("❎ / right click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[theme_select]["main"])
+        print("❎ / right click TO dig\nrevealing no. of\nadjacent mines", 19, 27, themes[ct]["main"])
         
         print("🅾️ / left click TO flag\nto mark a mine", 19, 48, 8)
 
@@ -1730,10 +1735,10 @@ function draw_guide(info_message)
         end
 
         -- fill in spaces on sample grid
-        rectfill(76, 76, 99, 91, themes[theme_select]["main"])
-        rectfill(84, 76, 99, 99, themes[theme_select]["main"])
-        rectfill(68, 84, 75, 107, themes[theme_select]["main"])
-        rectfill(76, 100, 99, 107, themes[theme_select]["main"])
+        rectfill(76, 76, 99, 91, themes[ct]["main"])
+        rectfill(84, 76, 99, 99, themes[ct]["main"])
+        rectfill(68, 84, 75, 107, themes[ct]["main"])
+        rectfill(76, 100, 99, 107, themes[ct]["main"])
 
         -- draw numbers
         sspr(0, 96, 24, 36, 68, 76)
@@ -1742,15 +1747,15 @@ function draw_guide(info_message)
         spr(3, 76, 92)
 
         -- arrow to move to next page
-        rectfill(110, 63, 118, 69, themes[theme_select]["accent"])
+        rectfill(110, 63, 118, 69, themes[ct]["accent"])
         print("➡️", 111, 64, 7)
     -- page 2
     elseif page == 2 then
-        print("UNLOCK themes BY BEATING\nYOUR best times!\n", 19, 27, themes[theme_select]["main"])
+        print("UNLOCK themes BY BEATING\nYOUR best times!\n", 19, 27, themes[ct]["main"])
         sspr(72, 0, 94, 5, 47, 27) -- colourful "themes"
         
         print("CHANGE controls\nIN options OR\npico-8 menu!", 22, 45)
-        print("controls", 50, 45, themes[theme_select]["accent"])
+        print("controls", 50, 45, themes[ct]["accent"])
         spr(33, 90, 48) -- mouse icon
         spr(34, 99, 48) -- controller icon
 
@@ -1765,15 +1770,15 @@ function draw_guide(info_message)
         -- repurpose timer to flash auto-dig spaces
         if show_mines then
             -- fill in dug spaces
-            rectfill(86, 88, 101, 111, themes[theme_select]["main"])
-            rectfill(102, 88, 109, 103, themes[theme_select]["main"])
+            rectfill(86, 88, 101, 111, themes[ct]["main"])
+            rectfill(102, 88, 109, 103, themes[ct]["main"])
             sspr(72, 64, 24, 24, 86, 88) -- auto-dig spaces sprites
         end
         
         spr(17, 94, 96) -- cursor sprite
         
         -- arrow to move to previous page
-        rectfill(10, 63, 18, 69, themes[theme_select]["accent"])
+        rectfill(10, 63, 18, 69, themes[ct]["accent"])
         print("⬅️", 11, 64, 7)
     end
 end
@@ -1781,10 +1786,10 @@ end
 function draw_win_loss(win)
 -- draw the win/loss window
     -- clear screen with grey background
-    cls(themes[theme_select]["gamebg"])
+    cls(themes[ct]["gamebg"])
 
     -- draw the map
-    map(0, 0, xoff, yoff, width, height+1) 
+    map(0, 0, xoff, yoff, w, h+1) 
 
     -- draw all dug spaces and flags
     draw_digs()
@@ -1815,7 +1820,7 @@ function draw_win_loss(win)
             if controller then
                 rectfill(80, 88, 109, 94, 9)
                 print("⬇️ HIDE", 81, 89, 7)
-            elseif mouse then
+            elseif mouse[1] then
                 rectfill(92, 88, 109, 93, 9)
                 print("HIDE", 93, 88, 7)
             end
@@ -1826,7 +1831,7 @@ function draw_win_loss(win)
             if controller then
                 rectfill(80, 72, 109, 78, 9)
                 print("⬇️ HIDE", 81, 73, 7)
-            elseif mouse then
+            elseif mouse[1] then
                 rectfill(92, 72, 109, 77, 9)
                 print("HIDE", 93, 72, 7)
             end
@@ -1856,7 +1861,7 @@ function draw_win_loss(win)
         if controller then
             rectfill(99, 121, 127, 127, 9)
             print("⬆️ SHOW", 100, 122, 7)
-        elseif mouse then
+        elseif mouse[1] then
             rectfill(111, 122, 127, 127, 9)
             print("SHOW", 112, 122, 7)
         end
@@ -1881,7 +1886,7 @@ function win_lose_message(timer)
         -- draw options
         print("❎ to replay", 22, 58, 13)
         print("🅾️ to return to menu", 22, 65)
-    elseif mouse then
+    elseif mouse[1] then
         -- set a background for whichever option is currently selected
         if hover_replay then
             rectfill(36, 57, 60, 63, 6)
@@ -1956,7 +1961,7 @@ function draw_digs()
         for c2=1, #digs[c1] do
             if digs[c1][c2] then
                 -- draw the coloured background
-                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[theme_select]["main"])
+                rectfill(xoff+c1*8-8, yoff+c2*8, xoff+c1*8-1, yoff+c2*8+7, themes[ct]["main"])
 
                 -- draw the number if needed
                 if type(grid[c1][c2]) == "number" and grid[c1][c2] >= 1 then
@@ -2017,16 +2022,29 @@ end
 -- ** MENUITEMS **
 function set_control(b)
 -- control scheme menuitem
-    -- left or right to select controller
+    -- ignore left/right inputs
     if(b&1 > 0) or (b&2 > 0) then
-        if controller then
-            menuitem(1, "control: mouse")
-            mouse = true
-            controller = false
-        elseif mouse then
+        return true
+    end
+
+    -- x to select control scheme
+    if controller then
+        menuitem(1, "control: mouse 1")
+        mouse[1] = true -- enable mouse
+        mouse[2] = 1 -- mouse scheme 1
+        controller = false
+    elseif mouse[1] then
+        if mouse[2] == 1 then
+            menuitem(1, "control: mouse 2")
+            mouse[2] = 2 -- mouse scheme 2
+        elseif mouse[2] == 2 then
             menuitem(1, "control: gamepad")
             controller = true
-            mouse = false
+            mouse[1] = false
+
+            if not menu_c then
+                menu_c = 1
+            end
         end
     end
 
